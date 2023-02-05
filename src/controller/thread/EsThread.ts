@@ -1,11 +1,13 @@
 import { assertMessageEvent,
     ControllerJobRunMessage,
     ControllerMessageType,
+    ControllerTerminateMessage,
     isWorkerInitMessage,
     isWorkerJobErrorMessage,
     isWorkerJobResultMessage,
     isWorkerUncaughtErrorMessage,
-    WorkerInitMessage } from "../../shared/messages";
+    WorkerInitMessage,
+    JobUID } from "../../shared/messages";
 import { WorkerModule } from "../../shared/Worker";
 import { isTransferDescriptor, TransferDescriptor } from "../../shared/TransferDescriptor";
 import { EsWorkerInterface } from "../workers/EsWorkerInterface";
@@ -40,6 +42,9 @@ class EsThread {
     private worker: EsWorkerInterface;
     readonly threadUID = getRandomUID();
 
+    private jobs: Set<JobUID> = new Set();
+    public get numQueuedJobs() { return this.jobs.size; }
+
     constructor(worker: EsWorkerInterface) {
         this.worker = worker;
     }
@@ -48,6 +53,13 @@ class EsThread {
     // and a more efficient way to publish job done/failed events.
 
     public terminate() {
+        // TODO: don't terminate until all jobs are done?
+        // Send terminate message to worker.
+        const terminateMessage: ControllerTerminateMessage = {
+            type: ControllerMessageType.Terminate
+        }
+        this.worker.postMessage(terminateMessage, []);
+
         this.worker.terminate();
     }
 
@@ -81,6 +93,7 @@ class EsThread {
             return new Promise<ReturnType>((resolve, reject) => {
                 try {
                     this.worker.postMessage(runMessage, transferables);
+                    this.jobs.add(uid);
                 } catch (error) {
                     return reject(error);
                 }
@@ -90,11 +103,13 @@ class EsThread {
                     
                     if(isWorkerJobResultMessage(evt.data) && evt.data.uid === uid) {
                         this.worker.removeEventListener("message", recieve);
+                        this.jobs.delete(uid);
                         resolve(evt.data.result as ReturnType);
                     }
                     
                     if(isWorkerJobErrorMessage(evt.data) && evt.data.uid === uid) {
                         this.worker.removeEventListener("message", recieve);
+                        this.jobs.delete(uid);
                         reject(new Error(evt.data.errorMessage));
                     }
                 }

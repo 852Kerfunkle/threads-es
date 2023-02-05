@@ -1,28 +1,17 @@
 import { assertMessageEvent,
     ControllerMessage,
     isControllerJobRunMessage,
+    isControllerTerminateMessage,
     WorkerInitMessage,
     WorkerMessageType,
     WorkerUncaughtErrorMessage,
     WorkerJobResultMessage,
-    WorkerJobErrorMessage } from "../shared/messages";
+    WorkerJobErrorMessage, 
+    JobUID} from "../shared/messages";
 import { WorkerFunction, WorkerModule } from "../shared/Worker";
 import { isTransferDescriptor } from "../shared/TransferDescriptor";
+import { assertSharedWorkerScope, assertWorkerScope, isDedicatedWorkerScope, isSharedWorkerContext, isWorkerScope, WorkerContext } from "./Utils";
 
-
-type WorkerScope = (DedicatedWorkerGlobalScope | SharedWorkerGlobalScope) & typeof globalThis;
-
-function assertWorkerRuntime(context: any): asserts context is WorkerScope {
-    if(!(context instanceof DedicatedWorkerGlobalScope || context instanceof SharedWorkerGlobalScope)) {
-        throw new Error("Not in a WebWorker");
-    }
-}
-
-function isDedicatedWorkerRuntime(context: WorkerScope): context is DedicatedWorkerGlobalScope & typeof globalThis {
-    return context instanceof DedicatedWorkerGlobalScope;
-}
-
-type WorkerContext = WorkerGlobalScope & typeof globalThis | MessagePort;
 
 function subscribeToControllerMessages(context: WorkerContext, handler: (ev: ControllerMessage) => void) {
     const messageHandler = (event: Event) => {
@@ -72,7 +61,7 @@ function prepareResult<Result>(rawResult: Result): {result: Result, transferable
     }
 }
 
-function postWorkerJobResultMessage(context: WorkerContext, jobUid: string, rawResult: any) {
+function postWorkerJobResultMessage(context: WorkerContext, jobUid: JobUID, rawResult: any) {
     const {result, transferables} = prepareResult(rawResult);
 
     const resultMessage: WorkerJobResultMessage = {
@@ -84,7 +73,7 @@ function postWorkerJobResultMessage(context: WorkerContext, jobUid: string, rawR
     context.postMessage(resultMessage, transferables);
 }
 
-function postWorkerJobErrorMessage(context: WorkerContext, jobUid: string, error: Error) {
+function postWorkerJobErrorMessage(context: WorkerContext, jobUid: JobUID, error: Error) {
     const resultMessage: WorkerJobErrorMessage = {
         type: WorkerMessageType.JobError,
         uid: jobUid,
@@ -93,7 +82,7 @@ function postWorkerJobErrorMessage(context: WorkerContext, jobUid: string, error
     context.postMessage(resultMessage);
 }
 
-async function runFunction(context: WorkerContext, jobUid: string, fn: WorkerFunction, args: any[]) {
+async function runFunction(context: WorkerContext, jobUid: JobUID, fn: WorkerFunction, args: any[]) {
     try {
         const res = fn(...args);
 
@@ -106,19 +95,43 @@ async function runFunction(context: WorkerContext, jobUid: string, fn: WorkerFun
 }
 
 let workerApiExposed = false;
+const workerScope = self;
+
+// Register error handlers
+if(isWorkerScope(workerScope)) {
+    workerScope.addEventListener("error", event => {
+        // Post with some delay, so the master had some time to subscribe to messages
+        setTimeout(() => postUncaughtErrorMessage(workerScope, event.error || event), 250)
+    });
+
+    workerScope.addEventListener("unhandledrejection", event => {
+        // TODO: figure out what's going on here.
+        const error = (event as any).reason
+        if (error && typeof (error as any).message === "string") {
+            // Post with some delay, so the master had some time to subscribe to messages
+            setTimeout(() => postUncaughtErrorMessage(workerScope, error), 250)
+        }
+    });
+}
 
 export function exposeApi(api: WorkerModule<any>) {
-    const workerScope = self;
-    assertWorkerRuntime(workerScope);
+    assertWorkerScope(workerScope);
 
     if (workerApiExposed) throw Error("exposeApi() should only be called once.");
     workerApiExposed = true;
 
     const exposeApiInner = (context: WorkerContext) => {
         if (typeof api === "object" && api) {
-            subscribeToControllerMessages(context, messageData => {
-                if (isControllerJobRunMessage(messageData) && messageData.method) {
-                    runFunction(context, messageData.uid, api[messageData.method], messageData.args)
+            const unsubscribe = subscribeToControllerMessages(context, messageData => {
+                if(isControllerJobRunMessage(messageData)) {
+                    runFunction(context, messageData.uid, api[messageData.method], messageData.args);
+                }
+                
+                if(isControllerTerminateMessage(messageData)) {
+                    // Unsubscribe from message events on this context.
+                    unsubscribe();
+                    // And if it's a shared worker context, close the port.
+                    if(isSharedWorkerContext(context)) context.close();
                 }
             })
         
@@ -141,27 +154,14 @@ export function exposeApi(api: WorkerModule<any>) {
         })*/
     }
 
-    if(isDedicatedWorkerRuntime(workerScope)) exposeApiInner(workerScope);
+    if(isDedicatedWorkerScope(workerScope)) exposeApiInner(workerScope);
     else {
-        globalThis.onconnect = (event) => {
+        assertSharedWorkerScope(workerScope);
+        workerScope.onconnect = (event) => {
             const port = event.ports[0];
             port.start();
             exposeApiInner(port);
         }
     }
-
-    // Register error handlers
-    workerScope.addEventListener("error", event => {
-        // Post with some delay, so the master had some time to subscribe to messages
-        setTimeout(() => postUncaughtErrorMessage(workerScope, event.error || event), 250)
-    });
-
-    workerScope.addEventListener("unhandledrejection", event => {
-        const error = (event as any).reason
-        if (error && typeof (error as any).message === "string") {
-            // Post with some delay, so the master had some time to subscribe to messages
-            setTimeout(() => postUncaughtErrorMessage(workerScope, error), 250)
-        }
-    });
 }
 

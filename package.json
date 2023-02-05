@@ -37,8 +37,14 @@
     ],
     "rules": {
       "eqeqeq": 1,
-      "curly": ["error", "multi-line"],
-      "quotes": ["error", "double"],
+      "curly": [
+        "error",
+        "multi-line"
+      ],
+      "quotes": [
+        "error",
+        "double"
+      ],
       "@typescript-eslint/no-explicit-any": 0
     },
     "root": true
