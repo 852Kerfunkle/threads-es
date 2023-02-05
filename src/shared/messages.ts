@@ -2,28 +2,28 @@
 /**
  * Messages client -> thread
  */
-export enum ClientMessageType {
+export enum ControllerMessageType {
     Run = 0,
     Cancel = 1,
 }
 
-export interface ClientMessage {
-    type: ClientMessageType;
+export interface ControllerMessage {
+    type: ControllerMessageType;
     uid: number;
 }
 
-export interface ClientJobRunMessage extends ClientMessage {
-    type: ClientMessageType.Run;
+export interface ControllerJobRunMessage extends ControllerMessage {
+    type: ControllerMessageType.Run;
     method: string;
     args: any[];
 }
 
-/*export interface ClientJobCancelMessage extends ClientMessage {
-    type: ClientMessageType.Cancel;
+/*export interface ControllerJobCancelMessage extends ControllerMessage {
+    type: ControllerMessageType.Cancel;
 }*/
 
-//export const isClientJobCancelMessage = (thing: ClientMessage): thing is ClientJobCancelMessage => thing && thing.type === ClientMessageType.Cancel
-export const isClientJobRunMessage = (thing: ClientMessage): thing is ClientJobRunMessage => thing && thing.type === ClientMessageType.Run
+//export const isControllerJobCancelMessage = (thing: ControllerMessage): thing is ControllerJobCancelMessage => thing && thing.type === ControllerMessageType.Cancel
+export const isControllerJobRunMessage = (thing: ControllerMessage): thing is ControllerJobRunMessage => thing && thing.type === ControllerMessageType.Run
 
 /**
  * Messages thread -> client

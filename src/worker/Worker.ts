@@ -1,6 +1,6 @@
 import { assertMessageEvent,
-    ClientMessage,
-    isClientJobRunMessage,
+    ControllerMessage,
+    isControllerJobRunMessage,
     ThreadInitMessage,
     ThreadMessageType,
     ThreadUncaughtErrorMessage,
@@ -24,7 +24,7 @@ function isDedicatedWorkerRuntime(context: WorkerScope): context is DedicatedWor
 
 type WorkerContext = WorkerGlobalScope & typeof globalThis | MessagePort;
 
-function subscribeToMasterMessages(context: WorkerContext, handler: (ev: ClientMessage) => void) {
+function subscribeToControllerMessages(context: WorkerContext, handler: (ev: ControllerMessage) => void) {
     const messageHandler = (event: Event) => {
         assertMessageEvent(event);
         handler(event.data);
@@ -118,8 +118,8 @@ export function exposeApi(api: ThreadModule<any>) {
 
     const exposeApiInner = (context: WorkerContext) => {
         if (typeof api === "object" && api) {
-            subscribeToMasterMessages(context, messageData => {
-                if (isClientJobRunMessage(messageData) && messageData.method) {
+            subscribeToControllerMessages(context, messageData => {
+                if (isControllerJobRunMessage(messageData) && messageData.method) {
                     runFunction(context, messageData.uid, api[messageData.method], messageData.args)
                 }
             })
@@ -130,7 +130,7 @@ export function exposeApi(api: ThreadModule<any>) {
             throw Error(`Invalid argument passed to expose(). Expected a function or an object, got: ${api}`)
         }
     
-        /*Implementation.subscribeToMasterMessages(messageData => {
+        /*Implementation.subscribeToControllerMessages(messageData => {
             if (isMasterJobCancelMessage(messageData)) {
                 const jobUID = messageData.uid
                 const subscription = activeSubscriptions.get(jobUID)
