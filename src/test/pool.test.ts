@@ -1,7 +1,6 @@
-import { spawn } from "../"
 import { expect } from "@esm-bundle/chai"
 import { HelloWorldApiType } from "./threads/hello-world.worker"
-import { EsWorkerPool } from "../controller/pool/EsWorkerPool";
+import { spawn, EsWorkerPool } from "../controller";
 
 describe("Run some basic pool tests", () => {
     it("Launch a pool", async () => {

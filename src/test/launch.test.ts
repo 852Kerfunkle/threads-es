@@ -1,8 +1,9 @@
-import { spawn, Transfer } from "../"
 import { expect } from "@esm-bundle/chai"
 import { HelloWorldApiType } from "./threads/hello-world.worker"
 import { TransferArrayApiType } from "./threads/transfer-array.worker";
 import { AsyncHelloWorldApiType } from "./threads/async-api.worker";
+import { spawn } from "../controller";
+import { Transfer } from "../shared";
 
 describe("Run some basic worker tests", () => {
     it("Launch a simple worker", async () => {

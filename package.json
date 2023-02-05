@@ -1,10 +1,24 @@
 {
   "name": "threads-es",
   "description": "A modern, zero dependency WebWorker library.",
-  "version": "0.1.2",
+  "version": "0.1.24",
   "type": "module",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./lib/cjs/index.js",
+      "default": "./lib/esm/index.js"
+    },
+    "./worker": {
+      "require": "./lib/cjs/worker/index.js",
+      "default": "./lib/esm/worker/index.js"
+    },
+    "./controller": {
+      "require": "./lib/cjs/controller/index.js",
+      "default": "./lib/esm/controller/index.js"
+    }
+  },
+  "main": "./lib/esm/index.js",
+  "types": "./lib/esm/index.d.ts",
   "license": "MIT",
   "private": true,
   "devDependencies": {
@@ -19,9 +33,15 @@
     "mocha": "^10.2.0",
     "typescript": "^4.9.5"
   },
+  "files": [
+    "lib/**/*"
+  ],
   "scripts": {
-    "clean": "rm -rf dist/",
-    "build": "npm rum clean && tsc",
+    "clean": "rm -rf ./lib",
+    "build": "yarn clean && yarn build:esm && yarn build:cjs",
+    "build:esm": "tsc -p ./config/tsconfig.esm.json",
+    "build:cjs": "tsc -p ./config/tsconfig.cjs.json",
+    "prepack": "yarn build",
     "test": "web-test-runner",
     "lint": "eslint src"
   },

@@ -1,7 +1,7 @@
 import { exposeApi } from "../../worker/Worker"
 
 const asyncHelloWorldApi = {
-    helloWorld: async (): Promise<String> => {
+    helloWorld: async (): Promise<string> => {
         return "Hello World!";
     }
 }
