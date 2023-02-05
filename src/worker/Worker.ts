@@ -74,7 +74,7 @@ function prepareResult<Result extends any>(rawResult: Result): {result: Result, 
     }
 }
 
-function postWorkerJobResultMessage(context: WorkerContext, jobUid: number, rawResult: any) {
+function postWorkerJobResultMessage(context: WorkerContext, jobUid: string, rawResult: any) {
     const {result, transferables} = prepareResult(rawResult);
 
     const resultMessage: WorkerJobResultMessage = {
@@ -86,7 +86,7 @@ function postWorkerJobResultMessage(context: WorkerContext, jobUid: number, rawR
     context.postMessage(resultMessage, transferables);
 }
 
-function postWorkerJobErrorMessage(context: WorkerContext, jobUid: number, error: Error) {
+function postWorkerJobErrorMessage(context: WorkerContext, jobUid: string, error: Error) {
     const resultMessage: WorkerJobErrorMessage = {
         type: WorkerMessageType.JobError,
         uid: jobUid,
@@ -95,7 +95,7 @@ function postWorkerJobErrorMessage(context: WorkerContext, jobUid: number, error
     context.postMessage(resultMessage);
 }
 
-async function runFunction(context: WorkerContext, jobUid: number, fn: WorkerFunction, args: any[]) {
+async function runFunction(context: WorkerContext, jobUid: string, fn: WorkerFunction, args: any[]) {
     try {
         const res = fn(...args);
 

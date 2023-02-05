@@ -9,7 +9,7 @@ export enum ControllerMessageType {
 
 export interface ControllerMessage {
     type: ControllerMessageType;
-    uid: number;
+    uid: string;
 }
 
 export interface ControllerJobRunMessage extends ControllerMessage {
@@ -51,13 +51,13 @@ export interface WorkerUncaughtErrorMessage extends WorkerMessage {
 
 export interface WorkerJobErrorMessage extends WorkerMessage {
     type: WorkerMessageType.JobError;
-    uid: number;
+    uid: string;
     errorMessage: string;
 }
 
 export interface WorkerJobResultMessage extends WorkerMessage {
     type: WorkerMessageType.JobResult;
-    uid: number;
+    uid: string;
     result: any;
 }
 

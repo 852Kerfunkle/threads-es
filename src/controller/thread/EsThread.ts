@@ -30,11 +30,15 @@ type ModuleProxy<Methods extends ModuleMethods> = {
     [method in keyof Methods]: ProxyableFunction<Parameters<Methods[method]>, ReturnType<Methods[method]>>
 }
 
+function getRandomUID() {
+    return self.crypto.randomUUID();
+}
+
 export type EsThreadProxy<ApiType extends WorkerModule<any>> = EsThread & ModuleProxy<ApiType>
 
 class EsThread {
-    readonly worker: EsWorkerInterface;
-    private nextJobUID = 0;
+    private worker: EsWorkerInterface;
+    readonly threadUID = getRandomUID();
 
     constructor(worker: EsWorkerInterface) {
         this.worker = worker;
@@ -61,7 +65,7 @@ class EsThread {
 
     private createProxyFunction<Args extends any[], ReturnType>(method: string) {
         return ((...rawArgs: Args) => {
-            const uid = this.nextJobUID++;
+            const uid = getRandomUID();
             const { args, transferables } = EsThread.prepareArguments(rawArgs);
             const runMessage: ControllerJobRunMessage = {
                 type: ControllerMessageType.Run,
