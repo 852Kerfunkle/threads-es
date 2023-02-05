@@ -1,12 +1,12 @@
 import { assertMessageEvent,
     ControllerMessage,
     isControllerJobRunMessage,
-    ThreadInitMessage,
-    ThreadMessageType,
-    ThreadUncaughtErrorMessage,
-    ThreadJobResultMessage,
-    ThreadJobErrorMessage } from "../shared/messages";
-import { ThreadFunction, ThreadModule } from "../shared/thread";
+    WorkerInitMessage,
+    WorkerMessageType,
+    WorkerUncaughtErrorMessage,
+    WorkerJobResultMessage,
+    WorkerJobErrorMessage } from "../shared/messages";
+import { WorkerFunction, WorkerModule } from "../shared/Worker";
 import { isTransferDescriptor } from "../shared/TransferDescriptor";
 
 
@@ -39,8 +39,8 @@ function subscribeToControllerMessages(context: WorkerContext, handler: (ev: Con
 }
 
 function postModuleInitMessage(context: WorkerContext, methodNames: string[]) {
-    const initMsg: ThreadInitMessage = {
-        type: ThreadMessageType.Init,
+    const initMsg: WorkerInitMessage = {
+        type: WorkerMessageType.Init,
         methodNames: methodNames
     }
     context.postMessage(initMsg);
@@ -48,8 +48,8 @@ function postModuleInitMessage(context: WorkerContext, methodNames: string[]) {
 
 function postUncaughtErrorMessage(context: WorkerContext, error: Error) {
     try {
-        const errorMessage: ThreadUncaughtErrorMessage = {
-            type: ThreadMessageType.UnchaughtError,
+        const errorMessage: WorkerUncaughtErrorMessage = {
+            type: WorkerMessageType.UnchaughtError,
             errorMessage: error.message
         };
         context.postMessage(errorMessage);
@@ -74,11 +74,11 @@ function prepareResult<Result extends any>(rawResult: Result): {result: Result, 
     }
 }
 
-function postThreadJobResultMessage(context: WorkerContext, jobUid: number, rawResult: any) {
+function postWorkerJobResultMessage(context: WorkerContext, jobUid: number, rawResult: any) {
     const {result, transferables} = prepareResult(rawResult);
 
-    const resultMessage: ThreadJobResultMessage = {
-        type: ThreadMessageType.JobResult,
+    const resultMessage: WorkerJobResultMessage = {
+        type: WorkerMessageType.JobResult,
         uid: jobUid,
         result: result
     };
@@ -86,30 +86,30 @@ function postThreadJobResultMessage(context: WorkerContext, jobUid: number, rawR
     context.postMessage(resultMessage, transferables);
 }
 
-function postThreadJobErrorMessage(context: WorkerContext, jobUid: number, error: Error) {
-    const resultMessage: ThreadJobErrorMessage = {
-        type: ThreadMessageType.JobError,
+function postWorkerJobErrorMessage(context: WorkerContext, jobUid: number, error: Error) {
+    const resultMessage: WorkerJobErrorMessage = {
+        type: WorkerMessageType.JobError,
         uid: jobUid,
         errorMessage: error.message
     };
     context.postMessage(resultMessage);
 }
 
-async function runFunction(context: WorkerContext, jobUid: number, f: ThreadFunction, args: any[]) {
+async function runFunction(context: WorkerContext, jobUid: number, fn: WorkerFunction, args: any[]) {
     try {
-        const res = f(...args);
+        const res = fn(...args);
 
         if (res instanceof Promise) await res;
 
-        postThreadJobResultMessage(context, jobUid, res);
+        postWorkerJobResultMessage(context, jobUid, res);
     } catch (error) {
-        postThreadJobErrorMessage(context, jobUid, error as Error);
+        postWorkerJobErrorMessage(context, jobUid, error as Error);
     }
 }
 
 var workerApiExposed = false;
 
-export function exposeApi(api: ThreadModule<any>) {
+export function exposeApi(api: WorkerModule<any>) {
     const workerScope = self;
     assertWorkerRuntime(workerScope);
 

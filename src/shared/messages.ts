@@ -28,43 +28,43 @@ export const isControllerJobRunMessage = (thing: ControllerMessage): thing is Co
 /**
  * Messages thread -> client
  */
-export enum ThreadMessageType {
+export enum WorkerMessageType {
     Init = 0,
     UnchaughtError = 1,
     JobError = 2,
     JobResult = 3
 }
 
-export interface ThreadMessage {
-    type: ThreadMessageType;
+export interface WorkerMessage {
+    type: WorkerMessageType;
 }
 
-export interface ThreadInitMessage extends ThreadMessage {
-    type: ThreadMessageType.Init;
+export interface WorkerInitMessage extends WorkerMessage {
+    type: WorkerMessageType.Init;
     methodNames: string[]
 }
 
-export interface ThreadUncaughtErrorMessage extends ThreadMessage {
-    type: ThreadMessageType.UnchaughtError;
+export interface WorkerUncaughtErrorMessage extends WorkerMessage {
+    type: WorkerMessageType.UnchaughtError;
     errorMessage: string
 }
 
-export interface ThreadJobErrorMessage extends ThreadMessage {
-    type: ThreadMessageType.JobError;
+export interface WorkerJobErrorMessage extends WorkerMessage {
+    type: WorkerMessageType.JobError;
     uid: number;
     errorMessage: string;
 }
 
-export interface ThreadJobResultMessage extends ThreadMessage {
-    type: ThreadMessageType.JobResult;
+export interface WorkerJobResultMessage extends WorkerMessage {
+    type: WorkerMessageType.JobResult;
     uid: number;
     result: any;
 }
 
-export const isThreadInitMessage = (thing: ThreadMessage): thing is ThreadInitMessage => thing && thing.type === ThreadMessageType.Init;
-export const isThreadUncaughtErrorMessage = (thing: ThreadMessage): thing is ThreadUncaughtErrorMessage => thing && thing.type === ThreadMessageType.UnchaughtError;
-export const isThreadJobErrorMessage = (thing: ThreadMessage): thing is ThreadJobErrorMessage => thing && thing.type === ThreadMessageType.JobError;
-export const isThreadJobResultMessage = (thing: ThreadMessage): thing is ThreadJobResultMessage => thing && thing.type === ThreadMessageType.JobResult;
+export const isWorkerInitMessage = (thing: WorkerMessage): thing is WorkerInitMessage => thing && thing.type === WorkerMessageType.Init;
+export const isWorkerUncaughtErrorMessage = (thing: WorkerMessage): thing is WorkerUncaughtErrorMessage => thing && thing.type === WorkerMessageType.UnchaughtError;
+export const isWorkerJobErrorMessage = (thing: WorkerMessage): thing is WorkerJobErrorMessage => thing && thing.type === WorkerMessageType.JobError;
+export const isWorkerJobResultMessage = (thing: WorkerMessage): thing is WorkerJobResultMessage => thing && thing.type === WorkerMessageType.JobResult;
 
 /**
  * Helpers, utils

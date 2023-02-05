@@ -1,12 +1,12 @@
 import { assertMessageEvent,
     ControllerJobRunMessage,
     ControllerMessageType,
-    isThreadInitMessage,
-    isThreadJobErrorMessage,
-    isThreadJobResultMessage,
-    isThreadUncaughtErrorMessage,
-    ThreadInitMessage } from "../../shared/messages";
-import { ThreadModule } from "../../shared/thread";
+    isWorkerInitMessage,
+    isWorkerJobErrorMessage,
+    isWorkerJobResultMessage,
+    isWorkerUncaughtErrorMessage,
+    WorkerInitMessage } from "../../shared/messages";
+import { WorkerModule } from "../../shared/Worker";
 import { isTransferDescriptor, TransferDescriptor } from "../../shared/TransferDescriptor";
 import { EsWorkerInterface } from "../workers/EsWorkerInterface";
 
@@ -30,7 +30,7 @@ type ModuleProxy<Methods extends ModuleMethods> = {
     [method in keyof Methods]: ProxyableFunction<Parameters<Methods[method]>, ReturnType<Methods[method]>>
 }
 
-export type EsThreadProxy<ApiType extends ThreadModule<any>> = EsThread & ModuleProxy<ApiType>
+export type EsThreadProxy<ApiType extends WorkerModule<any>> = EsThread & ModuleProxy<ApiType>
 
 class EsThread {
     readonly worker: EsWorkerInterface;
@@ -80,12 +80,12 @@ class EsThread {
                 const recieve = (evt: Event) => {
                     assertMessageEvent(evt);
                     
-                    if(isThreadJobResultMessage(evt.data) && evt.data.uid === uid) {
+                    if(isWorkerJobResultMessage(evt.data) && evt.data.uid === uid) {
                         this.worker.removeEventListener("message", recieve);
                         resolve(evt.data.result as ReturnType);
                     }
                     
-                    if(isThreadJobErrorMessage(evt.data) && evt.data.uid === uid) {
+                    if(isWorkerJobErrorMessage(evt.data) && evt.data.uid === uid) {
                         this.worker.removeEventListener("message", recieve);
                         reject(new Error(evt.data.errorMessage));
                     }
@@ -96,7 +96,7 @@ class EsThread {
         }) as any as ProxyableFunction<Args, ReturnType>
     }
 
-    private injectApiProxy<ApiType extends ThreadModule<any>>(
+    private injectApiProxy<ApiType extends WorkerModule<any>>(
         methodNames: string[]
     ): EsThreadProxy<ApiType> {
         const proxy = this as any;
@@ -108,17 +108,17 @@ class EsThread {
         return proxy as EsThreadProxy<ApiType>;
     }
 
-    public async initThread<ApiType extends ThreadModule<any>>()
+    public async initThread<ApiType extends WorkerModule<any>>()
         : Promise<EsThreadProxy<ApiType>>
     {
-        const exposedApi = await new Promise<ThreadInitMessage>((resolve, reject) => {
+        const exposedApi = await new Promise<WorkerInitMessage>((resolve, reject) => {
             const initMessageHandler = (event: Event) => {
                 assertMessageEvent(event);
-                if (isThreadInitMessage(event.data)) {
+                if (isWorkerInitMessage(event.data)) {
                     this.worker.removeEventListener("message", initMessageHandler);
                     resolve(event.data);
                 }
-                else if (isThreadUncaughtErrorMessage(event.data)) {
+                else if (isWorkerUncaughtErrorMessage(event.data)) {
                     this.worker.removeEventListener("message", initMessageHandler);
                     reject(event.data.errorMessage);
                 }
@@ -130,7 +130,7 @@ class EsThread {
     }
 }
 
-export async function spawn<ApiType extends ThreadModule<any>>(worker: EsWorkerInterface)
+export async function spawn<ApiType extends WorkerModule<any>>(worker: EsWorkerInterface)
     : Promise<EsThreadProxy<ApiType>>
 {
     const thread = new EsThread(worker);
