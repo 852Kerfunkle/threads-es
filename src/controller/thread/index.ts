@@ -1,1 +1,1 @@
-export * from "./EsThread"
+export { spawn, type EsThreadProxy } from "./EsThread"

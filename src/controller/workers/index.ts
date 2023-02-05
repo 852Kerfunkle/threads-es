@@ -1,2 +1,2 @@
-export * from "./EsSharedWorker"
-export * from "./EsWorker"
+export { EsSharedWorker } from "./EsSharedWorker"
+export { EsWorker } from "./EsWorker"

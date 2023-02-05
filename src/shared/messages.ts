@@ -18,11 +18,11 @@ export interface ClientJobRunMessage extends ClientMessage {
     args: any[];
 }
 
-export interface ClientJobCancelMessage extends ClientMessage {
+/*export interface ClientJobCancelMessage extends ClientMessage {
     type: ClientMessageType.Cancel;
-}
+}*/
 
-export const isClientJobCancelMessage = (thing: ClientMessage): thing is ClientJobCancelMessage => thing && thing.type === ClientMessageType.Cancel
+//export const isClientJobCancelMessage = (thing: ClientMessage): thing is ClientJobCancelMessage => thing && thing.type === ClientMessageType.Cancel
 export const isClientJobRunMessage = (thing: ClientMessage): thing is ClientJobRunMessage => thing && thing.type === ClientMessageType.Run
 
 /**

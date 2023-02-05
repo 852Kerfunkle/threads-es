@@ -1,4 +1,4 @@
-import { exposeApi } from "../../worker"
+import { exposeApi } from "../../worker/Worker"
 
 const helloWorldApi = {
     helloWorld: () => {

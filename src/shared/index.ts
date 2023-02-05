@@ -1,3 +1,1 @@
-export * from "./messages"
-export * from "./thread"
-export * from "./TransferDescriptor"
+export { type TransferDescriptor, Transfer } from "./TransferDescriptor"
