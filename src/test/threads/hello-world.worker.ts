@@ -1,9 +1,11 @@
 import { exposeApi } from "../../thread"
 
-console.log("hello world");
-
-exposeApi({
+const helloWorldApi = {
     helloWorld: () => {
-        return "Hello world";
+        return "Hello World!";
     }
-})
+}
+
+export type HelloWorldApiType = typeof helloWorldApi;
+
+exposeApi(helloWorldApi);

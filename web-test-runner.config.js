@@ -5,7 +5,7 @@ export default {
   plugins: [
     esbuildPlugin({
       ts: true,
-      tsconfig: fileURLToPath(new URL('./tsconfig.json', import.meta.url)),
+      tsconfig: fileURLToPath(new URL('./tsconfig.json', import.meta.url))
     })
   ],
   files: ['src/**/*.test.ts'],

@@ -1,15 +1,9 @@
-import { WorkerJobRunMessage, WorkerMessageType } from "../types/messages";
-import { ThreadModule } from "../types/thread";
-import { EsWorker } from "../workers";
+import { assertMessageEvent, ClientJobRunMessage, ClientMessageType, isThreadInitMessage, isThreadJobErrorMessage, isThreadJobResultMessage, isThreadUncaughtErrorMessage, ThreadInitMessage } from "../../shared/messages";
+import { ThreadModule } from "../../shared/thread";
+import { isTransferDescriptor, TransferDescriptor } from "../../shared/TransferDescriptor";
 import { EsWorkerInterface } from "../workers/EsWorkerInterface";
 
 var nextJobUID = 0;
-
-export interface TransferDescriptor<T = any> {
-    transferable: true
-    send: T
-    transferables: Transferable[]
-}
 
 export type StripTransfer<Type> =
     Type extends TransferDescriptor<infer BaseType>
@@ -41,17 +35,28 @@ class EsThread {
 
 export type EsThreadProxy<ApiType extends ThreadModule<any>> = EsThread & ModuleProxy<ApiType>
 
-function prepareArguments<Args extends any[]>(...rawArgs: Args): {args: Args[], transferables: Transferable[]} {
-    throw new Error("not implemented")
-    //return {args: [], transferables: []}
+function prepareArguments(rawArgs: any[]): {args: any[], transferables: Transferable[]} {
+    const args: any[] = [];
+    const transferables: Transferable[] = [];
+    for(const arg of rawArgs) {
+        if(isTransferDescriptor(arg)) {
+            transferables.push(...arg.transferables)
+            args.push(arg);
+        }
+        else {
+            args.push(arg);
+        }
+    }
+
+    return {args: args, transferables: transferables}
 }
 
 function createProxyFunction<Args extends any[], ReturnType>(thread: EsThread, method: string) {
     return ((...rawArgs: Args) => {
-        const uid = nextJobUID++
-        const { args, transferables } = prepareArguments(rawArgs)
-        const runMessage: WorkerJobRunMessage = {
-            type: WorkerMessageType.Run,
+        const uid = nextJobUID++;
+        const { args, transferables } = prepareArguments(rawArgs);
+        const runMessage: ClientJobRunMessage = {
+            type: ClientMessageType.Run,
             uid,
             method,
             args
@@ -65,9 +70,17 @@ function createProxyFunction<Args extends any[], ReturnType>(thread: EsThread, m
             }
 
             const recieve = (evt: Event) => {
-                // if right event job uid
-                thread.worker.removeEventListener("message", recieve);
-                resolve({} as ReturnType);
+                assertMessageEvent(evt);
+                
+                if(isThreadJobResultMessage(evt.data) && evt.data.uid === uid) {
+                    thread.worker.removeEventListener("message", recieve);
+                    resolve(evt.data.result as ReturnType);
+                }
+                
+                if(isThreadJobErrorMessage(evt.data) && evt.data.uid === uid) {
+                    thread.worker.removeEventListener("message", recieve);
+                    reject(new Error(evt.data.errorMessage));
+                }
             }
 
             thread.worker.addEventListener("message", recieve);
@@ -82,19 +95,36 @@ function createProxyModule<ApiType extends ThreadModule<any>>(
     const proxy = thread as any;
 
     for (const methodName of methodNames) {
-        proxy[methodName] = createProxyFunction(thread, methodName)
+        proxy[methodName] = createProxyFunction(thread, methodName);
     }
 
     return proxy as EsThreadProxy<ApiType>;
 }
 
+function receiveInitMessage(worker: EsWorkerInterface): Promise<ThreadInitMessage> {
+    return new Promise((resolve, reject) => {
+        const messageHandler = (event: Event) => {
+            assertMessageEvent(event);
+            if (isThreadInitMessage(event.data)) {
+                worker.removeEventListener("message", messageHandler);
+                resolve(event.data);
+            }
+            else if (isThreadUncaughtErrorMessage(event.data)) {
+                worker.removeEventListener("message", messageHandler);
+                reject(event.data.errorMessage);
+            }
+        };
+        worker.addEventListener("message", messageHandler)
+    })
+}
 
 export async function spawn<ApiType extends ThreadModule<any>>(worker: EsWorkerInterface)
     : Promise<EsThreadProxy<ApiType>> {
 
-    const exposed = { messages: [] } //initMessage.exposed
+    // TODO: wait for a short while to make sure we fail if the thread does not start
+    const exposedApi = await receiveInitMessage(worker);
 
     // Create our thread and inject it with the functions.
     const thread = new EsThread(worker);
-    return createProxyModule<ApiType>(thread, exposed.messages);
+    return createProxyModule<ApiType>(thread, exposedApi.methodNames);
 }

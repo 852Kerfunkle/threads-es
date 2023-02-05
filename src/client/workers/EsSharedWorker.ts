@@ -9,4 +9,9 @@ export class EsSharedWorker extends SharedWorker implements EsWorkerInterface {
     postMessage(message: any, transfer: Transferable[]): void {
         this.port.postMessage(message, transfer);
     }
+
+    terminate(): void {
+        // TODO: post client disconnect message first
+        this.port.close();
+    }
 }
