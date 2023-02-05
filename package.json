@@ -1,0 +1,25 @@
+{
+  "name": "threads-es",
+  "description": "A modern, zero dependency WebWorker library.",
+  "version": "0.0.1",
+  "type": "module",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "@esm-bundle/chai": "^4.3.4-fix.0",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^18.11.18",
+    "@types/sharedworker": "^0.0.91",
+    "@web/dev-server-esbuild": "^0.3.3",
+    "@web/test-runner": "^0.15.0",
+    "mocha": "^10.2.0",
+    "typescript": "^4.9.5"
+  },
+  "scripts": {
+    "clean": "rm -rf dist/",
+    "build": "npm rum clean && tsc",
+    "test": "web-test-runner"
+  }
+}

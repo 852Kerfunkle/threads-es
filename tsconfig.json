@@ -1,0 +1,30 @@
+{
+    "compilerOptions": {
+        "outDir": "dist",
+        "declaration": true,
+        "target": "ESNext",
+        "module": "ESNext",
+        "lib": [
+            "DOM",
+            "WebWorker"
+        ],
+        "moduleResolution": "node",
+        "esModuleInterop": false,
+        "strict": true,
+        "noImplicitAny": true,
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
+        "noImplicitOverride": true,
+        "exactOptionalPropertyTypes": true,
+        "forceConsistentCasingInFileNames": true,
+        "noFallthroughCasesInSwitch": true,
+        "isolatedModules": true,
+        "skipLibCheck": true
+    },
+    "include": [
+        "src"
+    ],
+    "exclude": [
+        "src/test"
+    ]
+}
