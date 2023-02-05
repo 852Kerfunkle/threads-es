@@ -86,9 +86,12 @@ async function runFunction(context: WorkerContext, jobUid: JobUID, fn: WorkerFun
     try {
         const res = fn(...args);
 
-        if (res instanceof Promise) await res;
-
-        postWorkerJobResultMessage(context, jobUid, res);
+        if (res instanceof Promise) {
+            postWorkerJobResultMessage(context, jobUid, await res);
+        }
+        else {
+            postWorkerJobResultMessage(context, jobUid, res);
+        }
     } catch (error) {
         postWorkerJobErrorMessage(context, jobUid, error as Error);
     }
@@ -138,9 +141,10 @@ export function exposeApi(api: WorkerModule<any>) {
             const methodNames = Object.keys(api).filter(key => typeof api[key] === "function");
             postModuleInitMessage(context, methodNames)
         } else {
-            throw Error(`Invalid argument passed to expose(). Expected a function or an object, got: ${api}`)
+            throw Error(`Invalid argument passed to exposeApi(). Expected an object, got: ${api}`)
         }
-    
+
+        // TODO: cancelling of pending (i.e. not yet started) jobs.
         /*Implementation.subscribeToControllerMessages(messageData => {
             if (isMasterJobCancelMessage(messageData)) {
                 const jobUID = messageData.uid
