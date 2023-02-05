@@ -1,5 +1,5 @@
 import { Transfer, TransferDescriptor } from "../../shared/TransferDescriptor";
-import { exposeApi } from "../../thread"
+import { exposeApi } from "../../worker"
 
 const transferArrayApi = {
     transferArray: (array: TransferDescriptor<ArrayBuffer>): TransferDescriptor<ArrayBuffer> => {

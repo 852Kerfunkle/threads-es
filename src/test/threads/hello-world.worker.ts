@@ -1,4 +1,4 @@
-import { exposeApi } from "../../thread"
+import { exposeApi } from "../../worker"
 
 const helloWorldApi = {
     helloWorld: () => {
