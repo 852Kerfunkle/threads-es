@@ -343,11 +343,6 @@
     "@types/mime" "*"
     "@types/node" "*"
 
-"@types/sharedworker@^0.0.91":
-  version "0.0.91"
-  resolved "https://registry.yarnpkg.com/@types/sharedworker/-/sharedworker-0.0.91.tgz#479fab66fbb5bfb1930a341bfcc5b2e3ee7fa55c"
-  integrity sha512-dgah1rutdK+TnzecsnfHn+zpisC2ILn9sBeXRGGEvBrrZJL4722UdYT56yjcDxvGiT2rMHGKXg/NygyEree5ZQ==
-
 "@types/ws@^7.4.0":
   version "7.4.7"
   resolved "https://registry.yarnpkg.com/@types/ws/-/ws-7.4.7.tgz#f7c390a36f7a0679aa69de2d501319f4f8d9b702"

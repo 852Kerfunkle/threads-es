@@ -1,7 +1,7 @@
 {
   "name": "threads-es",
   "description": "A modern, zero dependency WebWorker library.",
-  "version": "0.0.1",
+  "version": "0.1.1",
   "type": "module",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -11,7 +11,6 @@
     "@esm-bundle/chai": "^4.3.4-fix.0",
     "@types/mocha": "^10.0.1",
     "@types/node": "^18.11.18",
-    "@types/sharedworker": "^0.0.91",
     "@typescript-eslint/eslint-plugin": "^5.50.0",
     "@typescript-eslint/parser": "^5.50.0",
     "@web/dev-server-esbuild": "^0.3.3",
@@ -45,7 +44,12 @@
         "error",
         "double"
       ],
-      "@typescript-eslint/no-explicit-any": 0
+      "@typescript-eslint/no-explicit-any": [
+        "off",
+        {
+          "ignoreRestArgs": true
+        }
+      ]
     },
     "root": true
   }

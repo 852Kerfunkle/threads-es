@@ -56,8 +56,7 @@ class EsThread {
         // TODO: don't terminate until all jobs are done?
         // Send terminate message to worker.
         const terminateMessage: ControllerTerminateMessage = {
-            type: ControllerMessageType.Terminate
-        }
+            type: ControllerMessageType.Terminate }
         this.worker.postMessage(terminateMessage, []);
 
         this.worker.terminate();
