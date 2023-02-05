@@ -4,6 +4,6 @@ console.log("hello world");
 
 exposeApi({
     helloWorld: () => {
-        console.log("Hello world")
+        return "Hello world";
     }
 })
