@@ -45,7 +45,7 @@ class EsThread {
     private jobs: Set<JobUID> = new Set();
     public get numQueuedJobs() { return this.jobs.size; }
 
-    constructor(worker: EsWorkerInterface) {
+    constructor(worker: Worker) {
         this.worker = worker;
     }
 
@@ -152,7 +152,7 @@ class EsThread {
     }
 }
 
-export async function spawn<ApiType extends WorkerModule<any>>(worker: EsWorkerInterface)
+export async function spawn<ApiType extends WorkerModule<any>>(worker: Worker)
     : Promise<EsThreadProxy<ApiType>>
 {
     const thread = new EsThread(worker);

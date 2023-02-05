@@ -1,4 +1,4 @@
-import { spawn, EsWorker, Transfer } from "../"
+import { spawn, Transfer } from "../"
 import { expect } from "@esm-bundle/chai"
 import { HelloWorldApiType } from "./threads/hello-world.worker"
 import { TransferArrayApiType } from "./threads/transfer-array.worker";
@@ -7,7 +7,7 @@ import { AsyncHelloWorldApiType } from "./threads/async-api.worker";
 describe("Run some basic worker tests", () => {
     it("Launch a simple worker", async () => {
         const thread = await spawn<HelloWorldApiType>(
-            new EsWorker(new URL("threads/hello-world.worker.ts", import.meta.url),
+            new Worker(new URL("threads/hello-world.worker.ts", import.meta.url),
             {type: "module"}));
 
         expect(thread).to.not.be.undefined;
@@ -20,7 +20,7 @@ describe("Run some basic worker tests", () => {
 
     it("Launch a worker with transfer", async () => {
         const thread = await spawn<TransferArrayApiType>(
-            new EsWorker(new URL("threads/transfer-array.worker.ts", import.meta.url),
+            new Worker(new URL("threads/transfer-array.worker.ts", import.meta.url),
             {type: "module"}));
 
         expect(thread).to.not.be.undefined;
@@ -39,7 +39,7 @@ describe("Run some basic worker tests", () => {
 
     it("Launch a worker with async api", async () => {
         const thread = await spawn<AsyncHelloWorldApiType>(
-            new EsWorker(new URL("threads/async-api.worker.ts", import.meta.url),
+            new Worker(new URL("threads/async-api.worker.ts", import.meta.url),
             {type: "module"}));
 
         expect(thread).to.not.be.undefined;

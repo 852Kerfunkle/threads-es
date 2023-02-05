@@ -1,6 +1,6 @@
 import { EsWorkerInterface } from "./EsWorkerInterface";
 
-export class EsSharedWorker extends SharedWorker implements EsWorkerInterface {
+/*export class EsSharedWorker extends SharedWorker implements EsWorkerInterface {
     constructor(url: string | URL, options?: WorkerOptions) {
         super(url, options);
         this.port.start();
@@ -14,4 +14,4 @@ export class EsSharedWorker extends SharedWorker implements EsWorkerInterface {
         // TODO: post client disconnect message first
         this.port.close();
     }
-}
+}*/
