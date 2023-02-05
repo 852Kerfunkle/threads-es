@@ -1,24 +1,20 @@
-import { isClientJobRunMessage, ClientMessage, ThreadInitMessage, ThreadMessageType, assertMessageEvent, ThreadUncaughtErrorMessage, ThreadJobResultMessage, ThreadJobErrorMessage } from "../shared/messages";
+import { isClientJobRunMessage, ClientMessage, ThreadInitMessage,
+    ThreadMessageType, assertMessageEvent, ThreadUncaughtErrorMessage,
+    ThreadJobResultMessage, ThreadJobErrorMessage } from "../shared/messages";
 import { ThreadFunction, ThreadModule } from "../shared/thread";
 import { isTransferDescriptor } from "../shared/TransferDescriptor";
 
-enum WorkerRuntimeType {
-    Worker = 0,
-    SharedWorker = 1
-}
 
-type WorkerScope = (WorkerGlobalScope | SharedWorkerGlobalScope) & typeof globalThis;
+type WorkerScope = (DedicatedWorkerGlobalScope | SharedWorkerGlobalScope) & typeof globalThis;
 
 function assertWorkerRuntime(context: any): asserts context is WorkerScope {
-    if(!(context instanceof WorkerGlobalScope || context instanceof SharedWorkerGlobalScope)) {
+    if(!(context instanceof DedicatedWorkerGlobalScope || context instanceof SharedWorkerGlobalScope)) {
         throw new Error("Not in a WebWorker");
     }
 }
 
-function workerRuntimeType(context: WorkerScope): WorkerRuntimeType {
-    if(typeof SharedWorkerGlobalScope !== "undefined" && context instanceof SharedWorkerGlobalScope)
-        return WorkerRuntimeType.SharedWorker;
-    return WorkerRuntimeType.Worker;
+function isDedicatedWorkerRuntime(context: WorkerScope): context is DedicatedWorkerGlobalScope & typeof globalThis {
+    return context instanceof DedicatedWorkerGlobalScope;
 }
 
 type WorkerContext = WorkerGlobalScope & typeof globalThis | MessagePort;
@@ -111,7 +107,6 @@ var workerApiExposed = false;
 export function exposeApi(api: ThreadModule<any>) {
     const workerScope = self;
     assertWorkerRuntime(workerScope);
-    const runtimeType = workerRuntimeType(workerScope);
 
     if (workerApiExposed) throw Error("exposeApi() should only be called once.");
     workerApiExposed = true;
@@ -143,13 +138,12 @@ export function exposeApi(api: ThreadModule<any>) {
         })*/
     }
 
-    if(runtimeType === WorkerRuntimeType.Worker) exposeApiInner(workerScope);
+    if(isDedicatedWorkerRuntime(workerScope)) exposeApiInner(workerScope);
     else {
         globalThis.onconnect = (event) => {
             const port = event.ports[0];
             port.start();
-
-            exposeApiInner(port)
+            exposeApiInner(port);
         }
     }
 

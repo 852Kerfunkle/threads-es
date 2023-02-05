@@ -1,4 +1,4 @@
-import { spawn, EsWorker, Transfer } from "../"
+import { spawn, EsWorker, Transfer, EsSharedWorker } from "../"
 import { expect, assert } from "@esm-bundle/chai"
 import { HelloWorldApiType } from "./threads/hello-world.worker"
 import { TransferArrayApiType } from "./threads/transfer-array.worker";
@@ -37,4 +37,18 @@ describe("Run some basic tests", () => {
 
         thread.worker.terminate();
     });
+
+    /*it("Launch a sahred worker", async () => {
+        const thread = await spawn<HelloWorldApiType>(
+            new EsSharedWorker(new URL("threads/hello-world.worker.ts", import.meta.url),
+            {type: "module"}));
+
+        expect(thread).to.not.be.undefined;
+        expect(thread.worker).to.not.be.undefined;
+        expect(thread.helloWorld).to.not.be.undefined;
+
+        expect(await thread.helloWorld()).to.be.eq("Hello World!");
+
+        thread.worker.terminate();
+    });*/
 });
