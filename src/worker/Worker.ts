@@ -63,9 +63,7 @@ function postUncaughtErrorMessage(context: WorkerContext, error: Error) {
     }
 }
 
-function prepareResult<Result extends any>(rawResult: Result): {result: Result, transferables: Transferable[]} {
-    const transferables: Transferable[] = [];
-
+function prepareResult<Result>(rawResult: Result): {result: Result, transferables: Transferable[]} {
     if(isTransferDescriptor(rawResult)) {
         return {result: rawResult.send, transferables: rawResult.transferables}
     }
@@ -107,7 +105,7 @@ async function runFunction(context: WorkerContext, jobUid: string, fn: WorkerFun
     }
 }
 
-var workerApiExposed = false;
+let workerApiExposed = false;
 
 export function exposeApi(api: WorkerModule<any>) {
     const workerScope = self;

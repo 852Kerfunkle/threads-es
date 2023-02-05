@@ -1,5 +1,5 @@
-import { spawn, EsWorker, Transfer, EsSharedWorker } from "../"
-import { expect, assert } from "@esm-bundle/chai"
+import { spawn, EsWorker, Transfer } from "../"
+import { expect } from "@esm-bundle/chai"
 import { HelloWorldApiType } from "./threads/hello-world.worker"
 import { TransferArrayApiType } from "./threads/transfer-array.worker";
 
@@ -10,12 +10,11 @@ describe("Run some basic tests", () => {
             {type: "module"}));
 
         expect(thread).to.not.be.undefined;
-        expect(thread.worker).to.not.be.undefined;
         expect(thread.helloWorld).to.not.be.undefined;
 
         expect(await thread.helloWorld()).to.be.eq("Hello World!");
 
-        thread.worker.terminate();
+        thread.terminate();
     });
 
     it("Launch a worker with transfer", async () => {
@@ -24,7 +23,6 @@ describe("Run some basic tests", () => {
             {type: "module"}));
 
         expect(thread).to.not.be.undefined;
-        expect(thread.worker).to.not.be.undefined;
         expect(thread.transferArray).to.not.be.undefined;
 
         const arrayIn = new Uint8Array(10);
@@ -35,7 +33,7 @@ describe("Run some basic tests", () => {
         expect(arrayOut.byteLength).to.be.eq(10);
         expect(new Uint8Array(arrayOut.byteLength)).to.be.eql(new Uint8Array([0,0,0,0,0,0,0,0,0,0]));
 
-        thread.worker.terminate();
+        thread.terminate();
     });
 
     /*it("Launch a sahred worker", async () => {

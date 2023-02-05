@@ -47,6 +47,10 @@ class EsThread {
     // TODO: thread should have a set of queued tasks
     // and a more efficient way to publish job done/failed events.
 
+    public terminate() {
+        this.worker.terminate();
+    }
+
     private static prepareArguments(rawArgs: any[]): {args: any[], transferables: Transferable[]} {
         const args: any[] = [];
         const transferables: Transferable[] = [];
