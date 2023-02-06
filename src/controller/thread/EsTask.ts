@@ -20,8 +20,10 @@ export class EsTaskPromise<Return> extends Promise<Return> {
             taskResolve = resolve;
         });
 
-        task.reject = taskReject!;
-        task.resolve = taskResolve!;
+        // @ts-expect-error: is assigned
+        task.reject = taskReject;
+        // @ts-expect-error: is assigned
+        task.resolve = taskResolve;
         return task;
     }
 }

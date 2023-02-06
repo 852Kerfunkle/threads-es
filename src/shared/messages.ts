@@ -23,8 +23,8 @@ export interface ControllerJobRunMessage extends ControllerMessage {
     uid: TaskUID;
 }*/
 
-export interface ControllerTerminateMessage extends ControllerMessage {
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ControllerTerminateMessage extends ControllerMessage { }
 
 //export const isControllerJobCancelMessage = (thing: ControllerMessage): thing is ControllerJobCancelMessage => thing && thing.type === ControllerMessageType.Cancel
 export const isControllerJobRunMessage = (thing: ControllerMessage): thing is ControllerJobRunMessage => thing && thing.type === ControllerMessageType.Run

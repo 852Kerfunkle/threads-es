@@ -2,7 +2,7 @@ import { EsThreadProxy, spawn } from "../../controller";
 import { exposeApi } from "../../worker/Worker"
 import { AsyncHelloWorldApiType } from "./async-api.worker";
 
-var thread: EsThreadProxy<AsyncHelloWorldApiType>;
+let thread: EsThreadProxy<AsyncHelloWorldApiType>;
 
 const withSubworkerApi = {
     init: async () => {
