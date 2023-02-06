@@ -33,7 +33,7 @@ type ModuleProxy<Methods extends ModuleMethods> = {
     [method in keyof Methods]: ProxyableFunction<Parameters<Methods[method]>, ReturnType<Methods[method]>>
 }
 
-type WorkerType = Worker | SharedWorker;
+type WorkerType = Worker | SharedWorker | ServiceWorker;
 
 interface WorkerInterface {
     postMessage(message: any, transfer: Transferable[]): void;
@@ -42,20 +42,20 @@ interface WorkerInterface {
 }
 
 export class EsThread<ApiType extends WorkerModule<any>> implements Terminable {
-    private _worker: WorkerType;
-    private interface: WorkerInterface;
+    readonly tasks: Map<TaskUID, EsTaskPromise<any>> = new Map();
     readonly threadUID = getRandomUID();
 
+    private worker: WorkerType;
+    private interface: WorkerInterface;
+    
     public methods: ModuleProxy<ApiType> = {} as ModuleProxy<ApiType>;
-
-    readonly tasks: Map<TaskUID, EsTaskPromise<any>> = new Map();
 
     //private jobs: Map<TaskUID, EsTask> = new Map();
     public get numQueuedJobs() { return this.tasks.size; }
 
     private constructor(worker: WorkerType) {
-        this._worker = worker;
-        if(worker instanceof Worker) this.interface = worker;
+        this.worker = worker;
+        if(worker instanceof Worker || worker instanceof ServiceWorker) this.interface = worker;
         else {
             this.interface = worker.port;
             worker.port.start();
@@ -83,7 +83,7 @@ export class EsThread<ApiType extends WorkerModule<any>> implements Terminable {
 
         this.interface.removeEventListener("message", this.taskResultDispatch);
 
-        if(this._worker instanceof Worker) this._worker.terminate();
+        if(this.worker instanceof Worker) this.worker.terminate();
     }
 
     private taskResultDispatch = (evt: Event) => {
