@@ -1,4 +1,4 @@
-import { exposeApi } from "../../worker/Worker"
+import { exposeApi } from "../../src/worker/Worker"
 
 const throwHelloWorldApi = {
     helloWorld: async (): Promise<string> => {

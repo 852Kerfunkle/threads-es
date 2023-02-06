@@ -1,6 +1,5 @@
 import { fileURLToPath } from 'url';
 import { esbuildPlugin } from '@web/dev-server-esbuild';
-import { chromeLauncher } from '@web/test-runner-chrome';
 
 export default {
   plugins: [
@@ -20,7 +19,7 @@ export default {
       tsconfig: fileURLToPath(new URL('./tsconfig.json', import.meta.url))
     })
   ],
-  files: ['src/**/*.test.ts'],
+  files: ['test/**/*.test.ts'],
   testFramework: {
     config: {
       ui: 'bdd',
@@ -29,10 +28,5 @@ export default {
   },
   port: 9876,
   watch: true,
-  nodeResolve: true,
-  /*browsers: [chromeLauncher({
-    launchOptions: {
-      args: ['--no-sandbox']
-    }
-  })],*/
+  nodeResolve: true
 };

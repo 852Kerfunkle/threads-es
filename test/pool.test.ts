@@ -1,6 +1,6 @@
 import { expect } from "@esm-bundle/chai"
 import { HelloWorldApiType } from "./threads/hello-world.worker"
-import { EsThread, EsThreadPool } from "../controller";
+import { EsThread, EsThreadPool } from "../src/controller";
 
 describe("Run some basic pool tests", () => {
     it("Launch a pool", async () => {

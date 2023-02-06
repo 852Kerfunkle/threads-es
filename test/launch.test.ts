@@ -2,8 +2,8 @@ import { expect, assert } from "@esm-bundle/chai"
 import { HelloWorldApiType } from "./threads/hello-world.worker"
 import { TransferArrayApiType } from "./threads/transfer-array.worker";
 import { AsyncHelloWorldApiType } from "./threads/async-api.worker";
-import { EsThread } from "../controller";
-import { Transfer } from "../shared";
+import { EsThread } from "../src/controller";
+import { Transfer } from "../src/shared";
 import { WithSubworkerApiType } from "./threads/with-subworker.worker";
 import { ThrowHelloWorldApiType } from "./threads/throw.worker";
 

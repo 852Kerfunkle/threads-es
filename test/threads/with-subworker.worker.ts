@@ -1,5 +1,5 @@
-import { EsThread } from "../../controller";
-import { exposeApi } from "../../worker/Worker"
+import { EsThread } from "../../src/controller";
+import { exposeApi } from "../../src/worker/Worker"
 import { AsyncHelloWorldApiType } from "./async-api.worker";
 
 let thread: EsThread<AsyncHelloWorldApiType>;
