@@ -9,6 +9,6 @@
     "target": "ES6",
     "module": "CommonJS",
     "moduleResolution": "node",
-    "outDir": "../lib/cjs"
+    "outDir": "../dist-cjs"
   }
 }

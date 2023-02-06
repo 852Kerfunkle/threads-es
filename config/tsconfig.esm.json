@@ -9,6 +9,6 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "node",
-    "outDir": "../lib/esm"
+    "outDir": "../dist-esm"
   }
 }

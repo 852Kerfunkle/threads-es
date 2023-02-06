@@ -1,24 +1,11 @@
 {
   "name": "threads-es",
   "description": "A modern, zero dependency WebWorker library.",
-  "version": "0.1.24",
+  "version": "0.1.12",
   "type": "module",
-  "exports": {
-    ".": {
-      "require": "./lib/cjs/index.js",
-      "default": "./lib/esm/index.js"
-    },
-    "./worker": {
-      "require": "./lib/cjs/worker/index.js",
-      "default": "./lib/esm/worker/index.js"
-    },
-    "./controller": {
-      "require": "./lib/cjs/controller/index.js",
-      "default": "./lib/esm/controller/index.js"
-    }
-  },
-  "main": "./lib/esm/index.js",
-  "types": "./lib/esm/index.d.ts",
+  "main": "./index.js",
+  "module": "./index.js",
+  "types": "./index.d.ts",
   "license": "MIT",
   "private": true,
   "devDependencies": {
@@ -33,15 +20,11 @@
     "mocha": "^10.2.0",
     "typescript": "^4.9.5"
   },
-  "files": [
-    "lib/**/*"
-  ],
   "scripts": {
-    "clean": "rm -rf ./lib",
-    "build": "yarn clean && yarn build:esm && yarn build:cjs",
+    "clean": "rm -rf ./dist-esm",
+    "build": "yarn clean && yarn build:esm",
     "build:esm": "tsc -p ./config/tsconfig.esm.json",
-    "build:cjs": "tsc -p ./config/tsconfig.cjs.json",
-    "prepack": "yarn build",
+    "bundle": "yarn build && cp package.json dist-esm/ && cd dist-esm && yarn pack",
     "test": "web-test-runner",
     "lint": "eslint src"
   },

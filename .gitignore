@@ -1,4 +1,5 @@
-lib/
+dist-esm/
+dist-cjs/
 node_modules/
 yarn-error.log
 
