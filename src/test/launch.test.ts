@@ -51,17 +51,16 @@ describe("Run some basic worker tests", () => {
         thread.terminate();
     });
 
-    /*it("Launch a sahred worker", async () => {
+    it("Launch a sahred worker", async () => {
         const thread = await spawn<HelloWorldApiType>(
-            new EsSharedWorker(new URL("threads/hello-world.worker.ts", import.meta.url),
+            new SharedWorker(new URL("threads/hello-world.worker.ts", import.meta.url),
             {type: "module"}));
 
         expect(thread).to.not.be.undefined;
-        expect(thread.worker).to.not.be.undefined;
         expect(thread.helloWorld).to.not.be.undefined;
 
         expect(await thread.helloWorld()).to.be.eq("Hello World!");
 
-        thread.worker.terminate();
-    });*/
+        thread.terminate();
+    });
 });

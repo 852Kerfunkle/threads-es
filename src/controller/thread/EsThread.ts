@@ -10,7 +10,6 @@ import { assertMessageEvent,
     JobUID } from "../../shared/messages";
 import { WorkerModule } from "../../shared/Worker";
 import { isTransferDescriptor, TransferDescriptor } from "../../shared/TransferDescriptor";
-import { EsWorkerInterface } from "../workers/EsWorkerInterface";
 
 type StripTransfer<Type> =
     Type extends TransferDescriptor<infer BaseType>
@@ -38,15 +37,29 @@ function getRandomUID() {
 
 export type EsThreadProxy<ApiType extends WorkerModule<any>> = EsThread & ModuleProxy<ApiType>
 
+type WorkerType = Worker | SharedWorker;
+
+interface WorkerInterface {
+    postMessage(message: any, transfer: Transferable[]): void;
+    addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+    removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+}
+
 class EsThread {
-    private worker: EsWorkerInterface;
+    private _worker: WorkerType;
+    private interface: WorkerInterface;
     readonly threadUID = getRandomUID();
 
     private jobs: Set<JobUID> = new Set();
     public get numQueuedJobs() { return this.jobs.size; }
 
-    constructor(worker: Worker) {
-        this.worker = worker;
+    constructor(worker: WorkerType) {
+        this._worker = worker;
+        if(worker instanceof Worker) this.interface = worker;
+        else {
+            this.interface = worker.port;
+            worker.port.start();
+        }
     }
 
     // TODO: thread should have a set of queued tasks
@@ -57,9 +70,9 @@ class EsThread {
         // Send terminate message to worker.
         const terminateMessage: ControllerTerminateMessage = {
             type: ControllerMessageType.Terminate }
-        this.worker.postMessage(terminateMessage, []);
+        this.interface.postMessage(terminateMessage, []);
 
-        this.worker.terminate();
+        if(this._worker instanceof Worker) this._worker.terminate();
     }
 
     private static prepareArguments(rawArgs: any[]): {args: any[], transferables: Transferable[]} {
@@ -91,7 +104,7 @@ class EsThread {
     
             return new Promise<ReturnType>((resolve, reject) => {
                 try {
-                    this.worker.postMessage(runMessage, transferables);
+                    this.interface.postMessage(runMessage, transferables);
                     this.jobs.add(uid);
                 } catch (error) {
                     return reject(error);
@@ -101,19 +114,19 @@ class EsThread {
                     assertMessageEvent(evt);
                     
                     if(isWorkerJobResultMessage(evt.data) && evt.data.uid === uid) {
-                        this.worker.removeEventListener("message", recieve);
+                        this.interface.removeEventListener("message", recieve);
                         this.jobs.delete(uid);
                         resolve(evt.data.result as ReturnType);
                     }
                     
                     if(isWorkerJobErrorMessage(evt.data) && evt.data.uid === uid) {
-                        this.worker.removeEventListener("message", recieve);
+                        this.interface.removeEventListener("message", recieve);
                         this.jobs.delete(uid);
                         reject(new Error(evt.data.errorMessage));
                     }
                 }
     
-                this.worker.addEventListener("message", recieve);
+                this.interface.addEventListener("message", recieve);
             })
         }) as any as ProxyableFunction<Args, ReturnType>
     }
@@ -137,22 +150,22 @@ class EsThread {
             const initMessageHandler = (event: Event) => {
                 assertMessageEvent(event);
                 if (isWorkerInitMessage(event.data)) {
-                    this.worker.removeEventListener("message", initMessageHandler);
+                    this.interface.removeEventListener("message", initMessageHandler);
                     resolve(event.data);
                 }
                 else if (isWorkerUncaughtErrorMessage(event.data)) {
-                    this.worker.removeEventListener("message", initMessageHandler);
+                    this.interface.removeEventListener("message", initMessageHandler);
                     reject(event.data.errorMessage);
                 }
             };
-            this.worker.addEventListener("message", initMessageHandler)
+            this.interface.addEventListener("message", initMessageHandler)
         })
 
         return this.injectApiProxy<ApiType>(exposedApi.methodNames);
     }
 }
 
-export async function spawn<ApiType extends WorkerModule<any>>(worker: Worker)
+export async function spawn<ApiType extends WorkerModule<any>>(worker: WorkerType)
     : Promise<EsThreadProxy<ApiType>>
 {
     const thread = new EsThread(worker);

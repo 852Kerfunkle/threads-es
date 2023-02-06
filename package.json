@@ -1,7 +1,7 @@
 {
   "name": "threads-es",
   "description": "A modern, zero dependency WebWorker library.",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "type": "module",
   "main": "./index.js",
   "module": "./index.js",
