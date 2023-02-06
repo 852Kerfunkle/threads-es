@@ -11,7 +11,7 @@ const withSubworkerApi = {
             {type: "module"}));
     },
     shutdown: async () => {
-        thread.terminate();
+        await thread.terminate();
     },
     helloWorld: async () => {
         return thread.helloWorld();

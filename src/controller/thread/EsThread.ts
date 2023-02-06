@@ -87,8 +87,10 @@ class EsThread {
         }
     }
 
-    public terminate() {
-        // TODO: don't terminate until all jobs are done?
+    public async terminate() {
+        // Don't terminate until all jobs are done.
+        await Promise.allSettled(this.jobs);
+
         // Send terminate message to worker.
         const terminateMessage: ControllerTerminateMessage = {
             type: ControllerMessageType.Terminate }

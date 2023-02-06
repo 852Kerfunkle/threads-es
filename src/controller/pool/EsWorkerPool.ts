@@ -56,9 +56,11 @@ export class EsWorkerPool<ApiType extends WorkerModule<any>> {
     }
 
     public async terminate() {
-        // TODO: wait for finished tasks and whatever
+        // Wait for finished tasks and whatever
+        const terminatePromises: Promise<void>[] = [];
         for (const thread of this.threads) {
-            thread.terminate();
+            terminatePromises.push(thread.terminate());
         }
+        await Promise.allSettled(terminatePromises);
     }
 }

@@ -10,6 +10,8 @@ describe("Run some basic pool tests", () => {
         await pool.spawnThreads();
 
         expect(await pool.queue(worker => worker.helloWorld())).to.be.eq("Hello World!");
+
+        await pool.terminate();
     });
 
     it("Launch a pool and queue 20k tasks", async () => {
@@ -27,5 +29,7 @@ describe("Run some basic pool tests", () => {
         for (const res of await Promise.all(results)) {
             expect(res).to.be.eq("Hello World!");
         }
+
+        await pool.terminate();
     }).timeout(4000);
 });

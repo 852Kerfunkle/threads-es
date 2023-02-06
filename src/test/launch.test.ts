@@ -18,7 +18,7 @@ describe("Run some basic worker tests", () => {
 
         expect(await thread.helloWorld()).to.be.eq("Hello World!");
 
-        thread.terminate();
+        await thread.terminate();
     });
 
     it("Launch a simple worker that throws", async () => {
@@ -37,7 +37,7 @@ describe("Run some basic worker tests", () => {
             assert(e.toString() === "Error: Hello World!");
         }
 
-        thread.terminate();
+        await thread.terminate();
     });
 
     it("Launch a worker with transfer", async () => {
@@ -56,7 +56,7 @@ describe("Run some basic worker tests", () => {
         expect(arrayOut.byteLength).to.be.eq(10);
         expect(new Uint8Array(arrayOut.byteLength)).to.be.eql(new Uint8Array([0,0,0,0,0,0,0,0,0,0]));
 
-        thread.terminate();
+        await thread.terminate();
     });
 
     it("Launch a worker with async api", async () => {
@@ -69,7 +69,7 @@ describe("Run some basic worker tests", () => {
 
         expect(await thread.helloWorld()).to.be.eq("Hello World!");
 
-        thread.terminate();
+        await thread.terminate();
     });
 
     it("Launch a worker with subworker", async () => {
@@ -86,7 +86,7 @@ describe("Run some basic worker tests", () => {
         expect(await thread.helloWorld()).to.be.eq("Hello World!");
         await thread.shutdown()
 
-        thread.terminate();
+        await thread.terminate();
     });
 
     it("Launch a shared worker", async () => {
@@ -99,7 +99,7 @@ describe("Run some basic worker tests", () => {
 
         expect(await thread.helloWorld()).to.be.eq("Hello World!");
 
-        thread.terminate();
+        await thread.terminate();
     });
 
     // Figure out if SharedWorker can have sub-workers...
@@ -119,6 +119,6 @@ describe("Run some basic worker tests", () => {
         expect(await thread.helloWorld()).to.be.eq("Hello World!");
         await thread.shutdown()
 
-        thread.terminate();
+        await thread.terminate();
     });*/
 });
