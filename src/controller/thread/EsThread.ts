@@ -10,6 +10,7 @@ import { assertMessageEvent,
     JobUID } from "../../shared/messages";
 import { WorkerModule } from "../../shared/Worker";
 import { isTransferDescriptor, TransferDescriptor } from "../../shared/TransferDescriptor";
+import { getRandomUID } from "../../shared/Utils";
 
 type StripTransfer<Type> =
     Type extends TransferDescriptor<infer BaseType>
@@ -29,10 +30,6 @@ type ModuleMethods = { [methodName: string]: (...args: any) => any }
 
 type ModuleProxy<Methods extends ModuleMethods> = {
     [method in keyof Methods]: ProxyableFunction<Parameters<Methods[method]>, ReturnType<Methods[method]>>
-}
-
-function getRandomUID() {
-    return self.crypto.randomUUID();
 }
 
 export type EsThreadProxy<ApiType extends WorkerModule<any>> = EsThread & ModuleProxy<ApiType>
@@ -102,6 +99,9 @@ class EsThread {
                 args
             }
     
+            // This is quite inefficient. It will check the messages in every promise.
+            // TODO: have an observable per task and notify only the promise depending
+            // on it.
             return new Promise<ReturnType>((resolve, reject) => {
                 try {
                     this.interface.postMessage(runMessage, transferables);
@@ -146,6 +146,8 @@ class EsThread {
     public async initThread<ApiType extends WorkerModule<any>>()
         : Promise<EsThreadProxy<ApiType>>
     {
+        // TODO: have a timeout on this, to make sure a worker failing to init doesn't
+        // block execution forever.
         const exposedApi = await new Promise<WorkerInitMessage>((resolve, reject) => {
             const initMessageHandler = (event: Event) => {
                 assertMessageEvent(event);

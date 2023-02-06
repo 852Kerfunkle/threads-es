@@ -51,7 +51,7 @@ export class EsWorkerPool<ApiType extends WorkerModule<any>> {
                 min = thread.numQueuedJobs;
             }
         }
-        console.log(`picked thread ${threadId} with ${min} active tasks`);
+        //console.log(`picked thread ${threadId} with ${min} active tasks`);
         return threadId;
     }
 
