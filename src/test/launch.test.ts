@@ -2,14 +2,14 @@ import { expect, assert } from "@esm-bundle/chai"
 import { HelloWorldApiType } from "./threads/hello-world.worker"
 import { TransferArrayApiType } from "./threads/transfer-array.worker";
 import { AsyncHelloWorldApiType } from "./threads/async-api.worker";
-import { spawn } from "../controller";
+import { EsThread } from "../controller";
 import { Transfer } from "../shared";
 import { WithSubworkerApiType } from "./threads/with-subworker.worker";
 import { ThrowHelloWorldApiType } from "./threads/throw.worker";
 
 describe("Run some basic worker tests", () => {
     it("Launch a simple worker", async () => {
-        const thread = await spawn<HelloWorldApiType>(
+        const thread = await EsThread.Spawn<HelloWorldApiType>(
             new Worker(new URL("threads/hello-world.worker.ts", import.meta.url),
             {type: "module"}));
 
@@ -22,7 +22,7 @@ describe("Run some basic worker tests", () => {
     });
 
     it("Launch a simple worker that throws", async () => {
-        const thread = await spawn<ThrowHelloWorldApiType>(
+        const thread = await EsThread.Spawn<ThrowHelloWorldApiType>(
             new Worker(new URL("threads/throw.worker.ts", import.meta.url),
             {type: "module"}));
 
@@ -41,7 +41,7 @@ describe("Run some basic worker tests", () => {
     });
 
     it("Launch a worker with transfer", async () => {
-        const thread = await spawn<TransferArrayApiType>(
+        const thread = await EsThread.Spawn<TransferArrayApiType>(
             new Worker(new URL("threads/transfer-array.worker.ts", import.meta.url),
             {type: "module"}));
 
@@ -60,7 +60,7 @@ describe("Run some basic worker tests", () => {
     });
 
     it("Launch a worker with async api", async () => {
-        const thread = await spawn<AsyncHelloWorldApiType>(
+        const thread = await EsThread.Spawn<AsyncHelloWorldApiType>(
             new Worker(new URL("threads/async-api.worker.ts", import.meta.url),
             {type: "module"}));
 
@@ -73,7 +73,7 @@ describe("Run some basic worker tests", () => {
     });
 
     it("Launch a worker with subworker", async () => {
-        const thread = await spawn<WithSubworkerApiType>(
+        const thread = await EsThread.Spawn<WithSubworkerApiType>(
             new Worker(new URL("threads/with-subworker.worker.ts", import.meta.url),
             {type: "module"}));
 
@@ -90,7 +90,7 @@ describe("Run some basic worker tests", () => {
     });
 
     it("Launch a shared worker", async () => {
-        const thread = await spawn<HelloWorldApiType>(
+        const thread = await EsThread.Spawn<HelloWorldApiType>(
             new SharedWorker(new URL("threads/hello-world.worker.ts", import.meta.url),
             {type: "module"}));
 
@@ -106,7 +106,7 @@ describe("Run some basic worker tests", () => {
     // Accoding to this SharedWorkers can't have sub-workers:
     // https://bugs.chromium.org/p/chromium/issues/detail?id=31666
     /*it("Launch a shared worker with subworker", async () => {
-        const thread = await spawn<WithSubworkerApiType>(
+        const thread = await EsThread.Spawn<WithSubworkerApiType>(
             new SharedWorker(new URL("threads/with-subworker.worker.ts", import.meta.url),
             {type: "module"}));
 

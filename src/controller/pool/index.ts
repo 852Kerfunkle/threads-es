@@ -1,1 +1,1 @@
-export { EsWorkerPool } from "./EsWorkerPool"
+export { EsThreadPool } from "./EsThreadPool"

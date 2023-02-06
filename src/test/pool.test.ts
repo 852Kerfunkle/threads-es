@@ -1,13 +1,12 @@
 import { expect } from "@esm-bundle/chai"
 import { HelloWorldApiType } from "./threads/hello-world.worker"
-import { spawn, EsWorkerPool } from "../controller";
+import { EsThread, EsThreadPool } from "../controller";
 
 describe("Run some basic pool tests", () => {
     it("Launch a pool", async () => {
-        const pool = new EsWorkerPool(() => spawn<HelloWorldApiType>(
+        const pool = await EsThreadPool.Spawn(() => EsThread.Spawn<HelloWorldApiType>(
             new Worker(new URL("threads/hello-world.worker.ts", import.meta.url),
             {type: "module"})), {size: 1});
-        await pool.spawnThreads();
 
         expect(await pool.queue(worker => worker.helloWorld())).to.be.eq("Hello World!");
 
@@ -15,10 +14,9 @@ describe("Run some basic pool tests", () => {
     });
 
     it("Launch a pool and queue 20k tasks", async () => {
-        const pool = new EsWorkerPool(() => spawn<HelloWorldApiType>(
+        const pool = await EsThreadPool.Spawn(() => EsThread.Spawn<HelloWorldApiType>(
             new Worker(new URL("threads/hello-world.worker.ts", import.meta.url),
             {type: "module"})), {size: 8});
-        await pool.spawnThreads();
 
         const results: Promise<string>[] = []
 
@@ -31,5 +29,5 @@ describe("Run some basic pool tests", () => {
         }
 
         await pool.terminate();
-    }).timeout(4000);
+    })
 });

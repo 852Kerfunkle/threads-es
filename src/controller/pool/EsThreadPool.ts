@@ -16,26 +16,26 @@ export interface EsPoolOptions {
 }
 
 
-export class EsWorkerPool<ApiType extends WorkerModule<any>> implements Terminable {
-    private spawnThread: () => Promise<EsThreadProxy<ApiType>>;
+export class EsThreadPool<ApiType extends WorkerModule<any>> implements Terminable {
     private threads: EsThreadProxy<ApiType>[] = [];
     readonly size: number;
     readonly name: string;
     //readonly concurrency: number;
 
-    constructor(
-        spawnThread: () => Promise<EsThreadProxy<ApiType>>,
-        poolOptions?: EsPoolOptions)
-    {
-        this.spawnThread = spawnThread;
+    private constructor(poolOptions?: EsPoolOptions) {
         const options = poolOptions ? poolOptions : {};
         this.size = options.size || defaultPoolSize;
-        this.name = options.name || "EsWorkerPool";
+        this.name = options.name || "EsThreadPool";
         //this.concurrency = options.concurrency || 1;
     }
 
-    public async spawnThreads(): Promise<void> {
-        this.threads = await Promise.all([...Array(this.size).keys()].map(() => this.spawnThread()));
+    public static async Spawn<ApiType extends WorkerModule<any>>(
+        spawnThread: () => Promise<EsThreadProxy<ApiType>>,
+        poolOptions?: EsPoolOptions)
+    {
+        const pool = new EsThreadPool(poolOptions);
+        pool.threads = await Promise.all([...Array(pool.size).keys()].map(() => spawnThread()));
+        return pool;
     }
 
     public async queue<Return>(taskFunction: (worker: EsThreadProxy<ApiType>) => Promise<Return>) {

@@ -43,7 +43,7 @@ interface WorkerInterface {
     removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
 }
 
-class EsThread implements Terminable {
+export class EsThread implements Terminable {
     private _worker: WorkerType;
     private interface: WorkerInterface;
     readonly threadUID = getRandomUID();
@@ -53,13 +53,20 @@ class EsThread implements Terminable {
     //private jobs: Map<TaskUID, EsTask> = new Map();
     public get numQueuedJobs() { return this.tasks.size; }
 
-    constructor(worker: WorkerType) {
+    private constructor(worker: WorkerType) {
         this._worker = worker;
         if(worker instanceof Worker) this.interface = worker;
         else {
             this.interface = worker.port;
             worker.port.start();
         }
+    }
+
+    public static async Spawn<ApiType extends WorkerModule<any>>(worker: WorkerType)
+    : Promise<EsThreadProxy<ApiType>>
+    {
+        const thread = new EsThread(worker);
+        return thread.initThread();
     }
 
     private taskResultDispatch = (evt: Event) => {
@@ -174,11 +181,4 @@ class EsThread implements Terminable {
 
         return this.injectApiProxy<ApiType>(exposedApi.methodNames);
     }
-}
-
-export async function spawn<ApiType extends WorkerModule<any>>(worker: WorkerType)
-    : Promise<EsThreadProxy<ApiType>>
-{
-    const thread = new EsThread(worker);
-    return thread.initThread();
 }
