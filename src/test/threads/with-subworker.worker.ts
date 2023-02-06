@@ -1,8 +1,8 @@
-import { EsThreadProxy, EsThread } from "../../controller";
+import { EsThread } from "../../controller";
 import { exposeApi } from "../../worker/Worker"
 import { AsyncHelloWorldApiType } from "./async-api.worker";
 
-let thread: EsThreadProxy<AsyncHelloWorldApiType>;
+let thread: EsThread<AsyncHelloWorldApiType>;
 
 const withSubworkerApi = {
     init: async () => {
@@ -14,7 +14,7 @@ const withSubworkerApi = {
         await thread.terminate();
     },
     helloWorld: async () => {
-        return thread.helloWorld();
+        return thread.methods.helloWorld();
     }
 }
 

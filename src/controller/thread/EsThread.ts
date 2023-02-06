@@ -33,8 +33,6 @@ type ModuleProxy<Methods extends ModuleMethods> = {
     [method in keyof Methods]: ProxyableFunction<Parameters<Methods[method]>, ReturnType<Methods[method]>>
 }
 
-export type EsThreadProxy<ApiType extends WorkerModule<any>> = EsThread & ModuleProxy<ApiType>
-
 type WorkerType = Worker | SharedWorker;
 
 interface WorkerInterface {
@@ -43,10 +41,12 @@ interface WorkerInterface {
     removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
 }
 
-export class EsThread implements Terminable {
+export class EsThread<ApiType extends WorkerModule<any>> implements Terminable {
     private _worker: WorkerType;
     private interface: WorkerInterface;
     readonly threadUID = getRandomUID();
+
+    public methods: ModuleProxy<ApiType> = {} as ModuleProxy<ApiType>;
 
     readonly tasks: Map<TaskUID, EsTaskPromise<any>> = new Map();
 
@@ -62,11 +62,28 @@ export class EsThread implements Terminable {
         }
     }
 
-    public static async Spawn<ApiType extends WorkerModule<any>>(worker: WorkerType)
-    : Promise<EsThreadProxy<ApiType>>
-    {
-        const thread = new EsThread(worker);
+    public static async Spawn<ApiType extends WorkerModule<any>>(worker: WorkerType) {
+        const thread = new EsThread<ApiType>(worker);
         return thread.initThread();
+    }
+
+    public async settled(): Promise<void> {
+        this.methods
+        await Promise.allSettled(this.tasks);
+    }
+
+    public async terminate(): Promise<void> {
+        // Don't terminate until all tasks are done.
+        await this.settled();
+
+        // Send terminate message to worker.
+        const terminateMessage: ControllerTerminateMessage = {
+            type: ControllerMessageType.Terminate };
+        this.interface.postMessage(terminateMessage, []);
+
+        this.interface.removeEventListener("message", this.taskResultDispatch);
+
+        if(this._worker instanceof Worker) this._worker.terminate();
     }
 
     private taskResultDispatch = (evt: Event) => {
@@ -92,24 +109,6 @@ export class EsThread implements Terminable {
         catch(e) {
             console.error(e);
         }
-    }
-
-    public async settled(): Promise<void> {
-        await Promise.allSettled(this.tasks);
-    }
-
-    public async terminate(): Promise<void> {
-        // Don't terminate until all tasks are done.
-        await this.settled();
-
-        // Send terminate message to worker.
-        const terminateMessage: ControllerTerminateMessage = {
-            type: ControllerMessageType.Terminate };
-        this.interface.postMessage(terminateMessage, []);
-
-        this.interface.removeEventListener("message", this.taskResultDispatch);
-
-        if(this._worker instanceof Worker) this._worker.terminate();
     }
 
     private static prepareArguments(rawArgs: any[]): {args: any[], transferables: Transferable[]} {
@@ -145,21 +144,19 @@ export class EsThread implements Terminable {
         }) as any as ProxyableFunction<Args, ReturnType>
     }
 
-    private injectApiProxy<ApiType extends WorkerModule<any>>(
-        methodNames: string[]
-    ): EsThreadProxy<ApiType> {
-        const proxy = this as any;
+    private createMethodsProxy(
+        methodNames: string[])
+    {
+        const proxy = this.methods as any;
     
         for (const methodName of methodNames) {
             proxy[methodName] = this.createProxyFunction(methodName);
         }
     
-        return proxy as EsThreadProxy<ApiType>;
+        return proxy as ModuleProxy<ApiType>;
     }
 
-    public async initThread<ApiType extends WorkerModule<any>>()
-        : Promise<EsThreadProxy<ApiType>>
-    {
+    private async initThread() {
         // TODO: have a timeout on this, to make sure a worker failing to init doesn't
         // block execution forever.
         const exposedApi = await new Promise<WorkerInitMessage>((resolve, reject) => {
@@ -177,8 +174,10 @@ export class EsThread implements Terminable {
             this.interface.addEventListener("message", initMessageHandler)
         });
 
+        this.createMethodsProxy(exposedApi.methodNames);
+
         this.interface.addEventListener("message", this.taskResultDispatch);
 
-        return this.injectApiProxy<ApiType>(exposedApi.methodNames);
+        return this;
     }
 }

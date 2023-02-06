@@ -1,5 +1,5 @@
 import { Terminable, WorkerModule } from "../../shared/Worker"
-import { EsThreadProxy } from "../thread/EsThread"
+import { EsThread } from "../thread/EsThread"
 
 export const defaultPoolSize = typeof navigator !== "undefined" && navigator.hardwareConcurrency
     ? navigator.hardwareConcurrency : 4;
@@ -17,7 +17,7 @@ export interface EsPoolOptions {
 
 
 export class EsThreadPool<ApiType extends WorkerModule<any>> implements Terminable {
-    private threads: EsThreadProxy<ApiType>[] = [];
+    private threads: EsThread<ApiType>[] = [];
     readonly size: number;
     readonly name: string;
     //readonly concurrency: number;
@@ -30,15 +30,15 @@ export class EsThreadPool<ApiType extends WorkerModule<any>> implements Terminab
     }
 
     public static async Spawn<ApiType extends WorkerModule<any>>(
-        spawnThread: () => Promise<EsThreadProxy<ApiType>>,
+        spawnThread: () => Promise<EsThread<ApiType>>,
         poolOptions?: EsPoolOptions)
     {
-        const pool = new EsThreadPool(poolOptions);
+        const pool = new EsThreadPool<ApiType>(poolOptions);
         pool.threads = await Promise.all([...Array(pool.size).keys()].map(() => spawnThread()));
         return pool;
     }
 
-    public async queue<Return>(taskFunction: (worker: EsThreadProxy<ApiType>) => Promise<Return>) {
+    public async queue<Return>(taskFunction: (worker: EsThread<ApiType>) => Promise<Return>) {
         return taskFunction(this.threads[this.findThreadWithFewTasks()]);
     }
 

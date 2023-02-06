@@ -14,9 +14,9 @@ describe("Run some basic worker tests", () => {
             {type: "module"}));
 
         expect(thread).to.not.be.undefined;
-        expect(thread.helloWorld).to.not.be.undefined;
+        expect(thread.methods.helloWorld).to.not.be.undefined;
 
-        expect(await thread.helloWorld()).to.be.eq("Hello World!");
+        expect(await thread.methods.helloWorld()).to.be.eq("Hello World!");
 
         await thread.terminate();
     });
@@ -27,10 +27,10 @@ describe("Run some basic worker tests", () => {
             {type: "module"}));
 
         expect(thread).to.not.be.undefined;
-        expect(thread.helloWorld).to.not.be.undefined;
+        expect(thread.methods.helloWorld).to.not.be.undefined;
 
         try {
-            await thread.helloWorld();
+            await thread.methods.helloWorld();
             assert(false);
         }
         catch(e) {
@@ -46,12 +46,12 @@ describe("Run some basic worker tests", () => {
             {type: "module"}));
 
         expect(thread).to.not.be.undefined;
-        expect(thread.transferArray).to.not.be.undefined;
+        expect(thread.methods.transferArray).to.not.be.undefined;
 
         const arrayIn = new Uint8Array(10);
         arrayIn.forEach((value, index) => { arrayIn[index] = index });
 
-        const arrayOut = await thread.transferArray(Transfer(arrayIn.buffer));
+        const arrayOut = await thread.methods.transferArray(Transfer(arrayIn.buffer));
 
         expect(arrayOut.byteLength).to.be.eq(10);
         expect(new Uint8Array(arrayOut.byteLength)).to.be.eql(new Uint8Array([0,0,0,0,0,0,0,0,0,0]));
@@ -65,9 +65,9 @@ describe("Run some basic worker tests", () => {
             {type: "module"}));
 
         expect(thread).to.not.be.undefined;
-        expect(thread.helloWorld).to.not.be.undefined;
+        expect(thread.methods.helloWorld).to.not.be.undefined;
 
-        expect(await thread.helloWorld()).to.be.eq("Hello World!");
+        expect(await thread.methods.helloWorld()).to.be.eq("Hello World!");
 
         await thread.terminate();
     });
@@ -78,13 +78,13 @@ describe("Run some basic worker tests", () => {
             {type: "module"}));
 
         expect(thread).to.not.be.undefined;
-        expect(thread.init).to.not.be.undefined;
-        expect(thread.helloWorld).to.not.be.undefined;
-        expect(thread.shutdown).to.not.be.undefined;
+        expect(thread.methods.init).to.not.be.undefined;
+        expect(thread.methods.helloWorld).to.not.be.undefined;
+        expect(thread.methods.shutdown).to.not.be.undefined;
 
-        await thread.init()
-        expect(await thread.helloWorld()).to.be.eq("Hello World!");
-        await thread.shutdown()
+        await thread.methods.init()
+        expect(await thread.methods.helloWorld()).to.be.eq("Hello World!");
+        await thread.methods.shutdown()
 
         await thread.terminate();
     });
@@ -95,9 +95,9 @@ describe("Run some basic worker tests", () => {
             {type: "module"}));
 
         expect(thread).to.not.be.undefined;
-        expect(thread.helloWorld).to.not.be.undefined;
+        expect(thread.methods.helloWorld).to.not.be.undefined;
 
-        expect(await thread.helloWorld()).to.be.eq("Hello World!");
+        expect(await thread.methods.helloWorld()).to.be.eq("Hello World!");
 
         await thread.terminate();
     });
@@ -111,12 +111,12 @@ describe("Run some basic worker tests", () => {
             {type: "module"}));
 
         expect(thread).to.not.be.undefined;
-        expect(thread.init).to.not.be.undefined;
-        expect(thread.helloWorld).to.not.be.undefined;
-        expect(thread.shutdown).to.not.be.undefined;
+        expect(thread.methods.init).to.not.be.undefined;
+        expect(thread.methods.helloWorld).to.not.be.undefined;
+        expect(thread.methods.shutdown).to.not.be.undefined;
 
         await thread.init()
-        expect(await thread.helloWorld()).to.be.eq("Hello World!");
+        expect(await thread.methods.helloWorld()).to.be.eq("Hello World!");
         await thread.shutdown()
 
         await thread.terminate();
