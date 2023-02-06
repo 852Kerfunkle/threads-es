@@ -11,7 +11,7 @@ import { assertMessageEvent,
 import { WorkerModule } from "../../shared/Worker";
 import { isTransferDescriptor, TransferDescriptor } from "../../shared/TransferDescriptor";
 import { getRandomUID } from "../../shared/Utils";
-import { createTaskWithPromise, EsTask } from "./EsTask";
+import { EsPromiseTask } from "./EsTask";
 
 type StripTransfer<Type> =
     Type extends TransferDescriptor<infer BaseType>
@@ -48,7 +48,9 @@ class EsThread {
     private interface: WorkerInterface;
     readonly threadUID = getRandomUID();
 
-    private jobs: Map<TaskUID, EsTask> = new Map();
+    private jobs: Map<TaskUID, EsPromiseTask<any>> = new Map();
+
+    //private jobs: Map<TaskUID, EsTask> = new Map();
     public get numQueuedJobs() { return this.jobs.size; }
 
     constructor(worker: WorkerType) {
@@ -64,12 +66,15 @@ class EsThread {
         try {
             assertMessageEvent(evt);
 
-            if(isWorkerJobResultMessage(evt.data) || isWorkerJobErrorMessage(evt.data)) {
+            if(isWorkerJobResultMessage(evt.data)) {
                 const task = this.jobs.get(evt.data.uid);
                 if(!task) throw new Error("Recived result for finised task with UID " + evt.data.uid);
-                if(!task.notifyResult) throw new Error("Task without notify handler: " + evt.data.uid);
-                task.notifyResult(evt.data);
-                this.jobs.delete(task.taskUID);
+                task.resolve(evt.data.result);
+            }
+            else if(isWorkerJobErrorMessage(evt.data)) {
+                const task = this.jobs.get(evt.data.uid);
+                if(!task) throw new Error("Recived error for finised task with UID " + evt.data.uid);
+                task.reject(new Error(evt.data.errorMessage));
             }
             else if(isWorkerUncaughtErrorMessage(evt.data)) {
                 throw new Error("Uncaught error in worker: " + evt.data.errorMessage);
@@ -78,7 +83,7 @@ class EsThread {
             // TODO: handle other event types?
         }
         catch(e) {
-            console.error(e);
+            console.error("uhm", e);
         }
     }
 
@@ -112,19 +117,19 @@ class EsThread {
 
     private createProxyFunction<Args extends any[], ReturnType>(method: string) {
         return ((...rawArgs: Args) => {
-            const [task, resultPromise] = createTaskWithPromise();
+            const taskPromise = new EsPromiseTask<ReturnType>();
             const { args, transferables } = EsThread.prepareArguments(rawArgs);
             const runMessage: ControllerJobRunMessage = {
                 type: ControllerMessageType.Run,
-                uid: task.taskUID,
+                uid: taskPromise.taskUID,
                 method: method,
                 args: args
             }
 
             this.interface.postMessage(runMessage, transferables);
-            this.jobs.set(task.taskUID, task);
+            this.jobs.set(taskPromise.taskUID, taskPromise);
 
-            return resultPromise;
+            return taskPromise.promise;
         }) as any as ProxyableFunction<Args, ReturnType>
     }
 

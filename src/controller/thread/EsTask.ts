@@ -1,10 +1,22 @@
-import { WorkerMessage,
-    isWorkerJobErrorMessage,
-    isWorkerJobResultMessage,
-    TaskUID, } from "../../shared/messages";
+import { TaskUID } from "../../shared/messages";
 import { getRandomUID } from "../../shared/Utils";
 
-export class EsTask {
+export class EsPromiseTask<Return> {
+    readonly taskUID: TaskUID = getRandomUID();
+    readonly promise: Promise<Return>;
+
+    public resolve!: (value: Return | PromiseLike<Return>) => void;
+    public reject!: (reason?: any) => void;
+
+    constructor() {
+        this.promise = new Promise<Return>((resolve, reject) => {
+            this.reject = reject;
+            this.resolve = resolve;
+        })
+    }
+}
+
+/*export class EsTask {
     readonly taskUID: TaskUID = getRandomUID();
 
     public notifyResult: ((result: WorkerMessage) => void) | null = null;
@@ -41,4 +53,4 @@ export function createTaskWithPromise<ResultType>(): [EsTask, Promise<ResultType
     const task = new EsTask();
 
     return [task, taskResultPromise(task)];
-}
+}*/
