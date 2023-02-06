@@ -47,10 +47,8 @@ export class EsThread<ApiType extends WorkerModule<any>> implements Terminable {
 
     private worker: WorkerType;
     private interface: WorkerInterface;
-    
-    public methods: ModuleProxy<ApiType> = {} as ModuleProxy<ApiType>;
 
-    //private jobs: Map<TaskUID, EsTask> = new Map();
+    public methods: ModuleProxy<ApiType> = {} as ModuleProxy<ApiType>;
     public get numQueuedJobs() { return this.tasks.size; }
 
     private constructor(worker: WorkerType) {
