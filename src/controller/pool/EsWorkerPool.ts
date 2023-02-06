@@ -6,7 +6,7 @@ export const defaultPoolSize = typeof navigator !== "undefined" && navigator.har
 
 export interface EsPoolOptions {
     /** Maximum no. of tasks to run on one worker thread at a time. Defaults to one. */
-    concurrency?: number
+    //concurrency?: number
 
     /** Gives that pool a name to be used for debug logging, letting you distinguish between log output of different pools. */
     name?: string
@@ -17,48 +17,48 @@ export interface EsPoolOptions {
 
 
 export class EsWorkerPool<ApiType extends WorkerModule<any>> {
-    private workers: Promise<EsThreadProxy<ApiType>>[];
+    private spawnThread: () => Promise<EsThreadProxy<ApiType>>;
+    private threads: EsThreadProxy<ApiType>[] = [];
     readonly size: number;
     readonly name: string;
-    readonly concurrency: number;
+    //readonly concurrency: number;
 
-    constructor(spawnThread: () => Promise<EsThreadProxy<ApiType>>, poolOptions?: EsPoolOptions) {
+    constructor(
+        spawnThread: () => Promise<EsThreadProxy<ApiType>>,
+        poolOptions?: EsPoolOptions)
+    {
+        this.spawnThread = spawnThread;
         const options = poolOptions ? poolOptions : {};
         this.size = options.size || defaultPoolSize;
         this.name = options.name || "EsWorkerPool";
-        this.concurrency = options.concurrency || 1;
-
-        this.workers = EsWorkerPool.spawnThreads(spawnThread, this.size);
-
-        // TODO:
-        /*Promise.all(this.workers).then(
-            () => this.eventSubject.next({
-                type: PoolEventType.initialized,
-                size: this.workers.length
-            }),
-            error => {
-                this.debug("Error while initializing pool worker:", error)
-                this.eventSubject.error(error)
-                this.initErrors.push(error)
-            }
-        )*/
+        //this.concurrency = options.concurrency || 1;
     }
 
-    private static spawnThreads<ApiType extends WorkerModule<any>>(
-        spawnThread: () => Promise<EsThreadProxy<ApiType>>,
-        count: number
-    ): Promise<EsThreadProxy<ApiType>>[] {
-        return [...Array(count).keys()].map(() => spawnThread());
+    public async spawnThreads(): Promise<void> {
+        this.threads = await Promise.all([...Array(this.size).keys()].map(() => this.spawnThread()));
     }
 
     public async queue<Return>(taskFunction: (worker: EsThreadProxy<ApiType>) => Promise<Return>) {
-        return taskFunction(await this.workers[0])
+        return taskFunction(this.threads[this.findThreadWithFewTasks()]);
+    }
+
+    private findThreadWithFewTasks(): number {
+        let min = Infinity;
+        let threadId = 0;
+        for (const [idx, thread] of this.threads.entries()) {
+            if(thread.numQueuedJobs < min) {
+                threadId = idx;
+                min = thread.numQueuedJobs;
+            }
+        }
+        console.log(`picked thread ${threadId} with ${min} active tasks`);
+        return threadId;
     }
 
     public async terminate() {
         // TODO: wait for finished tasks and whatever
-        for await (const worker of this.workers) {
-            worker.terminate();
+        for (const thread of this.threads) {
+            thread.terminate();
         }
     }
 }

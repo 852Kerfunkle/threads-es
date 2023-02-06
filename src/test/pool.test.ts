@@ -6,7 +6,8 @@ describe("Run some basic pool tests", () => {
     it("Launch a pool", async () => {
         const pool = new EsWorkerPool(() => spawn<HelloWorldApiType>(
             new Worker(new URL("threads/hello-world.worker.ts", import.meta.url),
-            {type: "module"})));
+            {type: "module"})), {size: 1});
+        await pool.spawnThreads();
 
         expect(await pool.queue(worker => worker.helloWorld())).to.be.eq("Hello World!");
     });
