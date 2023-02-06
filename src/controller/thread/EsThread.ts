@@ -83,7 +83,7 @@ class EsThread {
             // TODO: handle other event types?
         }
         catch(e) {
-            console.error("uhm", e);
+            console.error(e);
         }
     }
 
