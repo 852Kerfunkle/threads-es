@@ -4,8 +4,8 @@ import { getRandomUID } from "../../shared/Utils";
 export class EsTaskPromise<Return> extends Promise<Return> {
     readonly taskUID: TaskUID = getRandomUID();
 
-    public resolve!: (value: Return | PromiseLike<Return>) => void;
     public reject!: (reason?: any) => void;
+    public resolve!: (value: Return | PromiseLike<Return>) => void;
 
     private constructor(executor: (resolve: (value: Return | PromiseLike<Return>) => void, reject: (reason?: any) => void) => void) {
         super(executor);
