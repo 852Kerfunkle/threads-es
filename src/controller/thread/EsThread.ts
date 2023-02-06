@@ -11,7 +11,7 @@ import { assertMessageEvent,
 import { WorkerModule } from "../../shared/Worker";
 import { isTransferDescriptor, TransferDescriptor } from "../../shared/TransferDescriptor";
 import { getRandomUID } from "../../shared/Utils";
-import { EsPromiseTask } from "./EsTask";
+import { EsTaskPromise } from "./EsTask";
 
 type StripTransfer<Type> =
     Type extends TransferDescriptor<infer BaseType>
@@ -24,8 +24,8 @@ type ProxyableArgs<Args extends any[]> = Args extends [arg0: infer Arg0, ...rest
 
 type ProxyableFunction<Args extends any[], ReturnType> =
     Args extends []
-    ? () => Promise<StripTransfer<Awaited<ReturnType>>>
-    : (...args: ProxyableArgs<Args>) => Promise<StripTransfer<Awaited<ReturnType>>>
+    ? () => EsTaskPromise<StripTransfer<Awaited<ReturnType>>>
+    : (...args: ProxyableArgs<Args>) => EsTaskPromise<StripTransfer<Awaited<ReturnType>>>
 
 type ModuleMethods = { [methodName: string]: (...args: any) => any }
 
@@ -48,7 +48,7 @@ class EsThread {
     private interface: WorkerInterface;
     readonly threadUID = getRandomUID();
 
-    private jobs: Map<TaskUID, EsPromiseTask<any>> = new Map();
+    private jobs: Map<TaskUID, EsTaskPromise<any>> = new Map();
 
     //private jobs: Map<TaskUID, EsTask> = new Map();
     public get numQueuedJobs() { return this.jobs.size; }
@@ -117,7 +117,7 @@ class EsThread {
 
     private createProxyFunction<Args extends any[], ReturnType>(method: string) {
         return ((...rawArgs: Args) => {
-            const taskPromise = new EsPromiseTask<ReturnType>();
+            const taskPromise = EsTaskPromise.Create<ReturnType>();
             const { args, transferables } = EsThread.prepareArguments(rawArgs);
             const runMessage: ControllerJobRunMessage = {
                 type: ControllerMessageType.Run,
@@ -129,7 +129,7 @@ class EsThread {
             this.interface.postMessage(runMessage, transferables);
             this.jobs.set(taskPromise.taskUID, taskPromise);
 
-            return taskPromise.promise;
+            return taskPromise;
         }) as any as ProxyableFunction<Args, ReturnType>
     }
 

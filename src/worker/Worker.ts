@@ -84,14 +84,9 @@ function postWorkerJobErrorMessage(context: WorkerContext, jobUid: TaskUID, erro
 
 async function runFunction(context: WorkerContext, jobUid: TaskUID, fn: WorkerFunction, args: any[]) {
     try {
-        const res = fn(...args);
-
-        if (res instanceof Promise) {
-            postWorkerJobResultMessage(context, jobUid, await res);
-        }
-        else {
-            postWorkerJobResultMessage(context, jobUid, res);
-        }
+        let res = fn(...args);
+        if (res instanceof Promise) res = await res;
+        postWorkerJobResultMessage(context, jobUid, res);
     } catch (error) {
         postWorkerJobErrorMessage(context, jobUid, error as Error);
     }

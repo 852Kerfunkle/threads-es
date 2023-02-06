@@ -1,18 +1,28 @@
 import { TaskUID } from "../../shared/messages";
 import { getRandomUID } from "../../shared/Utils";
 
-export class EsPromiseTask<Return> {
+export class EsTaskPromise<Return> extends Promise<Return> {
     readonly taskUID: TaskUID = getRandomUID();
-    readonly promise: Promise<Return>;
 
     public resolve!: (value: Return | PromiseLike<Return>) => void;
     public reject!: (reason?: any) => void;
 
-    constructor() {
-        this.promise = new Promise<Return>((resolve, reject) => {
-            this.reject = reject;
-            this.resolve = resolve;
-        })
+    private constructor(executor: (resolve: (value: Return | PromiseLike<Return>) => void, reject: (reason?: any) => void) => void) {
+        super(executor);
+    }
+
+    static Create<Return>() {
+        let taskReject: (reason?: any) => void;
+        let taskResolve: (value: Return | PromiseLike<Return>) => void;
+
+        const task = new EsTaskPromise<Return>((resolve, reject) => {
+            taskReject = reject;
+            taskResolve = resolve;
+        });
+
+        task.reject = taskReject!;
+        task.resolve = taskResolve!;
+        return task;
     }
 }
 
