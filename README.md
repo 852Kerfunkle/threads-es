@@ -47,7 +47,7 @@ const pool = await EsThreadPool.Spawn<HelloWorldApiType>(() => EsThread.Spawn(
     {type: "module"}), {size: 4});
 
 // "Hello World!"
-console.log(await pool.queue(worker => worker.methods.helloWorld()));
+console.log(await pool.queue(thread => thread.methods.helloWorld()));
 
 await pool.terminate();
 ```
