@@ -7,10 +7,11 @@ import { assertMessageEvent,
     isWorkerJobResultMessage,
     isWorkerUncaughtErrorMessage,
     WorkerInitMessage,
-    JobUID } from "../../shared/messages";
+    TaskUID } from "../../shared/messages";
 import { WorkerModule } from "../../shared/Worker";
 import { isTransferDescriptor, TransferDescriptor } from "../../shared/TransferDescriptor";
 import { getRandomUID } from "../../shared/Utils";
+import { createTaskWithPromise, EsTask } from "./EsTask";
 
 type StripTransfer<Type> =
     Type extends TransferDescriptor<infer BaseType>
@@ -47,7 +48,7 @@ class EsThread {
     private interface: WorkerInterface;
     readonly threadUID = getRandomUID();
 
-    private jobs: Set<JobUID> = new Set();
+    private jobs: Map<TaskUID, EsTask> = new Map();
     public get numQueuedJobs() { return this.jobs.size; }
 
     constructor(worker: WorkerType) {
@@ -59,8 +60,27 @@ class EsThread {
         }
     }
 
-    // TODO: thread should have a set of queued tasks
-    // and a more efficient way to publish job done/failed events.
+    private taskResultDispatch = (evt: Event) => {
+        try {
+            assertMessageEvent(evt);
+
+            if(isWorkerJobResultMessage(evt.data) || isWorkerJobErrorMessage(evt.data)) {
+                const task = this.jobs.get(evt.data.uid);
+                if(!task) throw new Error("Recived result for finised task with UID " + evt.data.uid);
+                if(!task.notifyResult) throw new Error("Task without notify handler: " + evt.data.uid);
+                task.notifyResult(evt.data);
+                this.jobs.delete(task.taskUID);
+            }
+            else if(isWorkerUncaughtErrorMessage(evt.data)) {
+                throw new Error("Uncaught error in worker: " + evt.data.errorMessage);
+            }
+
+            // TODO: handle other event types?
+        }
+        catch(e) {
+            console.error(e);
+        }
+    }
 
     public terminate() {
         // TODO: don't terminate until all jobs are done?
@@ -68,6 +88,8 @@ class EsThread {
         const terminateMessage: ControllerTerminateMessage = {
             type: ControllerMessageType.Terminate }
         this.interface.postMessage(terminateMessage, []);
+
+        this.interface.removeEventListener("message", this.taskResultDispatch);
 
         if(this._worker instanceof Worker) this._worker.terminate();
     }
@@ -90,44 +112,19 @@ class EsThread {
 
     private createProxyFunction<Args extends any[], ReturnType>(method: string) {
         return ((...rawArgs: Args) => {
-            const uid = getRandomUID();
+            const [task, resultPromise] = createTaskWithPromise();
             const { args, transferables } = EsThread.prepareArguments(rawArgs);
             const runMessage: ControllerJobRunMessage = {
                 type: ControllerMessageType.Run,
-                uid,
-                method,
-                args
+                uid: task.taskUID,
+                method: method,
+                args: args
             }
-    
-            // This is quite inefficient. It will check the messages in every promise.
-            // TODO: have an observable per task and notify only the promise depending
-            // on it.
-            return new Promise<ReturnType>((resolve, reject) => {
-                try {
-                    this.interface.postMessage(runMessage, transferables);
-                    this.jobs.add(uid);
-                } catch (error) {
-                    return reject(error);
-                }
-    
-                const recieve = (evt: Event) => {
-                    assertMessageEvent(evt);
-                    
-                    if(isWorkerJobResultMessage(evt.data) && evt.data.uid === uid) {
-                        this.interface.removeEventListener("message", recieve);
-                        this.jobs.delete(uid);
-                        resolve(evt.data.result as ReturnType);
-                    }
-                    
-                    if(isWorkerJobErrorMessage(evt.data) && evt.data.uid === uid) {
-                        this.interface.removeEventListener("message", recieve);
-                        this.jobs.delete(uid);
-                        reject(new Error(evt.data.errorMessage));
-                    }
-                }
-    
-                this.interface.addEventListener("message", recieve);
-            })
+
+            this.interface.postMessage(runMessage, transferables);
+            this.jobs.set(task.taskUID, task);
+
+            return resultPromise;
         }) as any as ProxyableFunction<Args, ReturnType>
     }
 
@@ -161,7 +158,9 @@ class EsThread {
                 }
             };
             this.interface.addEventListener("message", initMessageHandler)
-        })
+        });
+
+        this.interface.addEventListener("message", this.taskResultDispatch);
 
         return this.injectApiProxy<ApiType>(exposedApi.methodNames);
     }

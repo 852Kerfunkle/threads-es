@@ -11,4 +11,21 @@ describe("Run some basic pool tests", () => {
 
         expect(await pool.queue(worker => worker.helloWorld())).to.be.eq("Hello World!");
     });
+
+    it("Launch a pool and queue 20k tasks", async () => {
+        const pool = new EsWorkerPool(() => spawn<HelloWorldApiType>(
+            new Worker(new URL("threads/hello-world.worker.ts", import.meta.url),
+            {type: "module"})), {size: 8});
+        await pool.spawnThreads();
+
+        const results: Promise<string>[] = []
+
+        for(let i = 0; i < 20000; ++i) {
+            results.push(pool.queue(worker => worker.helloWorld()));
+        }
+
+        for (const res of await Promise.all(results)) {
+            expect(res).to.be.eq("Hello World!");
+        }
+    }).timeout(4000);
 });

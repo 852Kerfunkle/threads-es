@@ -1,4 +1,4 @@
-export type JobUID = string;
+export type TaskUID = string;
 
 /**
  * Messages client -> thread
@@ -14,19 +14,16 @@ export interface ControllerMessage {
 }
 
 export interface ControllerJobRunMessage extends ControllerMessage {
-    type: ControllerMessageType.Run;
-    uid: JobUID;
+    uid: TaskUID;
     method: string;
     args: any[];
 }
 
 /*export interface ControllerJobCancelMessage extends ControllerMessage {
-    type: ControllerMessageType.Cancel;
-    uid: JobUID;
+    uid: TaskUID;
 }*/
 
 export interface ControllerTerminateMessage extends ControllerMessage {
-    type: ControllerMessageType.Terminate;
 }
 
 //export const isControllerJobCancelMessage = (thing: ControllerMessage): thing is ControllerJobCancelMessage => thing && thing.type === ControllerMessageType.Cancel
@@ -48,24 +45,20 @@ export interface WorkerMessage {
 }
 
 export interface WorkerInitMessage extends WorkerMessage {
-    type: WorkerMessageType.Init;
     methodNames: string[]
 }
 
 export interface WorkerUncaughtErrorMessage extends WorkerMessage {
-    type: WorkerMessageType.UnchaughtError;
     errorMessage: string
 }
 
 export interface WorkerJobErrorMessage extends WorkerMessage {
-    type: WorkerMessageType.JobError;
-    uid: JobUID;
+    uid: TaskUID;
     errorMessage: string;
 }
 
 export interface WorkerJobResultMessage extends WorkerMessage {
-    type: WorkerMessageType.JobResult;
-    uid: JobUID;
+    uid: TaskUID;
     result: any;
 }
 

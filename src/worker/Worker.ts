@@ -7,7 +7,7 @@ import { assertMessageEvent,
     WorkerUncaughtErrorMessage,
     WorkerJobResultMessage,
     WorkerJobErrorMessage, 
-    JobUID} from "../shared/messages";
+    TaskUID} from "../shared/messages";
 import { WorkerFunction, WorkerModule } from "../shared/Worker";
 import { isTransferDescriptor } from "../shared/TransferDescriptor";
 import { assertSharedWorkerScope, assertWorkerScope, isDedicatedWorkerScope, isSharedWorkerContext, isWorkerScope, WorkerContext } from "./Utils";
@@ -61,7 +61,7 @@ function prepareResult<Result>(rawResult: Result): {result: Result, transferable
     }
 }
 
-function postWorkerJobResultMessage(context: WorkerContext, jobUid: JobUID, rawResult: any) {
+function postWorkerJobResultMessage(context: WorkerContext, jobUid: TaskUID, rawResult: any) {
     const {result, transferables} = prepareResult(rawResult);
 
     const resultMessage: WorkerJobResultMessage = {
@@ -73,7 +73,7 @@ function postWorkerJobResultMessage(context: WorkerContext, jobUid: JobUID, rawR
     context.postMessage(resultMessage, transferables);
 }
 
-function postWorkerJobErrorMessage(context: WorkerContext, jobUid: JobUID, error: Error) {
+function postWorkerJobErrorMessage(context: WorkerContext, jobUid: TaskUID, error: Error) {
     const resultMessage: WorkerJobErrorMessage = {
         type: WorkerMessageType.JobError,
         uid: jobUid,
@@ -82,7 +82,7 @@ function postWorkerJobErrorMessage(context: WorkerContext, jobUid: JobUID, error
     context.postMessage(resultMessage);
 }
 
-async function runFunction(context: WorkerContext, jobUid: JobUID, fn: WorkerFunction, args: any[]) {
+async function runFunction(context: WorkerContext, jobUid: TaskUID, fn: WorkerFunction, args: any[]) {
     try {
         const res = fn(...args);
 
