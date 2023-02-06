@@ -83,6 +83,8 @@ describe("Run some basic worker tests", () => {
     });
 
     // Figure out if SharedWorker can have sub-workers...
+    // Accoding to this SharedWorkers can't have sub-workers:
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=31666
     /*it("Launch a shared worker with subworker", async () => {
         const thread = await spawn<WithSubworkerApiType>(
             new SharedWorker(new URL("threads/with-subworker.worker.ts", import.meta.url),
