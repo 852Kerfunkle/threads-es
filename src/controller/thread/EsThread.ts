@@ -93,7 +93,7 @@ class EsThread {
 
         // Send terminate message to worker.
         const terminateMessage: ControllerTerminateMessage = {
-            type: ControllerMessageType.Terminate }
+            type: ControllerMessageType.Terminate };
         this.interface.postMessage(terminateMessage, []);
 
         this.interface.removeEventListener("message", this.taskResultDispatch);
@@ -125,8 +125,7 @@ class EsThread {
                 type: ControllerMessageType.Run,
                 uid: taskPromise.taskUID,
                 method: method,
-                args: args
-            }
+                args: args };
 
             this.interface.postMessage(runMessage, transferables);
             this.jobs.set(taskPromise.taskUID, taskPromise);

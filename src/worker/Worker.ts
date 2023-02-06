@@ -30,8 +30,7 @@ function subscribeToControllerMessages(context: WorkerContext, handler: (ev: Con
 function postModuleInitMessage(context: WorkerContext, methodNames: string[]) {
     const initMsg: WorkerInitMessage = {
         type: WorkerMessageType.Init,
-        methodNames: methodNames
-    }
+        methodNames: methodNames };
     context.postMessage(initMsg);
 }
 
@@ -39,8 +38,7 @@ function postUncaughtErrorMessage(context: WorkerContext, error: Error) {
     try {
         const errorMessage: WorkerUncaughtErrorMessage = {
             type: WorkerMessageType.UnchaughtError,
-            errorMessage: error.message
-        };
+            errorMessage: error.message };
         context.postMessage(errorMessage);
     } catch (subError) {
         console.error(
@@ -67,9 +65,7 @@ function postWorkerJobResultMessage(context: WorkerContext, jobUid: TaskUID, raw
     const resultMessage: WorkerJobResultMessage = {
         type: WorkerMessageType.JobResult,
         uid: jobUid,
-        result: result
-    };
-
+        result: result };
     context.postMessage(resultMessage, transferables);
 }
 
@@ -77,8 +73,7 @@ function postWorkerJobErrorMessage(context: WorkerContext, jobUid: TaskUID, erro
     const resultMessage: WorkerJobErrorMessage = {
         type: WorkerMessageType.JobError,
         uid: jobUid,
-        errorMessage: error.message
-    };
+        errorMessage: error.message };
     context.postMessage(resultMessage);
 }
 
