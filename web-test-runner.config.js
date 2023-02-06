@@ -4,6 +4,17 @@ import { chromeLauncher } from '@web/test-runner-chrome';
 
 export default {
   plugins: [
+    /*{
+      name: 'add-coop-coep-headers',
+      transform(context) {
+        //console.log(context.path)
+        //if (context.path === '/') {
+          //console.log(context)
+          context.set('Cross-Origin-Embedder-Policy', 'require-corp');
+          context.set('Cross-Origin-Opener-Policy', 'same-origin');
+        //}
+      },
+    },*/
     esbuildPlugin({
       ts: true,
       tsconfig: fileURLToPath(new URL('./tsconfig.json', import.meta.url))
@@ -18,5 +29,10 @@ export default {
   },
   port: 9876,
   watch: true,
-  nodeResolve: true
+  nodeResolve: true,
+  /*browsers: [chromeLauncher({
+    launchOptions: {
+      args: ['--no-sandbox']
+    }
+  })],*/
 };

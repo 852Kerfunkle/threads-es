@@ -4,6 +4,7 @@ import { TransferArrayApiType } from "./threads/transfer-array.worker";
 import { AsyncHelloWorldApiType } from "./threads/async-api.worker";
 import { spawn } from "../controller";
 import { Transfer } from "../shared";
+import { WithSubworkerApiType } from "./threads/with-subworker.worker";
 
 describe("Run some basic worker tests", () => {
     it("Launch a simple worker", async () => {
@@ -51,7 +52,24 @@ describe("Run some basic worker tests", () => {
         thread.terminate();
     });
 
-    it("Launch a sahred worker", async () => {
+    it("Launch a worker with subworker", async () => {
+        const thread = await spawn<WithSubworkerApiType>(
+            new Worker(new URL("threads/with-subworker.worker.ts", import.meta.url),
+            {type: "module"}));
+
+        expect(thread).to.not.be.undefined;
+        expect(thread.init).to.not.be.undefined;
+        expect(thread.helloWorld).to.not.be.undefined;
+        expect(thread.shutdown).to.not.be.undefined;
+
+        await thread.init()
+        expect(await thread.helloWorld()).to.be.eq("Hello World!");
+        await thread.shutdown()
+
+        thread.terminate();
+    });
+
+    it("Launch a shared worker", async () => {
         const thread = await spawn<HelloWorldApiType>(
             new SharedWorker(new URL("threads/hello-world.worker.ts", import.meta.url),
             {type: "module"}));
@@ -63,4 +81,22 @@ describe("Run some basic worker tests", () => {
 
         thread.terminate();
     });
+
+    // Figure out if SharedWorker can have sub-workers...
+    /*it("Launch a shared worker with subworker", async () => {
+        const thread = await spawn<WithSubworkerApiType>(
+            new SharedWorker(new URL("threads/with-subworker.worker.ts", import.meta.url),
+            {type: "module"}));
+
+        expect(thread).to.not.be.undefined;
+        expect(thread.init).to.not.be.undefined;
+        expect(thread.helloWorld).to.not.be.undefined;
+        expect(thread.shutdown).to.not.be.undefined;
+
+        await thread.init()
+        expect(await thread.helloWorld()).to.be.eq("Hello World!");
+        await thread.shutdown()
+
+        thread.terminate();
+    });*/
 });
