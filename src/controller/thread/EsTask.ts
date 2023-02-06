@@ -1,4 +1,4 @@
-import { TaskUID } from "../../shared/messages";
+import { TaskUID } from "../../shared/Messages";
 import { getRandomUID } from "../../shared/Utils";
 
 export class EsTaskPromise<Return> extends Promise<Return> {

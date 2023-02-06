@@ -1,4 +1,4 @@
-import { WorkerModule } from "../../shared/Worker"
+import { Terminable, WorkerModule } from "../../shared/Worker"
 import { EsThreadProxy } from "../thread/EsThread"
 
 export const defaultPoolSize = typeof navigator !== "undefined" && navigator.hardwareConcurrency
@@ -16,7 +16,7 @@ export interface EsPoolOptions {
 }
 
 
-export class EsWorkerPool<ApiType extends WorkerModule<any>> {
+export class EsWorkerPool<ApiType extends WorkerModule<any>> implements Terminable {
     private spawnThread: () => Promise<EsThreadProxy<ApiType>>;
     private threads: EsThreadProxy<ApiType>[] = [];
     readonly size: number;
@@ -55,8 +55,16 @@ export class EsWorkerPool<ApiType extends WorkerModule<any>> {
         return threadId;
     }
 
-    public async terminate() {
-        // Wait for finished tasks and whatever
+    public async settled(): Promise<void> {
+        const settledThreads: Promise<void>[] = [];
+        for (const thread of this.threads) {
+            settledThreads.push(thread.settled());
+        }
+        await Promise.allSettled(settledThreads);
+    }
+
+    public async terminate(): Promise<void> {
+        // Should wait for finished tasks and whatever.
         const terminatePromises: Promise<void>[] = [];
         for (const thread of this.threads) {
             terminatePromises.push(thread.terminate());

@@ -7,8 +7,8 @@ import { assertMessageEvent,
     isWorkerJobResultMessage,
     isWorkerUncaughtErrorMessage,
     WorkerInitMessage,
-    TaskUID } from "../../shared/messages";
-import { WorkerModule } from "../../shared/Worker";
+    TaskUID } from "../../shared/Messages";
+import { Terminable, WorkerModule } from "../../shared/Worker";
 import { isTransferDescriptor, TransferDescriptor } from "../../shared/TransferDescriptor";
 import { getRandomUID } from "../../shared/Utils";
 import { EsTaskPromise } from "./EsTask";
@@ -43,15 +43,15 @@ interface WorkerInterface {
     removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
 }
 
-class EsThread {
+class EsThread implements Terminable {
     private _worker: WorkerType;
     private interface: WorkerInterface;
     readonly threadUID = getRandomUID();
 
-    private jobs: Map<TaskUID, EsTaskPromise<any>> = new Map();
+    readonly tasks: Map<TaskUID, EsTaskPromise<any>> = new Map();
 
     //private jobs: Map<TaskUID, EsTask> = new Map();
-    public get numQueuedJobs() { return this.jobs.size; }
+    public get numQueuedJobs() { return this.tasks.size; }
 
     constructor(worker: WorkerType) {
         this._worker = worker;
@@ -67,12 +67,12 @@ class EsThread {
             assertMessageEvent(evt);
 
             if(isWorkerJobResultMessage(evt.data)) {
-                const task = this.jobs.get(evt.data.uid);
+                const task = this.tasks.get(evt.data.uid);
                 if(!task) throw new Error("Recived result for finised task with UID " + evt.data.uid);
                 task.resolve(evt.data.result);
             }
             else if(isWorkerJobErrorMessage(evt.data)) {
-                const task = this.jobs.get(evt.data.uid);
+                const task = this.tasks.get(evt.data.uid);
                 if(!task) throw new Error("Recived error for finised task with UID " + evt.data.uid);
                 task.reject(new Error(evt.data.errorMessage));
             }
@@ -87,9 +87,13 @@ class EsThread {
         }
     }
 
-    public async terminate() {
-        // Don't terminate until all jobs are done.
-        await Promise.allSettled(this.jobs);
+    public async settled(): Promise<void> {
+        await Promise.allSettled(this.tasks);
+    }
+
+    public async terminate(): Promise<void> {
+        // Don't terminate until all tasks are done.
+        await this.settled();
 
         // Send terminate message to worker.
         const terminateMessage: ControllerTerminateMessage = {
@@ -128,7 +132,7 @@ class EsThread {
                 args: args };
 
             this.interface.postMessage(runMessage, transferables);
-            this.jobs.set(taskPromise.taskUID, taskPromise);
+            this.tasks.set(taskPromise.taskUID, taskPromise);
 
             return taskPromise;
         }) as any as ProxyableFunction<Args, ReturnType>
