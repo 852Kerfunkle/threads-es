@@ -7,7 +7,6 @@ const transferObjectWithArrayApi = {
         uint8.forEach((value, index) => {
             uint8[index] = value * 2;
         });
-        console.log(uint8)
         const res = {array: uint8.buffer};
         return Transfer(res, [res.array]);
     }
