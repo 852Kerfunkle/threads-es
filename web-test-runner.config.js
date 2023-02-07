@@ -1,7 +1,8 @@
 import { fileURLToPath } from 'url';
 import { esbuildPlugin } from '@web/dev-server-esbuild';
+//import { playwrightLauncher } from '@web/test-runner-playwright';
 
-export default {
+const config = {
   plugins: [
     /*{
       name: 'add-coop-coep-headers',
@@ -29,5 +30,12 @@ export default {
   port: 9876,
   watch: true,
   nodeResolve: true,
-  coverage: true
+  coverage: true,
+  /*browsers: [
+    playwrightLauncher({ product: 'chromium' }),
+    playwrightLauncher({ product: 'firefox' }),
+    playwrightLauncher({ product: 'webkit' })
+  ],*/
 };
+
+export default config;
