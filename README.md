@@ -12,7 +12,7 @@ It's made for the web, it doesn't support Node.js workers. Use with bundlers tha
 
 ### Examples
 
-#### Worker
+#### Threads
 
 hello-world.worker.ts
 ```ts
