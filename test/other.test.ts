@@ -1,8 +1,9 @@
 import { expect, assert } from "@esm-bundle/chai"
 import { Transfer } from "../src/shared";
-import { assertMessageEvent, ControllerJobRunMessage, ControllerMessageType, isControllerJobRunMessage, isControllerTerminateMessage } from "../src/shared/Messages";
+import { assertMessageEvent, ControllerJobRunMessage, ControllerMessageType,
+    isControllerJobRunMessage, isControllerTerminateMessage } from "../src/shared/Messages";
 
-describe("Run some basic worker tests", () => {
+describe("Other tests", () => {
     it("Transfer non-transferrable fails", () => {
         const payload = {nonTransferable: "should fail"};
         // @ts-expect-error: test case
