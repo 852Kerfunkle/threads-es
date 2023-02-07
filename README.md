@@ -5,9 +5,9 @@
 ![NPM License](https://img.shields.io/npm/l/threads-es)
 [![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-blue.svg?style=flat)](https://github.com/852Kerfunkle/threads-es/issues)
 
-Supports `Worker`, `SharedWorker` and quite possilby also `ServiceWorker`.
+Supports `Worker`, `SharedWorker` and quite possibly also `ServiceWorker`.
 
-It's made for the web, it doesn't support node.js workers. Use with bundlers that support bundling workers with `import.meta`, i.e. Rollup or Webpack 5.
+It's made for the web, it doesn't support Node.js workers. Use with bundlers that support bundling workers with `import.meta`, i.e. Rollup or Webpack 5.
 
 ### Examples
 
