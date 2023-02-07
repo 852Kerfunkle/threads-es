@@ -51,10 +51,11 @@ describe("Worker tests", () => {
             await EsThread.Spawn<ThrowTopApiType>(
                 new Worker(new URL("threads/throw-top.worker.ts", import.meta.url),
                 {type: "module"}));
-            assert(false);
+            assert(false, "No error was thrown");
         }
         catch(e) {
-            expect(e.toString()).to.be.eq("Error: whoops");
+            assert(e instanceof Error, "Error isn't of 'Error' type");
+            expect(e.message).to.be.eq("whoops");
         }
     });
 
@@ -63,10 +64,17 @@ describe("Worker tests", () => {
             await EsThread.Spawn<RejectTopApiType>(
                 new Worker(new URL("threads/reject-top.worker.ts", import.meta.url),
                 {type: "module"}));
-            assert(false);
+            assert(false, "No error was thrown");
         }
         catch(e) {
-            expect(e.toString()).to.be.eq("Error: spoohw");
+            assert(e instanceof Error, "Error isn't of 'Error' type");
+            expect(e.message).to.be.eq("spoohw");
         }
     });
+
+    // TODO: find (or make) a Worker and SharedWorker polyfill!
+    /*it("Test with Worker polyfill", async () => {
+        window.Worker = ???
+        genericWorkerTests(PseudoWorker);
+    });*/
 })

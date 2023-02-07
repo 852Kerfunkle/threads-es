@@ -2,7 +2,7 @@ import { exposeApi } from "../../src/worker/Worker"
 
 const throwHelloWorldApi = {
     helloWorld: async (): Promise<string> => {
-        throw new Error("Hello World!");
+        throw new Error("Hello Error!");
     }
 }
 

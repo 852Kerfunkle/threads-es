@@ -9,6 +9,7 @@
         ],
         "moduleResolution": "node",
         "esModuleInterop": false,
+        "allowSyntheticDefaultImports": true,
         "strict": true,
         "noImplicitAny": true,
         "noImplicitReturns": true,
@@ -21,6 +22,7 @@
         "skipLibCheck": true
     },
     "include": [
-        "src"
+        "src",
+        "test"
     ]
 }

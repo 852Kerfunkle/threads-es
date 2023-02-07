@@ -9,6 +9,7 @@ import { ThrowHelloWorldApiType } from "./threads/throw.worker";
 import { LongRunningApiType } from "./threads/long-running.worker";
 import { RejectApiType } from "./threads/reject.worker";
 import { TransferObjectWithArrayApiType } from "./threads/transfer-object-with-array.worker";
+import { TestWorkerApiType } from "./threads/test-worker-api.worker";
 
 type TestWorkerType = new (scriptURL: string | URL, options?: WorkerOptions) => (Worker | SharedWorker);
 
@@ -37,10 +38,11 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
 
             try {
                 await thread.methods.helloWorld();
-                assert(false);
+                assert(false, "No error was thrown");
             }
             catch(e) {
-                assert(e.toString() === "Error: Hello World!");
+                assert(e instanceof Error, "Error isn't of 'Error' type");
+                expect(e.message).to.be.eq("Hello Error!");
             }
 
             await thread.terminate();
@@ -125,6 +127,25 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
 
             expect(await result).to.be.eq("Hello World!");
 
+            await thread.terminate();
+        });
+
+        it("Test worker Api", async () => {
+            const thread = await EsThread.Spawn<TestWorkerApiType>(
+                new WorkerType(new URL("threads/test-worker-api.worker.ts", import.meta.url),
+                {type: "module"}));
+    
+            expect(thread).to.not.be.undefined;
+            expect(thread.methods.testWorkerApi).to.not.be.undefined;
+    
+            try {
+                await thread.methods.testWorkerApi(WorkerType === Worker ? "Worker" : "SharedWorker");
+            }
+            catch(e) {
+                assert(e instanceof Error, "Error isn't of 'Error' type");
+                assert(false, e.message);
+            }
+    
             await thread.terminate();
         });
     });
