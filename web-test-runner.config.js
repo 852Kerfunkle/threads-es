@@ -1,5 +1,6 @@
 import { fileURLToPath } from 'url';
 import { esbuildPlugin } from '@web/dev-server-esbuild';
+//import { TestRunnerConfig } from '@web/test-runner';
 //import { playwrightLauncher } from '@web/test-runner-playwright';
 
 const config = {
@@ -32,6 +33,9 @@ const config = {
   coverage: true,
   coverageConfig: {
     report: true,
+    include: [
+      'src/**/*'
+    ],
     threshold: {
       statements: 95,
       branches: 95,

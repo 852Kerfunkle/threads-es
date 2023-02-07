@@ -13,7 +13,6 @@ import { isTransferDescriptor } from "../shared/TransferDescriptor";
 import { assertSharedWorkerScope,
     assertWorkerScope,
     isDedicatedWorkerScope,
-    isSharedWorkerContext,
     isWorkerScope,
     WorkerContext } from "./Utils";
 
@@ -97,6 +96,10 @@ const workerScope = self;
 
 // Register error handlers
 if(isWorkerScope(workerScope)) {
+    // TODO: this doesn't work for SharedWorker.
+    // if an error is thrown before the onconnect handler in the
+    // SharedWorker is called, there is nowhere to post to. Could/should move
+    // these into the onconnect handler if it's a SharedWorker.
     workerScope.addEventListener("error", event => {
         // Post with some delay, so the master had some time to subscribe to messages
         event.preventDefault();
@@ -122,15 +125,18 @@ export function exposeApi(api: WorkerModule<any>) {
                 if(isControllerJobRunMessage(messageData)) {
                     runFunction(context, messageData.uid, api[messageData.method], messageData.args);
                 }
-                
+
                 if(isControllerTerminateMessage(messageData)) {
                     // Unsubscribe from message events on this context.
                     unsubscribe();
-                    // And if it's a shared worker context, close the port.
-                    if(isSharedWorkerContext(context)) context.close();
+                    // If it's a shared worker context, close the port.
+                    // If it's a dedicated worker context, abort the worker.
+                    context.close();
+                    // TODO: when all clients to a shared worker terminated,
+                    // use workerScope.close() to terminate shared worker?
                 }
             })
-        
+
             const methodNames = Object.keys(api).filter(key => typeof api[key] === "function");
             postModuleInitMessage(context, methodNames)
         } else {
