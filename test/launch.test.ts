@@ -6,6 +6,7 @@ import { EsThread } from "../src/controller";
 import { Transfer } from "../src/shared";
 import { WithSubworkerApiType } from "./threads/with-subworker.worker";
 import { ThrowHelloWorldApiType } from "./threads/throw.worker";
+import { LongRunningApiType } from "./threads/long-running.worker";
 
 describe("Run some basic worker tests", () => {
     it("Launch a simple worker", async () => {
@@ -85,6 +86,24 @@ describe("Run some basic worker tests", () => {
         await thread.methods.init()
         expect(await thread.methods.helloWorld()).to.be.eq("Hello World!");
         await thread.methods.shutdown()
+
+        await thread.terminate();
+    });
+
+    it("Launch a long-running worker", async () => {
+        const thread = await EsThread.Spawn<LongRunningApiType>(
+            new Worker(new URL("threads/long-running.worker.ts", import.meta.url),
+            {type: "module"}));
+
+        expect(thread).to.not.be.undefined;
+        expect(thread.methods.takesTime).to.not.be.undefined;
+
+        const result = thread.methods.takesTime();
+        expect(thread.numQueuedJobs).to.be.eq(1);
+        await thread.settled();
+        expect(thread.numQueuedJobs).to.be.eq(0);
+
+        expect(await result).to.be.eq("Hello World!");
 
         await thread.terminate();
     });
