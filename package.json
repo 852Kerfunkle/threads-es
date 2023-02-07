@@ -1,7 +1,7 @@
 {
   "name": "threads-es",
   "description": "A modern, zero-dependency WebWorker abstraction.",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "author": "852Kerfunkle",
   "license": "MIT",
   "repository": {
@@ -54,6 +54,7 @@
     "build": "yarn clean && yarn build:esm",
     "build:esm": "tsc -p ./config/tsconfig.esm.json",
     "bundle": "yarn build && cp package.json LICENSE README.md dist-esm/",
+    "bundle-local": "yarn bundle && cd dist-esm/ && yarn pack",
     "release": "yarn bundle && yarn publish ./dist-esm --access public",
     "test": "web-test-runner",
     "lint": "eslint src"
