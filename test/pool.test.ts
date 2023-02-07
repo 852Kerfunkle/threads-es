@@ -17,14 +17,18 @@ describe("Run some basic pool tests", () => {
     it("Launch a pool with long running task", async () => {
         const pool = await EsThreadPool.Spawn<LongRunningApiType>(() => EsThread.Spawn(
             new Worker(new URL("threads/long-running.worker.ts", import.meta.url),
-            {type: "module"})), {size: 1});
+            {type: "module"})), {size: 2});
 
-        const result = pool.queue(worker => worker.methods.takesTime(250));
+        const result0 = pool.queue(worker => worker.methods.takesTime(250));
+        const result1 = pool.queue(worker => worker.methods.takesTime(250));
         
         expect((pool as any).threads[0].numQueuedJobs).to.be.eq(1);
+        expect((pool as any).threads[1].numQueuedJobs).to.be.eq(1);
         await pool.settled();
         expect((pool as any).threads[0].numQueuedJobs).to.be.eq(0);
-        expect(await result).to.be.eq("Hello World!");
+        expect((pool as any).threads[1].numQueuedJobs).to.be.eq(0);
+        expect(await result0).to.be.eq("Hello World!");
+        expect(await result1).to.be.eq("Hello World!");
 
         await pool.terminate();
     });
