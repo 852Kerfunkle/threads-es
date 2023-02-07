@@ -24,8 +24,8 @@ type ProxyableArgs<Args extends any[]> = Args extends [arg0: infer Arg0, ...rest
 
 type ProxyableFunction<Args extends any[], ReturnType> =
     Args extends []
-    ? () => EsTaskPromise<StripTransfer<Awaited<ReturnType>>>
-    : (...args: ProxyableArgs<Args>) => EsTaskPromise<StripTransfer<Awaited<ReturnType>>>
+    ? () => Promise<StripTransfer<Awaited<ReturnType>>>
+    : (...args: ProxyableArgs<Args>) => Promise<StripTransfer<Awaited<ReturnType>>>
 
 type ModuleMethods = { [methodName: string]: (...args: any) => any }
 
