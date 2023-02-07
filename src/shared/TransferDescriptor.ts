@@ -30,16 +30,15 @@ function assertTransferable(thing: any): asserts thing is Transferable {
 
 export function Transfer(transferable: Transferable): TransferDescriptor;
 
-export function Transfer<T>(payload: T, transferables: Transferable[]): TransferDescriptor;
+export function Transfer<T extends Transferable>(payload: T, transferables: Transferable[]): TransferDescriptor;
 
-export function Transfer<T>(payload: T, transferables?: Transferable[]): TransferDescriptor {
-    if(transferables) {
-        for (const transfer of transferables) {
-            assertTransferable(transfer);
-        }
-    } else if(!transferables) {
-        assertTransferable(payload);
+export function Transfer<T extends Transferable>(payload: T, transferables?: Transferable[]): TransferDescriptor {
+    if(!transferables) {
         transferables = [payload];
+    }
+
+    for (const transfer of transferables) {
+        assertTransferable(transfer);
     }
 
     return {

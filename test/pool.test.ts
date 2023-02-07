@@ -4,6 +4,17 @@ import { HelloWorldApiType } from "./threads/hello-world.worker"
 import { LongRunningApiType } from "./threads/long-running.worker";
 
 describe("EsThreadPool tests", () => {
+    it("Default pool options", async () => {
+        const pool = await EsThreadPool.Spawn<HelloWorldApiType>(() => EsThread.Spawn(
+            new Worker(new URL("threads/hello-world.worker.ts", import.meta.url),
+            {type: "module"})));
+
+        expect(pool.size).to.be.eq(navigator.hardwareConcurrency);
+        expect(pool.name).to.be.eq("EsThreadPool");
+
+        await pool.terminate();
+    });
+
     it("One worker", async () => {
         const pool = await EsThreadPool.Spawn<HelloWorldApiType>(() => EsThread.Spawn(
             new Worker(new URL("threads/hello-world.worker.ts", import.meta.url),
