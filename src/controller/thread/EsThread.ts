@@ -167,7 +167,7 @@ export class EsThread<ApiType extends WorkerModule<any>> implements Terminable {
                 }
                 else if (isWorkerUncaughtErrorMessage(event.data)) {
                     this.interface.removeEventListener("message", initMessageHandler);
-                    reject(event.data.errorMessage);
+                    reject(new Error(event.data.errorMessage));
                 }
             };
             this.interface.addEventListener("message", initMessageHandler)

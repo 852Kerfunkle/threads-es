@@ -45,5 +45,5 @@ describe("Run some basic pool tests", () => {
         }
 
         await pool.terminate();
-    })
+    });
 });

@@ -1,12 +1,14 @@
 import { expect, assert } from "@esm-bundle/chai"
+import { EsThread } from "../src/controller";
+import { Transfer } from "../src/shared";
 import { HelloWorldApiType } from "./threads/hello-world.worker"
 import { TransferArrayApiType } from "./threads/transfer-array.worker";
 import { AsyncHelloWorldApiType } from "./threads/async-api.worker";
-import { EsThread } from "../src/controller";
-import { Transfer } from "../src/shared";
 import { WithSubworkerApiType } from "./threads/with-subworker.worker";
 import { ThrowHelloWorldApiType } from "./threads/throw.worker";
 import { LongRunningApiType } from "./threads/long-running.worker";
+import { ThrowTopApiType } from "./threads/throw-top.worker";
+import { RejectTopApiType } from "./threads/reject-top.worker";
 
 describe("Run some basic worker tests", () => {
     it("Launch a simple worker", async () => {
@@ -39,6 +41,30 @@ describe("Run some basic worker tests", () => {
         }
 
         await thread.terminate();
+    });
+
+    it("Launch a simple worker that throws before exposeApi", async () => {
+        try {
+            await EsThread.Spawn<ThrowTopApiType>(
+                new Worker(new URL("threads/throw-top.worker.ts", import.meta.url),
+                {type: "module"}));
+            assert(false);
+        }
+        catch(e) {
+            expect(e.toString()).to.be.eq("Error: whoops");
+        }
+    });
+
+    it("Launch a simple worker that rejects before exposeApi", async () => {
+        try {
+            await EsThread.Spawn<RejectTopApiType>(
+                new Worker(new URL("threads/reject-top.worker.ts", import.meta.url),
+                {type: "module"}));
+            assert(false);
+        }
+        catch(e) {
+            expect(e.toString()).to.be.eq("Error: spoohw");
+        }
     });
 
     it("Launch a worker with transfer", async () => {

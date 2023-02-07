@@ -94,16 +94,14 @@ const workerScope = self;
 if(isWorkerScope(workerScope)) {
     workerScope.addEventListener("error", event => {
         // Post with some delay, so the master had some time to subscribe to messages
-        setTimeout(() => postUncaughtErrorMessage(workerScope, event.error || event), 250)
+        event.preventDefault();
+        setTimeout(() => postUncaughtErrorMessage(workerScope, event.error || event), 250);
     });
 
     workerScope.addEventListener("unhandledrejection", event => {
-        // TODO: figure out what's going on here.
-        const error = (event as any).reason
-        if (error && typeof (error as any).message === "string") {
-            // Post with some delay, so the master had some time to subscribe to messages
-            setTimeout(() => postUncaughtErrorMessage(workerScope, error), 250)
-        }
+        event.preventDefault();
+        const error = (event as PromiseRejectionEvent).reason
+        setTimeout(() => postUncaughtErrorMessage(workerScope, error || event), 250);
     });
 }
 
