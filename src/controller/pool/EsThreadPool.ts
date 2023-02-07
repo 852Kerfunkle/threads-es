@@ -1,8 +1,7 @@
 import { Terminable, WorkerModule } from "../../shared/Worker"
 import { EsThread } from "../thread/EsThread"
 
-export const defaultPoolSize = typeof navigator !== "undefined" && navigator.hardwareConcurrency
-    ? navigator.hardwareConcurrency : 4;
+export const defaultPoolSize = navigator.hardwareConcurrency;
 
 export interface EsPoolOptions {
     /** Maximum no. of tasks to run on one worker thread at a time. Defaults to one. */
