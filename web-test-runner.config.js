@@ -28,7 +28,6 @@ const config = {
     },
   },
   port: 9876,
-  watch: true,
   nodeResolve: true,
   coverage: true,
   /*browsers: [
