@@ -53,7 +53,8 @@
     "clean": "rm -rf ./dist-esm",
     "build": "yarn clean && yarn build:esm",
     "build:esm": "tsc -p ./config/tsconfig.esm.json",
-    "bundle": "yarn build && cp package.json dist-esm/ && cd dist-esm && yarn pack",
+    "bundle": "yarn build && cp package.json LICENSE README.md dist-esm/",
+    "release": "yarn bundle && yarn publish ./dist-esm --access public",
     "test": "web-test-runner",
     "lint": "eslint src"
   },

@@ -28,5 +28,6 @@ export default {
   },
   port: 9876,
   watch: true,
-  nodeResolve: true
+  nodeResolve: true,
+  coverage: true
 };

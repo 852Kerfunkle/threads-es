@@ -1,6 +1,7 @@
 dist-esm/
 dist-cjs/
 node_modules/
-yarn-error.log
+coverage/
 
+yarn-error.log
 *.tgz
