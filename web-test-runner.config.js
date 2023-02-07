@@ -30,6 +30,15 @@ const config = {
   port: 9876,
   nodeResolve: true,
   coverage: true,
+  coverageConfig: {
+    report: true,
+    threshold: {
+      statements: 95,
+      branches: 95,
+      functions: 95,
+      lines: 95,
+    },
+  }
   /*browsers: [
     playwrightLauncher({ product: 'chromium' }),
     playwrightLauncher({ product: 'firefox' }),

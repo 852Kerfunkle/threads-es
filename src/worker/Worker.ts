@@ -108,7 +108,7 @@ if(isWorkerScope(workerScope)) {
 export function exposeApi(api: WorkerModule<any>) {
     assertWorkerScope(workerScope);
 
-    if (workerApiExposed) throw Error("exposeApi() should only be called once.");
+    if (workerApiExposed) throw new Error("exposeApi() should only be called once.");
     workerApiExposed = true;
 
     const exposeApiInner = (context: WorkerContext) => {
@@ -129,7 +129,7 @@ export function exposeApi(api: WorkerModule<any>) {
             const methodNames = Object.keys(api).filter(key => typeof api[key] === "function");
             postModuleInitMessage(context, methodNames)
         } else {
-            throw Error(`Invalid argument passed to exposeApi(). Expected an object, got: ${api}`)
+            throw new Error(`Invalid argument passed to exposeApi(). Expected an object, got: ${api}`)
         }
 
         // TODO: cancelling of pending (i.e. not yet started) jobs.

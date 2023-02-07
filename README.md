@@ -1,9 +1,11 @@
 # threads-es
 ## A modern, zero-dependency WebWorker abstraction.
 
-[![NPM](https://img.shields.io/npm/v/threads-es.svg?style=flat)](https://npmjs.org/threads-es/)
-![NPM License](https://img.shields.io/npm/l/threads-es)
-[![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-blue.svg?style=flat)](https://github.com/852Kerfunkle/threads-es/issues)
+[![Npm package version](https://img.shields.io/npm/v/threads-es)](https://npmjs.com/package/threads-es)
+![Npm license](https://img.shields.io/npm/l/threads-es)
+![Node.js tests](https://github.com/852Kerfunkle/threads-es/actions/workflows/node.js.yml/badge.svg)
+[![TypeScript](https://badgen.net/badge/icon/typescript?icon=typescript&label)](https://typescriptlang.org)
+[![Contributions welcome](https://img.shields.io/badge/contributions-welcome-blue.svg?style=flat)](https://github.com/852Kerfunkle/threads-es/issues)
 
 Supports `Worker`, `SharedWorker` and quite possibly also `ServiceWorker`.
 

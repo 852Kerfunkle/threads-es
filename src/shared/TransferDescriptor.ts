@@ -1,17 +1,31 @@
 export interface TransferDescriptor<T = any> {
-    transferable: true
-    send: T
-    transferables: Transferable[]
+    transferable: boolean;
+    send: T;
+    transferables: Transferable[];
 }
 
 export function isTransferDescriptor(thing: any): thing is TransferDescriptor {
     return thing && typeof thing === "object" && thing.transferable
 }
 
-function isTransferable(thing: any): thing is Transferable {
-    if (!thing || typeof thing !== "object") return false
-    // Don't check too thoroughly, since the list of transferable things in JS might grow over time
-    return true
+const TransferableTypes = [
+    OffscreenCanvas,
+    ImageBitmap,
+    MessagePort,
+    ReadableStream,
+    WritableStream,
+    TransformStream,
+    ArrayBuffer] as const;
+
+function assertTransferable(thing: any): asserts thing is Transferable {
+    let isTransferable = false
+    for(const type of TransferableTypes) {
+        if(thing instanceof type) {
+            isTransferable = true;
+            break;
+        }
+    }
+    if(!isTransferable) throw new Error("Object is not transferable");
 }
 
 export function Transfer(transferable: Transferable): TransferDescriptor;
@@ -19,8 +33,12 @@ export function Transfer(transferable: Transferable): TransferDescriptor;
 export function Transfer<T>(payload: T, transferables: Transferable[]): TransferDescriptor;
 
 export function Transfer<T>(payload: T, transferables?: Transferable[]): TransferDescriptor {
-    if (!transferables) {
-        if (!isTransferable(payload)) throw Error("Object is not transferable");
+    if(transferables) {
+        for (const transfer of transferables) {
+            assertTransferable(transfer);
+        }
+    } else if(!transferables) {
+        assertTransferable(payload);
         transferables = [payload];
     }
 
