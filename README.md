@@ -6,7 +6,7 @@
 ![Node.js tests](https://github.com/852Kerfunkle/threads-es/actions/workflows/node.js.yml/badge.svg)
 [![GitHub top language](https://img.shields.io/github/languages/top/852Kerfunkle/threads-es?logo=typescript)](https://typescriptlang.org)
 
-Supports `Worker`, `SharedWorker` and quite possibly also `ServiceWorker`.
+Supports `Worker`, `SharedWorker`.
 
 It's made for the web, it doesn't support Node.js workers. Use with bundlers that support bundling workers with `import.meta`, i.e. Rollup or Webpack 5.
 

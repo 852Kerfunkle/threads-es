@@ -10,7 +10,12 @@ import { assertMessageEvent,
     TaskUID} from "../shared/Messages";
 import { WorkerFunction, WorkerModule } from "../shared/Worker";
 import { isTransferDescriptor } from "../shared/TransferDescriptor";
-import { assertSharedWorkerScope, assertWorkerScope, isDedicatedWorkerScope, isSharedWorkerContext, isWorkerScope, WorkerContext } from "./Utils";
+import { assertSharedWorkerScope,
+    assertWorkerScope,
+    isDedicatedWorkerScope,
+    isSharedWorkerContext,
+    isWorkerScope,
+    WorkerContext } from "./Utils";
 
 
 function subscribeToControllerMessages(context: WorkerContext, handler: (ev: ControllerMessage) => void) {

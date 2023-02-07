@@ -33,7 +33,7 @@ type ModuleProxy<Methods extends ModuleMethods> = {
     [method in keyof Methods]: ProxyableFunction<Parameters<Methods[method]>, ReturnType<Methods[method]>>
 }
 
-type WorkerType = Worker | SharedWorker | ServiceWorker;
+type WorkerType = Worker | SharedWorker;
 
 interface WorkerInterface {
     postMessage(message: any, transfer: Transferable[]): void;
@@ -53,7 +53,7 @@ export class EsThread<ApiType extends WorkerModule<any>> implements Terminable {
 
     private constructor(worker: WorkerType) {
         this.worker = worker;
-        if(worker instanceof Worker || worker instanceof ServiceWorker) this.interface = worker;
+        if(worker instanceof Worker) this.interface = worker;
         else {
             this.interface = worker.port;
             worker.port.start();
