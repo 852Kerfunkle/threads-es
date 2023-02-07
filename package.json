@@ -58,7 +58,7 @@
     "release": "yarn bundle && yarn publish ./dist-esm --access public",
     "test": "web-test-runner",
     "test-watch": "web-test-runner --watch",
-    "lint": "eslint src"
+    "lint": "eslint --max-warnings=0 src"
   },
   "eslintConfig": {
     "extends": [
