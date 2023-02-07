@@ -2,8 +2,8 @@ import { delay } from "../../src/shared/Utils";
 import { exposeApi } from "../../src/worker/Worker"
 
 const longRunningApi = {
-    takesTime: async () => {
-        await delay(250);
+    takesTime: async (ms: number) => {
+        await delay(ms);
         return "Hello World!";
     }
 }

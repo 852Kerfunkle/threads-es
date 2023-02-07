@@ -62,19 +62,19 @@ function prepareResult<Result>(rawResult: Result): {result: Result, transferable
 function postWorkerJobResultMessage(context: WorkerContext, jobUid: TaskUID, rawResult: any) {
     const {result, transferables} = prepareResult(rawResult);
 
-    const resultMessage: WorkerJobResultMessage = {
+    const taskResultMessage: WorkerJobResultMessage = {
         type: WorkerMessageType.JobResult,
         uid: jobUid,
         result: result };
-    context.postMessage(resultMessage, transferables);
+    context.postMessage(taskResultMessage, transferables);
 }
 
 function postWorkerJobErrorMessage(context: WorkerContext, jobUid: TaskUID, error: Error) {
-    const resultMessage: WorkerJobErrorMessage = {
+    const taskErrorMessage: WorkerJobErrorMessage = {
         type: WorkerMessageType.JobError,
         uid: jobUid,
         errorMessage: error.message };
-    context.postMessage(resultMessage);
+    context.postMessage(taskErrorMessage);
 }
 
 async function runFunction(context: WorkerContext, jobUid: TaskUID, fn: WorkerFunction, args: any[]) {

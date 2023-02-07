@@ -19,7 +19,7 @@ describe("Run some basic pool tests", () => {
             new Worker(new URL("threads/long-running.worker.ts", import.meta.url),
             {type: "module"})), {size: 1});
 
-        const result = pool.queue(worker => worker.methods.takesTime());
+        const result = pool.queue(worker => worker.methods.takesTime(250));
         
         expect((pool as any).threads[0].numQueuedJobs).to.be.eq(1);
         await pool.settled();

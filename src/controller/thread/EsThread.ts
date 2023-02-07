@@ -89,13 +89,13 @@ export class EsThread<ApiType extends WorkerModule<any>> implements Terminable {
 
             if(isWorkerJobResultMessage(evt.data)) {
                 const task = this.tasks.get(evt.data.uid);
-                if(!task) throw new Error("Recived result for finised task with UID " + evt.data.uid);
+                if(!task) throw new Error("Recived result for invalid task with UID " + evt.data.uid);
                 this.tasks.delete(task.taskUID);
                 task.resolve(evt.data.result);
             }
             else if(isWorkerJobErrorMessage(evt.data)) {
                 const task = this.tasks.get(evt.data.uid);
-                if(!task) throw new Error("Recived error for finised task with UID " + evt.data.uid);
+                if(!task) throw new Error("Recived error for invalid task with UID " + evt.data.uid);
                 this.tasks.delete(task.taskUID);
                 task.reject(new Error(evt.data.errorMessage));
             }

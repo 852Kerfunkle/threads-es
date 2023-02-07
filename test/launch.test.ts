@@ -1,6 +1,7 @@
 import { expect, assert } from "@esm-bundle/chai"
 import { EsThread } from "../src/controller";
 import { Transfer } from "../src/shared";
+import { delay } from "../src/shared/Utils";
 import { HelloWorldApiType } from "./threads/hello-world.worker"
 import { TransferArrayApiType } from "./threads/transfer-array.worker";
 import { AsyncHelloWorldApiType } from "./threads/async-api.worker";
@@ -9,6 +10,8 @@ import { ThrowHelloWorldApiType } from "./threads/throw.worker";
 import { LongRunningApiType } from "./threads/long-running.worker";
 import { ThrowTopApiType } from "./threads/throw-top.worker";
 import { RejectTopApiType } from "./threads/reject-top.worker";
+import { RejectApiType } from "./threads/reject.worker";
+import { PostWeirdResultApiType } from "./threads/post-weird-result.worker";
 
 describe("Run some basic worker tests", () => {
     it("Launch a simple worker", async () => {
@@ -65,6 +68,31 @@ describe("Run some basic worker tests", () => {
         catch(e) {
             expect(e.toString()).to.be.eq("Error: spoohw");
         }
+    });
+
+    it("Launch a simple worker with unhandled rejection", async () => {
+        const thread = await EsThread.Spawn<RejectApiType>(
+            new Worker(new URL("threads/reject.worker.ts", import.meta.url),
+            {type: "module"}));
+        await delay(500);
+
+        // "Error: it had to happen eventually"
+        // NOTE: currently there is no way to deal with unhandled rejections.
+        // Maybe need some event for it.
+        thread.terminate();
+    });
+
+    it("Launch a simple worker that posts invalid results", async () => {
+        const thread = await EsThread.Spawn<PostWeirdResultApiType>(
+            new Worker(new URL("threads/post-weird-result.worker.ts", import.meta.url),
+            {type: "module"}));
+        
+        // "Error: it had to happen eventually"
+        // NOTE: currently there is no way to deal with these errors.
+        // Maybe need some event for it.
+        await thread.methods.postWeird();
+
+        thread.terminate();
     });
 
     it("Launch a worker with transfer", async () => {
@@ -124,7 +152,7 @@ describe("Run some basic worker tests", () => {
         expect(thread).to.not.be.undefined;
         expect(thread.methods.takesTime).to.not.be.undefined;
 
-        const result = thread.methods.takesTime();
+        const result = thread.methods.takesTime(250);
         expect(thread.numQueuedJobs).to.be.eq(1);
         await thread.settled();
         expect(thread.numQueuedJobs).to.be.eq(0);
