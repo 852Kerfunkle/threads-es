@@ -5,7 +5,7 @@ const transferArrayApi = {
     transferArray: (array: TransferDescriptor<ArrayBuffer>): TransferDescriptor<ArrayBuffer> => {
         const uint8 = new Uint8Array(array.send);
         uint8.forEach((value, index) => {
-            uint8[index] = 0;
+            uint8[index] = value * 3;
         });
         return Transfer(uint8.buffer);
     }

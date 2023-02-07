@@ -6,6 +6,7 @@ export interface TransferDescriptor<T = any> {
 
 export function isTransferDescriptor(thing: any): thing is TransferDescriptor {
     return thing && typeof thing === "object" && thing.transferable
+        && typeof thing.send === "object" && Array.isArray(thing.transferables);
 }
 
 const TransferableTypes = [
@@ -17,7 +18,7 @@ const TransferableTypes = [
     TransformStream,
     ArrayBuffer] as const;
 
-function assertTransferable(thing: any): asserts thing is Transferable {
+function isTransferable(thing: any): thing is Transferable {
     let isTransferable = false
     for(const type of TransferableTypes) {
         if(thing instanceof type) {
@@ -25,20 +26,28 @@ function assertTransferable(thing: any): asserts thing is Transferable {
             break;
         }
     }
-    if(!isTransferable) throw new Error("Object is not transferable");
+    return isTransferable;
+}
+
+function assertTransferable(thing: any): asserts thing is Transferable {
+    if(!isTransferable(thing)) throw new Error("Object is not transferable");
 }
 
 export function Transfer(transferable: Transferable): TransferDescriptor;
 
-export function Transfer<T extends Transferable>(payload: T, transferables: Transferable[]): TransferDescriptor;
+export function Transfer<T>(payload: T, transferables: Transferable[]): TransferDescriptor;
 
-export function Transfer<T extends Transferable>(payload: T, transferables?: Transferable[]): TransferDescriptor {
+export function Transfer<T>(payload: T, transferables?: Transferable[]): TransferDescriptor {
+    // If no transferables are specified, payload must be a Transferable.
     if(!transferables) {
+        assertTransferable(payload);
         transferables = [payload];
     }
-
-    for (const transfer of transferables) {
-        assertTransferable(transfer);
+    // If transferables are specified, each transferable must be a Transferable.
+    else {
+        for (const transfer of transferables) {
+            assertTransferable(transfer);
+        }
     }
 
     return {

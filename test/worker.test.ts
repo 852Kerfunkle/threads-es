@@ -12,6 +12,7 @@ import { ThrowTopApiType } from "./threads/throw-top.worker";
 import { RejectTopApiType } from "./threads/reject-top.worker";
 import { RejectApiType } from "./threads/reject.worker";
 import { PostWeirdResultApiType } from "./threads/post-weird-result.worker";
+import { TransferObjectWithArrayApiType } from "./threads/transfer-object-with-array.worker";
 
 describe("Worker tests", () => {
     it("Basic", async () => {
@@ -109,7 +110,27 @@ describe("Worker tests", () => {
         const arrayOut = await thread.methods.transferArray(Transfer(arrayIn.buffer));
 
         expect(arrayOut.byteLength).to.be.eq(10);
-        expect(new Uint8Array(arrayOut.byteLength)).to.be.eql(new Uint8Array([0,0,0,0,0,0,0,0,0,0]));
+        expect(new Uint8Array(arrayOut)).to.be.eql(new Uint8Array([0,3,6,9,12,15,18,21,24,27]));
+
+        await thread.terminate();
+    });
+
+    it("With complex transfer", async () => {
+        const thread = await EsThread.Spawn<TransferObjectWithArrayApiType>(
+            new Worker(new URL("threads/transfer-object-with-array.worker.ts", import.meta.url),
+            {type: "module"}));
+
+        expect(thread).to.not.be.undefined;
+        expect(thread.methods.transferObjectWithArray).to.not.be.undefined;
+
+        const arrayIn = new Uint8Array(10);
+        arrayIn.forEach((value, index) => { arrayIn[index] = index });
+        const objectIn = {array: arrayIn.buffer}
+
+        const objectOut = await thread.methods.transferObjectWithArray(Transfer(objectIn, [objectIn.array]));
+
+        expect(objectOut.array.byteLength).to.be.eq(10);
+        expect(new Uint8Array(objectOut.array)).to.be.eql(new Uint8Array([0,2,4,6,8,10,12,14,16,18]));
 
         await thread.terminate();
     });
