@@ -54,7 +54,7 @@ describe("Worker tests", () => {
             assert(false, "No error was thrown");
         }
         catch(e) {
-            assert(e instanceof Error, "Error isn't of 'Error' type");
+            assert(e instanceof Error, "Exception isn't of 'Error' type");
             expect(e.message).to.be.eq("whoops");
         }
     });
@@ -67,7 +67,7 @@ describe("Worker tests", () => {
             assert(false, "No error was thrown");
         }
         catch(e) {
-            assert(e instanceof Error, "Error isn't of 'Error' type");
+            assert(e instanceof Error, "Exception isn't of 'Error' type");
             expect(e.message).to.be.eq("spoohw");
         }
     });

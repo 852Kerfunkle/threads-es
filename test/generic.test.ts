@@ -11,6 +11,7 @@ import { RejectApiType } from "./threads/reject.worker";
 import { TransferObjectWithArrayApiType } from "./threads/transfer-object-with-array.worker";
 import { TestWorkerApiType } from "./threads/test-worker-api.worker";
 import { TransferReadableStreamApiType } from "./threads/transfer-readable-stream.worker";
+import { ExposeApiNotCalledApiType } from "./threads/exposeApi-not-called";
 
 type TestWorkerType = new (scriptURL: string | URL, options?: WorkerOptions) => (Worker | SharedWorker);
 
@@ -29,6 +30,19 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
             await thread.terminate();
         });
 
+        it("exposeApi not called", async () => {
+            try {
+                await EsThread.Spawn<ExposeApiNotCalledApiType>(
+                    new WorkerType(new URL("threads/exposeApi-not-called.ts", import.meta.url),
+                    {type: "module"}), {timeout: 250});
+                assert(false, "Spawn should not have succeeded");
+            }
+            catch(e) {
+                assert(e instanceof Error, "Exception isn't of 'Error' type");
+                expect(e.message).to.contain("Did not receive an init message from worker");
+            }
+        });
+
         it("Throws", async () => {
             const thread = await EsThread.Spawn<ThrowHelloWorldApiType>(
                 new WorkerType(new URL("threads/throw.worker.ts", import.meta.url),
@@ -42,7 +56,7 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
                 assert(false, "No error was thrown");
             }
             catch(e) {
-                assert(e instanceof Error, "Error isn't of 'Error' type");
+                assert(e instanceof Error, "Exception isn't of 'Error' type");
                 expect(e.message).to.be.eq("Hello Error!");
             }
 
@@ -165,7 +179,7 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
                 await thread.methods.testWorkerApi(WorkerType.name as "Worker" | "SharedWorker");
             }
             catch(e) {
-                assert(e instanceof Error, "Error isn't of 'Error' type");
+                assert(e instanceof Error, "Exception isn't of 'Error' type");
                 assert(false, e.message);
             }
     

@@ -10,7 +10,7 @@ import { assertMessageEvent,
     TaskUID } from "../../shared/Messages";
 import { Terminable, WorkerModule } from "../../shared/Worker";
 import { isTransferDescriptor, TransferDescriptor } from "../../shared/TransferDescriptor";
-import { getRandomUID } from "../../shared/Utils";
+import { getRandomUID, withTimeout } from "../../shared/Utils";
 import { EsTaskPromise } from "./EsTask";
 
 type StripTransfer<Type> =
@@ -33,9 +33,17 @@ interface WorkerInterface {
     removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
 }
 
+export interface EsThreadOptions {
+    // If the thread doesn't send the init message within timeout, it rejects.
+    timeout?: number;
+}
+
+const defaultThreadTimeout = 10000;
+
 export class EsThread<ApiType extends WorkerModule> implements Terminable {
     readonly tasks: Map<TaskUID, EsTaskPromise<any>> = new Map();
     readonly threadUID = getRandomUID();
+    readonly options: Required<EsThreadOptions>;
 
     private worker: WorkerType;
     private interface: WorkerInterface;
@@ -43,17 +51,21 @@ export class EsThread<ApiType extends WorkerModule> implements Terminable {
     public methods: ProxyModule<ApiType> = {} as ProxyModule<ApiType>;
     public get numQueuedTasks() { return this.tasks.size; }
 
-    private constructor(worker: WorkerType) {
+    private constructor(worker: WorkerType, threadOptions: EsThreadOptions) {
         this.worker = worker;
         if(worker instanceof Worker) this.interface = worker;
         else {
             this.interface = worker.port;
             worker.port.start();
         }
+
+        this.options = {
+            timeout: threadOptions.timeout || defaultThreadTimeout
+        }
     }
 
-    public static async Spawn<ApiType extends WorkerModule>(worker: WorkerType) {
-        const thread = new EsThread<ApiType>(worker);
+    public static async Spawn<ApiType extends WorkerModule>(worker: WorkerType, threadOptions: EsThreadOptions = {}) {
+        const thread = new EsThread<ApiType>(worker, threadOptions);
         return thread.initThread();
     }
 
@@ -148,20 +160,29 @@ export class EsThread<ApiType extends WorkerModule> implements Terminable {
     private async initThread() {
         // TODO: have a timeout on this, to make sure a worker failing to init doesn't
         // block execution forever.
-        const exposedApi = await new Promise<WorkerInitMessage>((resolve, reject) => {
-            const initMessageHandler = (event: Event) => {
-                assertMessageEvent(event);
-                if (isWorkerInitMessage(event.data)) {
-                    this.interface.removeEventListener("message", initMessageHandler);
-                    resolve(event.data);
-                }
-                else if (isWorkerUncaughtErrorMessage(event.data)) {
-                    this.interface.removeEventListener("message", initMessageHandler);
-                    reject(new Error(event.data.errorMessage));
-                }
-            };
-            this.interface.addEventListener("message", initMessageHandler)
-        });
+        let exposedApi;
+        try {
+            exposedApi = await withTimeout(new Promise<WorkerInitMessage>((resolve, reject) => {
+                const initMessageHandler = (event: Event) => {
+                    assertMessageEvent(event);
+                    if (isWorkerInitMessage(event.data)) {
+                        this.interface.removeEventListener("message", initMessageHandler);
+                        resolve(event.data);
+                    }
+                    else if (isWorkerUncaughtErrorMessage(event.data)) {
+                        this.interface.removeEventListener("message", initMessageHandler);
+                        reject(new Error(event.data.errorMessage));
+                    }
+                };
+                this.interface.addEventListener("message", initMessageHandler)
+            }), this.options.timeout, `Timeout: Did not receive an init message from worker after ${this.options.timeout}ms`);
+        }
+        catch(e) {
+            // If init times out, terminate worker, or close the message port.
+            if(this.worker instanceof Worker) this.worker.terminate();
+            else if(this.worker instanceof SharedWorker) this.worker.port.close();
+            throw e;
+        }
 
         this.createMethodsProxy(exposedApi.methodNames);
 

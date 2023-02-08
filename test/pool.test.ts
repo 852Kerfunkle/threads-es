@@ -9,8 +9,8 @@ describe("EsThreadPool tests", () => {
             new Worker(new URL("threads/hello-world.worker.ts", import.meta.url),
             {type: "module"})));
 
-        expect(pool.size).to.be.eq(navigator.hardwareConcurrency);
-        expect(pool.name).to.be.eq("EsThreadPool");
+        expect(pool.options.size).to.be.eq(navigator.hardwareConcurrency);
+        expect(pool.options.name).to.be.eq("EsThreadPool");
 
         await pool.terminate();
     });
