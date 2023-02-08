@@ -2,10 +2,10 @@ import { Transfer, TransferDescriptor } from "../../src/shared/TransferDescripto
 import { exposeApi } from "../../src/worker/Worker"
 
 const transferObjectWithArrayApi = {
-    transferObjectWithArray: (object: TransferDescriptor<{array: ArrayBuffer}>): TransferDescriptor<{array: ArrayBuffer}> => {
+    transferObjectWithArray: (object: TransferDescriptor<{array: ArrayBuffer}>, mul: number): TransferDescriptor<{array: ArrayBuffer}> => {
         const uint8 = new Uint8Array(object.send.array);
         uint8.forEach((value, index) => {
-            uint8[index] = value * 2;
+            uint8[index] = value * mul;
         });
         const res = {array: uint8.buffer};
         return Transfer(res, [res.array]);

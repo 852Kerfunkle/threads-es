@@ -71,7 +71,7 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
             const arrayIn = new Uint8Array(10);
             arrayIn.forEach((value, index) => { arrayIn[index] = index });
 
-            const arrayOut = await thread.methods.transferArray(Transfer(arrayIn.buffer));
+            const arrayOut = await thread.methods.transferArray(3, Transfer(arrayIn.buffer));
 
             expect(arrayOut.byteLength).to.be.eq(10);
             expect(new Uint8Array(arrayOut)).to.be.eql(new Uint8Array([0,3,6,9,12,15,18,21,24,27]));
@@ -91,7 +91,7 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
             arrayIn.forEach((value, index) => { arrayIn[index] = index });
             const objectIn = {array: arrayIn.buffer}
 
-            const objectOut = await thread.methods.transferObjectWithArray(Transfer(objectIn, [objectIn.array]));
+            const objectOut = await thread.methods.transferObjectWithArray(Transfer(objectIn, [objectIn.array]), 2);
 
             expect(objectOut.array.byteLength).to.be.eq(10);
             expect(new Uint8Array(objectOut.array)).to.be.eql(new Uint8Array([0,2,4,6,8,10,12,14,16,18]));

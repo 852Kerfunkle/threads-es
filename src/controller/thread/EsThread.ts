@@ -18,14 +18,10 @@ type StripTransfer<Type> =
     ? BaseType
     : Type
 
-type ProxyableArgs<Args extends any[]> = Args extends [arg0: infer Arg0, ...rest: infer RestArgs]
-    ? [Arg0 extends Transferable ? Arg0 | TransferDescriptor<Arg0> : Arg0, ...RestArgs]
-    : Args
-
 type ProxyableFunction<Args extends any[], ReturnType> =
     Args extends []
     ? () => Promise<StripTransfer<Awaited<ReturnType>>>
-    : (...args: ProxyableArgs<Args>) => Promise<StripTransfer<Awaited<ReturnType>>>
+    : (...args: Args) => Promise<StripTransfer<Awaited<ReturnType>>>
 
 type ModuleMethods = { [methodName: string]: (...args: any) => any }
 
