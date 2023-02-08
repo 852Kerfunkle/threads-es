@@ -45,9 +45,9 @@ export class EsThreadPool<ApiType extends WorkerModule> implements Terminable {
         let min = Infinity;
         let threadId = 0;
         for (const [idx, thread] of this.threads.entries()) {
-            if(thread.numQueuedJobs < min) {
+            if(thread.numQueuedTasks < min) {
                 threadId = idx;
-                min = thread.numQueuedJobs;
+                min = thread.numQueuedTasks;
             }
         }
         //console.log(`picked thread ${threadId} with ${min} active tasks`);

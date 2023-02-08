@@ -144,9 +144,9 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
             expect(thread.methods.takesTime).to.not.be.undefined;
 
             const result = thread.methods.takesTime(250);
-            expect(thread.numQueuedJobs).to.be.eq(1);
+            expect(thread.numQueuedTasks).to.be.eq(1);
             await thread.settled();
-            expect(thread.numQueuedJobs).to.be.eq(0);
+            expect(thread.numQueuedTasks).to.be.eq(0);
 
             expect(await result).to.be.eq("Hello World!");
 

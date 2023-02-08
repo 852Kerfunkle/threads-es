@@ -40,11 +40,11 @@ function taskResultPromise<ReturnType>(task: EsTask): Promise<ReturnType> {
             try {
                 task.notifyResult = null;
 
-                if(isWorkerJobResultMessage(msg)) {
+                if(isWorkerTaskResultMessage(msg)) {
                     if(msg.uid !== task.taskUID) throw new Error(`Recieved result for wrong task: ${msg.uid}, expected ${task.taskUID}`);
                     resolve(msg.result as ReturnType);
                 }
-                else if(isWorkerJobErrorMessage(msg)) {
+                else if(isWorkerTaskErrorMessage(msg)) {
                     if(msg.uid !== task.taskUID) throw new Error(`Recieved error for wrong task: ${msg.uid}, expected ${task.taskUID}`);
                     throw new Error(msg.errorMessage);
                 }

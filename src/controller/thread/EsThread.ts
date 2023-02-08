@@ -1,10 +1,10 @@
 import { assertMessageEvent,
-    ControllerJobRunMessage,
+    ControllerTaskRunMessage,
     ControllerMessageType,
     ControllerTerminateMessage,
     isWorkerInitMessage,
-    isWorkerJobErrorMessage,
-    isWorkerJobResultMessage,
+    isWorkerTaskErrorMessage,
+    isWorkerTaskResultMessage,
     isWorkerUncaughtErrorMessage,
     WorkerInitMessage,
     TaskUID } from "../../shared/Messages";
@@ -41,7 +41,7 @@ export class EsThread<ApiType extends WorkerModule> implements Terminable {
     private interface: WorkerInterface;
 
     public methods: ProxyModule<ApiType> = {} as ProxyModule<ApiType>;
-    public get numQueuedJobs() { return this.tasks.size; }
+    public get numQueuedTasks() { return this.tasks.size; }
 
     private constructor(worker: WorkerType) {
         this.worker = worker;
@@ -79,13 +79,13 @@ export class EsThread<ApiType extends WorkerModule> implements Terminable {
         try {
             assertMessageEvent(evt);
 
-            if(isWorkerJobResultMessage(evt.data)) {
+            if(isWorkerTaskResultMessage(evt.data)) {
                 const task = this.tasks.get(evt.data.uid);
                 if(!task) throw new Error("Recived result for invalid task with UID " + evt.data.uid);
                 this.tasks.delete(task.taskUID);
                 task.resolve(evt.data.result);
             }
-            else if(isWorkerJobErrorMessage(evt.data)) {
+            else if(isWorkerTaskErrorMessage(evt.data)) {
                 const task = this.tasks.get(evt.data.uid);
                 if(!task) throw new Error("Recived error for invalid task with UID " + evt.data.uid);
                 this.tasks.delete(task.taskUID);
@@ -122,7 +122,7 @@ export class EsThread<ApiType extends WorkerModule> implements Terminable {
         return ((...rawArgs: Args): Promise<ReturnType> => {
             const taskPromise = EsTaskPromise.Create<ReturnType>();
             const { args, transferables } = EsThread.prepareArguments(rawArgs);
-            const runMessage: ControllerJobRunMessage = {
+            const runMessage: ControllerTaskRunMessage = {
                 type: ControllerMessageType.Run,
                 uid: taskPromise.taskUID,
                 method: method,

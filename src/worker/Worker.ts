@@ -1,12 +1,12 @@
 import { assertMessageEvent,
     ControllerMessage,
-    isControllerJobRunMessage,
+    isControllerTaskRunMessage,
     isControllerTerminateMessage,
     WorkerInitMessage,
     WorkerMessageType,
     WorkerUncaughtErrorMessage,
-    WorkerJobResultMessage,
-    WorkerJobErrorMessage, 
+    WorkerTaskResultMessage,
+    WorkerTaskErrorMessage, 
     TaskUID} from "../shared/Messages";
 import { WorkerFunction, WorkerModule } from "../shared/Worker";
 import { isTransferDescriptor } from "../shared/TransferDescriptor";
@@ -63,31 +63,31 @@ function prepareResult<Result>(rawResult: Result): {result: Result, transferable
     }
 }
 
-function postWorkerJobResultMessage(context: WorkerContext, jobUid: TaskUID, rawResult: any) {
+function postWorkerTaskResultMessage(context: WorkerContext, taskUid: TaskUID, rawResult: any) {
     const {result, transferables} = prepareResult(rawResult);
 
-    const taskResultMessage: WorkerJobResultMessage = {
-        type: WorkerMessageType.JobResult,
-        uid: jobUid,
+    const taskResultMessage: WorkerTaskResultMessage = {
+        type: WorkerMessageType.TaskResult,
+        uid: taskUid,
         result: result };
     context.postMessage(taskResultMessage, transferables);
 }
 
-function postWorkerJobErrorMessage(context: WorkerContext, jobUid: TaskUID, error: Error) {
-    const taskErrorMessage: WorkerJobErrorMessage = {
-        type: WorkerMessageType.JobError,
-        uid: jobUid,
+function postWorkerTaskErrorMessage(context: WorkerContext, taskUid: TaskUID, error: Error) {
+    const taskErrorMessage: WorkerTaskErrorMessage = {
+        type: WorkerMessageType.TaskError,
+        uid: taskUid,
         errorMessage: error.message };
     context.postMessage(taskErrorMessage);
 }
 
-async function runFunction(context: WorkerContext, jobUid: TaskUID, fn: WorkerFunction, args: any[]) {
+async function runFunction(context: WorkerContext, taskUid: TaskUID, fn: WorkerFunction, args: any[]) {
     try {
         let res = fn(...args);
         if (res instanceof Promise) res = await res;
-        postWorkerJobResultMessage(context, jobUid, res);
+        postWorkerTaskResultMessage(context, taskUid, res);
     } catch (error) {
-        postWorkerJobErrorMessage(context, jobUid, error as Error);
+        postWorkerTaskErrorMessage(context, taskUid, error as Error);
     }
 }
 
@@ -122,7 +122,7 @@ export function exposeApi(api: WorkerModule) {
     const exposeApiInner = (context: WorkerContext) => {
         if (typeof api === "object" && api) {
             const unsubscribe = subscribeToControllerMessages(context, messageData => {
-                if(isControllerJobRunMessage(messageData)) {
+                if(isControllerTaskRunMessage(messageData)) {
                     runFunction(context, messageData.uid, api[messageData.method], messageData.args);
                 }
 
@@ -143,15 +143,15 @@ export function exposeApi(api: WorkerModule) {
             throw new Error(`Invalid argument passed to exposeApi(). Expected an object, got: ${api}`)
         }
 
-        // TODO: cancelling of pending (i.e. not yet started) jobs.
+        // TODO: cancelling of pending (i.e. not yet started) tasks.
         /*Implementation.subscribeToControllerMessages(messageData => {
-            if (isMasterJobCancelMessage(messageData)) {
-                const jobUID = messageData.uid
-                const subscription = activeSubscriptions.get(jobUID)
+            if (isMasterTaskCancelMessage(messageData)) {
+                const taskUID = messageData.uid
+                const subscription = activeSubscriptions.get(taskUID)
         
                 if (subscription) {
                 subscription.unsubscribe()
-                activeSubscriptions.delete(jobUID)
+                activeSubscriptions.delete(taskUID)
                 }
             }
         })*/

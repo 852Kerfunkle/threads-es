@@ -33,11 +33,11 @@ describe("EsThreadPool tests", () => {
         const result0 = pool.queue(worker => worker.methods.takesTime(250));
         const result1 = pool.queue(worker => worker.methods.takesTime(250));
         
-        expect((pool as any).threads[0].numQueuedJobs).to.be.eq(1);
-        expect((pool as any).threads[1].numQueuedJobs).to.be.eq(1);
+        expect((pool as any).threads[0].numQueuedTasks).to.be.eq(1);
+        expect((pool as any).threads[1].numQueuedTasks).to.be.eq(1);
         await pool.settled();
-        expect((pool as any).threads[0].numQueuedJobs).to.be.eq(0);
-        expect((pool as any).threads[1].numQueuedJobs).to.be.eq(0);
+        expect((pool as any).threads[0].numQueuedTasks).to.be.eq(0);
+        expect((pool as any).threads[1].numQueuedTasks).to.be.eq(0);
         expect(await result0).to.be.eq("Hello World!");
         expect(await result1).to.be.eq("Hello World!");
 
@@ -60,7 +60,7 @@ describe("EsThreadPool tests", () => {
         }
 
         for (const thread of (pool as any).threads) {
-            expect(thread.numQueuedJobs).to.be.eq(0);
+            expect(thread.numQueuedTasks).to.be.eq(0);
         }
 
         await pool.terminate();
