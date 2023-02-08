@@ -90,5 +90,18 @@
       ]
     },
     "root": true
-  }
+  },
+  "keywords": [
+    "thread",
+    "threads",
+    "worker",
+    "webworker",
+    "web worker",
+    "sharedworker",
+    "shared worker",
+    "pool",
+    "parallel",
+    "transferable",
+    "promise"
+  ]
 }
