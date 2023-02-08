@@ -1,12 +1,14 @@
+const $transferable = Symbol('threads-es.transferable"');
+
 export interface TransferDescriptor<T extends object> {
-    transferable: boolean;
+    [$transferable]: true;
     send: T;
     transferables: Transferable[];
 }
 
 export function isTransferDescriptor(thing: any): thing is TransferDescriptor<any> {
-    return thing && typeof thing === "object" && thing.transferable
-        && typeof thing.send === "object" && Array.isArray(thing.transferables);
+    // Since $transferable is a symbol, this check should be enough.
+    return thing && typeof thing === "object" && thing[$transferable];
 }
 
 const TransferableTypes = [
@@ -19,7 +21,7 @@ const TransferableTypes = [
     ArrayBuffer] as const;
 
 function isTransferable(thing: any): thing is Transferable {
-    let isTransferable = false
+    let isTransferable = false;
     for(const type of TransferableTypes) {
         if(thing instanceof type) {
             isTransferable = true;
@@ -51,7 +53,7 @@ export function Transfer<T extends object>(payload: T, transferables?: Transfera
     }
 
     return {
-        transferable: true,
+        [$transferable]: true,
         send: payload,
         transferables
     }
