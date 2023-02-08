@@ -55,7 +55,7 @@ function postUncaughtErrorMessage(context: WorkerContext, error: Error) {
 }
 
 function prepareResult<Result>(rawResult: Result): {result: Result, transferables: Transferable[]} {
-    if(isTransferDescriptor<Result>(rawResult)) {
+    if(isTransferDescriptor(rawResult)) {
         return {result: rawResult.send, transferables: rawResult.transferables}
     }
     else {

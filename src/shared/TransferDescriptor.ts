@@ -1,10 +1,10 @@
-export interface TransferDescriptor<T> {
+export interface TransferDescriptor<T extends object> {
     transferable: boolean;
     send: T;
     transferables: Transferable[];
 }
 
-export function isTransferDescriptor<T>(thing: any): thing is TransferDescriptor<T> {
+export function isTransferDescriptor(thing: any): thing is TransferDescriptor<any> {
     return thing && typeof thing === "object" && thing.transferable
         && typeof thing.send === "object" && Array.isArray(thing.transferables);
 }
@@ -33,11 +33,11 @@ function assertTransferable(thing: any): asserts thing is Transferable {
     if(!isTransferable(thing)) throw new Error("Object is not transferable");
 }
 
-export function Transfer<T>(transferable: T): TransferDescriptor<T>;
+export function Transfer<T extends Transferable>(transferable: T): TransferDescriptor<T>;
 
-export function Transfer<T>(payload: T, transferables: Transferable[]): TransferDescriptor<T>;
+export function Transfer<T extends object>(payload: T, transferables: Transferable[]): TransferDescriptor<T>;
 
-export function Transfer<T>(payload: T, transferables?: Transferable[]): TransferDescriptor<T> {
+export function Transfer<T extends object>(payload: T, transferables?: Transferable[]): TransferDescriptor<T> {
     // If no transferables are specified, payload must be a Transferable.
     if(!transferables) {
         assertTransferable(payload);
