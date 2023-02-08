@@ -1,4 +1,4 @@
-const $transferable = Symbol('threads-es.transferable"');
+const $transferable = Symbol("threads-es.transferable");
 
 export interface TransferDescriptor<T extends object> {
     [$transferable]: true;
