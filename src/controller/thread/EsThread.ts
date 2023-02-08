@@ -158,8 +158,6 @@ export class EsThread<ApiType extends WorkerModule> implements Terminable {
     }
 
     private async initThread() {
-        // TODO: have a timeout on this, to make sure a worker failing to init doesn't
-        // block execution forever.
         let exposedApi;
         try {
             exposedApi = await withTimeout(new Promise<WorkerInitMessage>((resolve, reject) => {
