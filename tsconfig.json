@@ -19,7 +19,8 @@
         "forceConsistentCasingInFileNames": true,
         "noFallthroughCasesInSwitch": true,
         "isolatedModules": true,
-        "skipLibCheck": true
+        "skipLibCheck": true,
+        "outDir": "build"
     },
     "include": [
         "src",
