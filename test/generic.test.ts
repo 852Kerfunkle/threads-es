@@ -139,7 +139,7 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
             expect(thread.methods.testWorkerApi).to.not.be.undefined;
     
             try {
-                await thread.methods.testWorkerApi(WorkerType === Worker ? "Worker" : "SharedWorker");
+                await thread.methods.testWorkerApi(WorkerType.name as "Worker" | "SharedWorker");
             }
             catch(e) {
                 assert(e instanceof Error, "Error isn't of 'Error' type");
