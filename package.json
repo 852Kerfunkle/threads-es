@@ -59,7 +59,8 @@
     "bundle": "yarn build && cp package.json LICENSE README.md dist-esm/",
     "bundle:local": "yarn bundle && cd dist-esm/ && yarn pack",
     "release": "yarn bundle && yarn publish ./dist-esm --access public",
-    "test": "tsc && web-test-runner",
+    "tsc": "tsc",
+    "test": "web-test-runner",
     "test:watch": "web-test-runner --watch",
     "lint": "eslint --max-warnings=0 src"
   },
