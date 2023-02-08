@@ -1,7 +1,7 @@
 export type WorkerFunction = ((...args: any[]) => any) | (() => any);
 
-export type WorkerModule<Keys extends string> = {
-    [key in Keys]: WorkerFunction;
+export type WorkerModule = {
+    [methodName: string]: WorkerFunction
 }
 
 export interface Terminable {

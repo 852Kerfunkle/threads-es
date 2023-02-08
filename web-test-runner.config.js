@@ -18,6 +18,7 @@ const config = {
     },*/
     esbuildPlugin({
       ts: true,
+      //target: "auto",
       tsconfig: fileURLToPath(new URL('./tsconfig.json', import.meta.url))
     })
   ],

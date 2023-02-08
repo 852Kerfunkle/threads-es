@@ -113,7 +113,7 @@ if(isWorkerScope(workerScope)) {
     });
 }
 
-export function exposeApi(api: WorkerModule<any>) {
+export function exposeApi(api: WorkerModule) {
     assertWorkerScope(workerScope);
 
     if (workerApiExposed) throw new Error("exposeApi() should only be called once.");

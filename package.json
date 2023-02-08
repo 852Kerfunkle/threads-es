@@ -57,10 +57,10 @@
     "build": "yarn clean && yarn build:esm",
     "build:esm": "tsc -p ./config/tsconfig.esm.json",
     "bundle": "yarn build && cp package.json LICENSE README.md dist-esm/",
-    "bundle-local": "yarn bundle && cd dist-esm/ && yarn pack",
+    "bundle:local": "yarn bundle && cd dist-esm/ && yarn pack",
     "release": "yarn bundle && yarn publish ./dist-esm --access public",
     "test": "web-test-runner",
-    "test-watch": "web-test-runner --watch",
+    "test:watch": "web-test-runner --watch",
     "lint": "eslint --max-warnings=0 src"
   },
   "eslintConfig": {

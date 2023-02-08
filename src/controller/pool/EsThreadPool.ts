@@ -15,7 +15,7 @@ export interface EsPoolOptions {
 }
 
 
-export class EsThreadPool<ApiType extends WorkerModule<any>> implements Terminable {
+export class EsThreadPool<ApiType extends WorkerModule> implements Terminable {
     private threads: EsThread<ApiType>[] = [];
     readonly size: number;
     readonly name: string;
@@ -28,7 +28,7 @@ export class EsThreadPool<ApiType extends WorkerModule<any>> implements Terminab
         //this.concurrency = options.concurrency || 1;
     }
 
-    public static async Spawn<ApiType extends WorkerModule<any>>(
+    public static async Spawn<ApiType extends WorkerModule>(
         spawnThread: () => Promise<EsThread<ApiType>>,
         poolOptions?: EsPoolOptions)
     {

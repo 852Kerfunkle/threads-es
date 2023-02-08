@@ -18,15 +18,11 @@ type StripTransfer<Type> =
     ? BaseType
     : Type
 
-type ProxyableFunction<Args extends any[], ReturnType> =
-    Args extends []
-    ? () => Promise<StripTransfer<Awaited<ReturnType>>>
-    : (...args: Args) => Promise<StripTransfer<Awaited<ReturnType>>>
+type ProxyFunction<Args extends any[], ReturnType> =
+    (...args: Args) => Promise<StripTransfer<Awaited<ReturnType>>>
 
-type ModuleMethods = { [methodName: string]: (...args: any) => any }
-
-type ModuleProxy<Methods extends ModuleMethods> = {
-    [method in keyof Methods]: ProxyableFunction<Parameters<Methods[method]>, ReturnType<Methods[method]>>
+type ProxyModule<ApiType extends WorkerModule> = {
+    [method in keyof ApiType]: ProxyFunction<Parameters<ApiType[method]>, ReturnType<ApiType[method]>>
 }
 
 type WorkerType = Worker | SharedWorker;
@@ -37,14 +33,14 @@ interface WorkerInterface {
     removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
 }
 
-export class EsThread<ApiType extends WorkerModule<any>> implements Terminable {
+export class EsThread<ApiType extends WorkerModule> implements Terminable {
     readonly tasks: Map<TaskUID, EsTaskPromise<any>> = new Map();
     readonly threadUID = getRandomUID();
 
     private worker: WorkerType;
     private interface: WorkerInterface;
 
-    public methods: ModuleProxy<ApiType> = {} as ModuleProxy<ApiType>;
+    public methods: ProxyModule<ApiType> = {} as ProxyModule<ApiType>;
     public get numQueuedJobs() { return this.tasks.size; }
 
     private constructor(worker: WorkerType) {
@@ -56,7 +52,7 @@ export class EsThread<ApiType extends WorkerModule<any>> implements Terminable {
         }
     }
 
-    public static async Spawn<ApiType extends WorkerModule<any>>(worker: WorkerType) {
+    public static async Spawn<ApiType extends WorkerModule>(worker: WorkerType) {
         const thread = new EsThread<ApiType>(worker);
         return thread.initThread();
     }
@@ -123,7 +119,7 @@ export class EsThread<ApiType extends WorkerModule<any>> implements Terminable {
     }
 
     private createProxyFunction<Args extends any[], ReturnType>(method: string) {
-        return ((...rawArgs: Args) => {
+        return ((...rawArgs: Args): Promise<ReturnType> => {
             const taskPromise = EsTaskPromise.Create<ReturnType>();
             const { args, transferables } = EsThread.prepareArguments(rawArgs);
             const runMessage: ControllerJobRunMessage = {
@@ -132,11 +128,11 @@ export class EsThread<ApiType extends WorkerModule<any>> implements Terminable {
                 method: method,
                 args: args };
 
-            this.interface.postMessage(runMessage, transferables);
             this.tasks.set(taskPromise.taskUID, taskPromise);
+            this.interface.postMessage(runMessage, transferables);
 
             return taskPromise;
-        }) as any as ProxyableFunction<Args, ReturnType>
+        }) as ProxyFunction<Args, ReturnType>;
     }
 
     private createMethodsProxy(
@@ -147,8 +143,6 @@ export class EsThread<ApiType extends WorkerModule<any>> implements Terminable {
         for (const methodName of methodNames) {
             proxy[methodName] = this.createProxyFunction(methodName);
         }
-    
-        return proxy as ModuleProxy<ApiType>;
     }
 
     private async initThread() {
