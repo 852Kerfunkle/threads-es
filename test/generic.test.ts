@@ -10,6 +10,7 @@ import { LongRunningApiType } from "./threads/long-running.worker";
 import { RejectApiType } from "./threads/reject.worker";
 import { TransferObjectWithArrayApiType } from "./threads/transfer-object-with-array.worker";
 import { TestWorkerApiType } from "./threads/test-worker-api.worker";
+import { TransferReadableStreamApiType } from "./threads/transfer-readable-stream.worker";
 
 type TestWorkerType = new (scriptURL: string | URL, options?: WorkerOptions) => (Worker | SharedWorker);
 
@@ -95,6 +96,28 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
 
             expect(objectOut.array.byteLength).to.be.eq(10);
             expect(new Uint8Array(objectOut.array)).to.be.eql(new Uint8Array([0,2,4,6,8,10,12,14,16,18]));
+
+            await thread.terminate();
+        });
+
+        it("Transfer stream", async () => {
+            const thread = await EsThread.Spawn<TransferReadableStreamApiType>(
+                new WorkerType(new URL("threads/transfer-readable-stream.worker.ts", import.meta.url),
+                {type: "module"}));
+
+            expect(thread).to.not.be.undefined;
+            expect(thread.methods.transferReadableStream).to.not.be.undefined;
+
+            const rs = new ReadableStream<string>({
+                start(controller) {
+                    controller.enqueue('Hello');
+                    controller.enqueue('World!');
+                    controller.close();
+                }
+            });
+
+            // Will only resolve once the sink is closed.
+            await thread.methods.transferReadableStream(Transfer(rs));
 
             await thread.terminate();
         });
