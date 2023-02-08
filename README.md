@@ -10,6 +10,11 @@ Supports `Worker`, `SharedWorker`.
 
 It's made for the web, it doesn't support Node.js workers. Use with bundlers that support bundling workers with `import.meta`, i.e. Rollup or Webpack 5.
 
+- Tiny, when minified.
+- Promise based.
+- Fully typed.
+- Well tested.
+
 ### Examples
 
 #### Threads
