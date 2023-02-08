@@ -4,36 +4,37 @@ import { EsThread } from "../thread/EsThread"
 export const defaultPoolSize = navigator.hardwareConcurrency;
 
 export interface EsPoolOptions {
-    /** Maximum no. of tasks to run on one worker thread at a time. Defaults to one. */
-    //concurrency?: number
-
     /** Gives that pool a name to be used for debug logging, letting you distinguish between log output of different pools. */
-    name?: string
+    name?: string;
 
     /** No. of worker threads to spawn and to be managed by the pool. */
-    size?: number
+    size?: number;
+
+    /** Maximum no. of tasks to run on one worker thread at a time. Defaults to one. */
+    //concurrency?: number;
 }
 
 
 export class EsThreadPool<ApiType extends WorkerModule> implements Terminable {
     private threads: EsThread<ApiType>[] = [];
-    readonly size: number;
-    readonly name: string;
+    readonly options: Required<EsPoolOptions>;
     //readonly concurrency: number;
 
-    private constructor(poolOptions?: EsPoolOptions) {
-        const options = poolOptions ? poolOptions : {};
-        this.size = options.size || defaultPoolSize;
-        this.name = options.name || "EsThreadPool";
-        //this.concurrency = options.concurrency || 1;
+    private constructor(poolOptions: EsPoolOptions = {}) {
+        this.options = {
+            size: poolOptions.size || defaultPoolSize,
+            name: poolOptions.name || "EsThreadPool"
+            //concurrency: poolOptions.concurrency || 1;
+        }
     }
 
     public static async Spawn<ApiType extends WorkerModule>(
         spawnThread: () => Promise<EsThread<ApiType>>,
-        poolOptions?: EsPoolOptions)
+        poolOptions: EsPoolOptions = {})
     {
         const pool = new EsThreadPool<ApiType>(poolOptions);
-        pool.threads = await Promise.all([...Array(pool.size).keys()].map(() => spawnThread()));
+        pool.threads = await Promise.all([...Array(pool.options.size).keys()].map(() => spawnThread()));
+        // TODO: when the threads fail to spawn, make sure all threads are terminated properly.
         return pool;
     }
 
