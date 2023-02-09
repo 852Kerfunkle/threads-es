@@ -12,6 +12,8 @@ import { isTransferDescriptor } from "../shared/TransferDescriptor";
 import { assertSharedWorkerScope,
     assertWorkerScope,
     isDedicatedWorkerScope,
+    isSharedWorkerContext,
+    isSharedWorkerScope,
     isWorkerScope,
     WorkerContext } from "./Utils";
 
@@ -133,14 +135,16 @@ export function exposeApi(api: WorkerModule) {
                         unsubscribe();
                         // If it's a shared worker context, close the port.
                         // If it's a dedicated worker context, abort the worker.
-                        if(context instanceof MessagePort) connectedClients.delete(context);
+                        if(isSharedWorkerContext(context)) connectedClients.delete(context);
                         context.close();
 
                         // When all clients to a shared worker terminated,
                         // use workerScope.close() to terminate shared worker.
                         // Unless the behaviour is overridden by keepSharedWorkerAlive.
-                        if(!messageData.keepSharedWorkerAlive) {
-                            if(connectedClients.size === 0) workerScope.close();
+                        if(isSharedWorkerScope(workerScope)
+                            && !messageData.keepSharedWorkerAlive
+                            && connectedClients.size === 0) {
+                            workerScope.close();
                         }
                         break;
 
