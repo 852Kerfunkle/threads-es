@@ -82,6 +82,7 @@ export class EsThread<ApiType extends WorkerModule> implements Terminable {
         this.interface.removeEventListener("message", this.taskResultDispatch);
 
         if(this.worker instanceof Worker) this.worker.terminate();
+        else this.worker.port.close();
     }
 
     private taskResultDispatch = (evt: Event) => {
@@ -191,7 +192,7 @@ export class EsThread<ApiType extends WorkerModule> implements Terminable {
         catch(e) {
             // If init times out, terminate worker, or close the message port.
             if(this.worker instanceof Worker) this.worker.terminate();
-            else if(this.worker instanceof SharedWorker) this.worker.port.close();
+            else this.worker.port.close();
             throw e;
         }
 
