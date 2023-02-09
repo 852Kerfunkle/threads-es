@@ -10,7 +10,7 @@ import { LongRunningApiType } from "./threads/valid/long-running.worker";
 import { RejectApiType } from "./threads/reject.worker";
 import { TransferObjectWithArrayApiType } from "./threads/valid/transfer-object-with-array.worker";
 import { TestWorkerApiType } from "./threads/test-worker-api.worker";
-import { TransferReadableStreamApiType } from "./threads/valid/transfer-readable-stream.worker";
+import { TransferStreamsApiType } from "./threads/valid/transfer-streams.worker";
 import { ExposeApiNotCalledApiType } from "./threads/exposeApi-not-called";
 
 type TestWorkerType = new (scriptURL: string | URL, options?: WorkerOptions) => (Worker | SharedWorker);
@@ -115,12 +115,12 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
         });
 
         it("Transfer stream", async () => {
-            const thread = await EsThread.Spawn<TransferReadableStreamApiType>(
-                new WorkerType(new URL("threads/valid/transfer-readable-stream.worker.ts", import.meta.url),
+            const thread = await EsThread.Spawn<TransferStreamsApiType>(
+                new WorkerType(new URL("threads/valid/transfer-streams.worker.ts", import.meta.url),
                 {type: "module"}));
 
             expect(thread).to.not.be.undefined;
-            expect(thread.methods.transferReadableStream).to.not.be.undefined;
+            expect(thread.methods.transferStreams).to.not.be.undefined;
 
             const rs = new ReadableStream<string>({
                 start(controller) {
@@ -130,8 +130,18 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
                 }
             });
 
+            const recievedMessages: string[] = [];
+
+            const ws = new WritableStream<string>({
+                write(message) {
+                    recievedMessages.push(message);
+                }
+            });
+
             // Will only resolve once the sink is closed.
-            await thread.methods.transferReadableStream(Transfer(rs));
+            await thread.methods.transferStreams(Transfer(rs), Transfer(ws));
+
+            expect(recievedMessages).to.be.eql(["World", "Hello!"]);
 
             await thread.terminate();
         });
