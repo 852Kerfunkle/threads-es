@@ -5,6 +5,7 @@ import { PostWeirdBeforeExposeApiType } from "./threads/post-weird-before-expose
 import { PostWeirdResultApiType } from "./threads/post-weird-result.worker";
 import { RejectTopApiType } from "./threads/reject-top.worker";
 import { ThrowTopApiType } from "./threads/throw-top.worker";
+import { WithSubpoolApiType } from "./threads/valid/with-subpool.worker";
 import { WithSubworkerApiType } from "./threads/valid/with-subworker.worker";
 
 describe("Worker tests", () => {
@@ -23,9 +24,26 @@ describe("Worker tests", () => {
         expect(thread.methods.helloWorld).to.not.be.undefined;
         expect(thread.methods.shutdown).to.not.be.undefined;
 
-        await thread.methods.init()
+        await thread.methods.init();
         expect(await thread.methods.helloWorld()).to.be.eq("Hello World!");
-        await thread.methods.shutdown()
+        await thread.methods.shutdown();
+
+        await thread.terminate();
+    });
+
+    it("Subpool", async () => {
+        const thread = await EsThread.Spawn<WithSubpoolApiType>(
+            new Worker(new URL("threads/valid/with-subpool.worker.ts", import.meta.url),
+            {type: "module"}));
+
+        expect(thread).to.not.be.undefined;
+        expect(thread.methods.init).to.not.be.undefined;
+        expect(thread.methods.poolHelloWorld).to.not.be.undefined;
+        expect(thread.methods.shutdown).to.not.be.undefined;
+
+        await thread.methods.init();
+        expect(await thread.methods.poolHelloWorld()).to.be.eq("Hello World!");
+        await thread.methods.shutdown();
 
         await thread.terminate();
     });
