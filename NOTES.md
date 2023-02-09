@@ -1,4 +1,6 @@
-# A bunch of EsTaskPromise variants...
+# Notes
+
+## A bunch of EsTaskPromise variants...
 
 Some slower, some faster, some less standards compliant, some more.
 
