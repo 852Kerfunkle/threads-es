@@ -138,7 +138,7 @@ export class EsThread<ApiType extends WorkerModule> implements Terminable {
 
     private createProxyFunction<Args extends any[], ReturnType>(method: string) {
         return ((...rawArgs: Args): Promise<ReturnType> => {
-            const taskPromise = EsTaskPromise.Create<ReturnType>();
+            const taskPromise = new EsTaskPromise<ReturnType>();
             const { args, transferables } = EsThread.prepareArguments(rawArgs);
             const runMessage: ControllerTaskRunMessage = {
                 type: ControllerMessageType.Run,
