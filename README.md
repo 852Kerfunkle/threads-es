@@ -4,7 +4,7 @@
 [![npm](https://img.shields.io/npm/v/threads-es?logo=npm)](https://npmjs.com/package/threads-es)
 ![GitHub license](https://img.shields.io/github/license/852Kerfunkle/threads-es?logo=github)
 [![GitHub top language](https://img.shields.io/github/languages/top/852Kerfunkle/threads-es?logo=typescript)](https://typescriptlang.org)
-![Node.js tests](https://github.com/852Kerfunkle/threads-es/actions/workflows/node.js.yml/badge.svg)
+![Node.js tests](https://img.shields.io/github/actions/workflow/status/852Kerfunkle/threads-es/node.js.yml?label=Node.js%20CI&logo=github)
 
 Supports `Worker`, `SharedWorker`.
 
