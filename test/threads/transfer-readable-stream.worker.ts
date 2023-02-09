@@ -1,3 +1,4 @@
+import { expect } from "@esm-bundle/chai";
 import { TransferDescriptor } from "../../src/shared/TransferDescriptor";
 import { exposeApi } from "../../src/worker/Worker"
 
@@ -5,11 +6,15 @@ const transferReadableStreamApi = {
     transferReadableStream: async (stream: TransferDescriptor<ReadableStream<string>>) => {
         const reader = stream.send.getReader();
 
+        const messages: string[] = [];
+
         while(true) {
             const {value, done} = await reader.read();
             if(done) break;
-            console.log(value); // logs 'hello'.
+            messages.push(value);
         }
+
+        expect(messages).to.be.eql(["Hello", "World!"]);
     }
 }
 
