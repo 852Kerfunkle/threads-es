@@ -5,7 +5,7 @@ import { PostWeirdBeforeExposeApiType } from "./threads/post-weird-before-expose
 import { PostWeirdResultApiType } from "./threads/post-weird-result.worker";
 import { RejectTopApiType } from "./threads/reject-top.worker";
 import { ThrowTopApiType } from "./threads/throw-top.worker";
-import { WithSubworkerApiType } from "./threads/with-subworker.worker";
+import { WithSubworkerApiType } from "./threads/valid/with-subworker.worker";
 
 describe("Worker tests", () => {
     genericWorkerTests(Worker);
@@ -15,7 +15,7 @@ describe("Worker tests", () => {
     // Which is why we only test it for Worker.
     it("Subworkers", async () => {
         const thread = await EsThread.Spawn<WithSubworkerApiType>(
-            new Worker(new URL("threads/with-subworker.worker.ts", import.meta.url),
+            new Worker(new URL("threads/valid/with-subworker.worker.ts", import.meta.url),
             {type: "module"}));
 
         expect(thread).to.not.be.undefined;

@@ -1,12 +1,12 @@
 import { expect } from "@esm-bundle/chai"
 import { EsThread, EsThreadPool } from "../src/controller";
-import { HelloWorldApiType } from "./threads/hello-world.worker"
-import { LongRunningApiType } from "./threads/long-running.worker";
+import { HelloWorldApiType } from "./threads/valid/hello-world.worker"
+import { LongRunningApiType } from "./threads/valid/long-running.worker";
 
 describe("EsThreadPool tests", () => {
     it("Default pool options", async () => {
         const pool = await EsThreadPool.Spawn<HelloWorldApiType>(() => EsThread.Spawn(
-            new Worker(new URL("threads/hello-world.worker.ts", import.meta.url),
+            new Worker(new URL("threads/valid/hello-world.worker.ts", import.meta.url),
             {type: "module"})));
 
         expect(pool.options.size).to.be.eq(navigator.hardwareConcurrency);
@@ -17,7 +17,7 @@ describe("EsThreadPool tests", () => {
 
     it("One worker", async () => {
         const pool = await EsThreadPool.Spawn<HelloWorldApiType>(() => EsThread.Spawn(
-            new Worker(new URL("threads/hello-world.worker.ts", import.meta.url),
+            new Worker(new URL("threads/valid/hello-world.worker.ts", import.meta.url),
             {type: "module"})), {size: 1});
 
         expect(await pool.queue(worker => worker.methods.helloWorld())).to.be.eq("Hello World!");
@@ -27,7 +27,7 @@ describe("EsThreadPool tests", () => {
 
     it("Multiple workers", async () => {
         const pool = await EsThreadPool.Spawn<LongRunningApiType>(() => EsThread.Spawn(
-            new Worker(new URL("threads/long-running.worker.ts", import.meta.url),
+            new Worker(new URL("threads/valid/long-running.worker.ts", import.meta.url),
             {type: "module"})), {size: 2});
 
         const result0 = pool.queue(worker => worker.methods.takesTime(250));
@@ -46,7 +46,7 @@ describe("EsThreadPool tests", () => {
 
     it("Many workers and many tasks", async () => {
         const pool = await EsThreadPool.Spawn<HelloWorldApiType>(() => EsThread.Spawn(
-            new Worker(new URL("threads/hello-world.worker.ts", import.meta.url),
+            new Worker(new URL("threads/valid/hello-world.worker.ts", import.meta.url),
             {type: "module"})), {size: 8});
 
         const results: Promise<string>[] = []

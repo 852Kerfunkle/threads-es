@@ -1,6 +1,6 @@
 import { expect } from "@esm-bundle/chai";
-import { TransferDescriptor } from "../../src/shared/TransferDescriptor";
-import { exposeApi } from "../../src/worker/Worker"
+import { TransferDescriptor } from "../../../src/shared/TransferDescriptor";
+import { exposeApi } from "../../../src/worker/Worker"
 
 const transferReadableStreamApi = {
     transferReadableStream: async (stream: TransferDescriptor<ReadableStream<string>>) => {

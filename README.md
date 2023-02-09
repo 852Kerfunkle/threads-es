@@ -17,7 +17,7 @@ It's made for the web, it doesn't support Node.js workers. Use with bundlers tha
 
 ### Examples
 
-[More examples](test/threads) in the tests.
+[More examples](test/threads/valid) in the tests.
 
 #### Threads
 

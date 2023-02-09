@@ -1,6 +1,6 @@
 import { expect, assert } from "@esm-bundle/chai"
 import { EsThread } from "../src/controller";
-import { HelloWorldApiType } from "./threads/hello-world.worker"
+import { HelloWorldApiType } from "./threads/valid/hello-world.worker"
 
 describe("ServiceWorker tests", () => {
     // TODO: figure out what to do with service workers.

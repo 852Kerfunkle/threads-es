@@ -1,5 +1,5 @@
-import { delay } from "../../src/shared/Utils";
-import { exposeApi } from "../../src/worker/Worker"
+import { delay } from "../../../src/shared/Utils";
+import { exposeApi } from "../../../src/worker/Worker"
 
 const longRunningApi = {
     takesTime: async (ms: number) => {

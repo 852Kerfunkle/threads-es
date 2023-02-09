@@ -2,15 +2,15 @@ import { expect, assert } from "@esm-bundle/chai"
 import { EsThread } from "../src/controller";
 import { Transfer } from "../src/shared";
 import { delay } from "../src/shared/Utils";
-import { HelloWorldApiType } from "./threads/hello-world.worker"
-import { TransferArrayApiType } from "./threads/transfer-array.worker";
-import { AsyncHelloWorldApiType } from "./threads/async-api.worker";
+import { HelloWorldApiType } from "./threads/valid/hello-world.worker"
+import { TransferArrayApiType } from "./threads/valid/transfer-array.worker";
+import { AsyncHelloWorldApiType } from "./threads/valid/async-api.worker";
 import { ThrowHelloWorldApiType } from "./threads/throw.worker";
-import { LongRunningApiType } from "./threads/long-running.worker";
+import { LongRunningApiType } from "./threads/valid/long-running.worker";
 import { RejectApiType } from "./threads/reject.worker";
-import { TransferObjectWithArrayApiType } from "./threads/transfer-object-with-array.worker";
+import { TransferObjectWithArrayApiType } from "./threads/valid/transfer-object-with-array.worker";
 import { TestWorkerApiType } from "./threads/test-worker-api.worker";
-import { TransferReadableStreamApiType } from "./threads/transfer-readable-stream.worker";
+import { TransferReadableStreamApiType } from "./threads/valid/transfer-readable-stream.worker";
 import { ExposeApiNotCalledApiType } from "./threads/exposeApi-not-called";
 
 type TestWorkerType = new (scriptURL: string | URL, options?: WorkerOptions) => (Worker | SharedWorker);
@@ -19,7 +19,7 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
     describe(`Generic ${WorkerType.name} tests`, () => {
         it("Basic", async () => {
             const thread = await EsThread.Spawn<HelloWorldApiType>(
-                new WorkerType(new URL("threads/hello-world.worker.ts", import.meta.url),
+                new WorkerType(new URL("threads/valid/hello-world.worker.ts", import.meta.url),
                 {type: "module"}));
 
             expect(thread).to.not.be.undefined;
@@ -77,7 +77,7 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
 
         it("With transfer", async () => {
             const thread = await EsThread.Spawn<TransferArrayApiType>(
-                new WorkerType(new URL("threads/transfer-array.worker.ts", import.meta.url),
+                new WorkerType(new URL("threads/valid/transfer-array.worker.ts", import.meta.url),
                 {type: "module"}));
 
             expect(thread).to.not.be.undefined;
@@ -96,7 +96,7 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
 
         it("With complex transfer", async () => {
             const thread = await EsThread.Spawn<TransferObjectWithArrayApiType>(
-                new WorkerType(new URL("threads/transfer-object-with-array.worker.ts", import.meta.url),
+                new WorkerType(new URL("threads/valid/transfer-object-with-array.worker.ts", import.meta.url),
                 {type: "module"}));
 
             expect(thread).to.not.be.undefined;
@@ -116,7 +116,7 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
 
         it("Transfer stream", async () => {
             const thread = await EsThread.Spawn<TransferReadableStreamApiType>(
-                new WorkerType(new URL("threads/transfer-readable-stream.worker.ts", import.meta.url),
+                new WorkerType(new URL("threads/valid/transfer-readable-stream.worker.ts", import.meta.url),
                 {type: "module"}));
 
             expect(thread).to.not.be.undefined;
@@ -138,7 +138,7 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
 
         it("Async api", async () => {
             const thread = await EsThread.Spawn<AsyncHelloWorldApiType>(
-                new WorkerType(new URL("threads/async-api.worker.ts", import.meta.url),
+                new WorkerType(new URL("threads/valid/async-api.worker.ts", import.meta.url),
                 {type: "module"}));
 
             expect(thread).to.not.be.undefined;
@@ -151,7 +151,7 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
 
         it("Long-running", async () => {
             const thread = await EsThread.Spawn<LongRunningApiType>(
-                new WorkerType(new URL("threads/long-running.worker.ts", import.meta.url),
+                new WorkerType(new URL("threads/valid/long-running.worker.ts", import.meta.url),
                 {type: "module"}));
 
             expect(thread).to.not.be.undefined;

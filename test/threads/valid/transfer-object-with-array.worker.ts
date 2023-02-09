@@ -1,5 +1,5 @@
-import { Transfer, TransferDescriptor } from "../../src/shared/TransferDescriptor";
-import { exposeApi } from "../../src/worker/Worker"
+import { Transfer, TransferDescriptor } from "../../../src/shared/TransferDescriptor";
+import { exposeApi } from "../../../src/worker/Worker"
 
 const transferObjectWithArrayApi = {
     transferObjectWithArray: (object: TransferDescriptor<{array: ArrayBuffer}>, mul: number): TransferDescriptor<{array: ArrayBuffer}> => {
