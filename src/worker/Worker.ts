@@ -92,6 +92,8 @@ async function runFunction(context: WorkerContext, taskUid: TaskUID, fn: WorkerF
 
 let workerApiExposed = false;
 const workerScope = self;
+// connectedClients is only used for SharedWorker.
+const connectedClients = new Set<MessagePort>();
 
 // Register error handlers
 if(isWorkerScope(workerScope)) {
@@ -131,9 +133,12 @@ export function exposeApi(api: WorkerModule) {
                         unsubscribe();
                         // If it's a shared worker context, close the port.
                         // If it's a dedicated worker context, abort the worker.
+                        if(context instanceof MessagePort) connectedClients.delete(context);
                         context.close();
-                        // TODO: when all clients to a shared worker terminated,
-                        // use workerScope.close() to terminate shared worker?
+
+                        // When all clients to a shared worker terminated,
+                        // use workerScope.close() to terminate shared worker.
+                        if(connectedClients.size === 0) workerScope.close();
                         break;
 
                     // TODO: default:
@@ -167,6 +172,7 @@ export function exposeApi(api: WorkerModule) {
         workerScope.onconnect = (event) => {
             const port = event.ports[0];
             port.start();
+            connectedClients.add(port);
             exposeApiInner(port);
         }
     }
