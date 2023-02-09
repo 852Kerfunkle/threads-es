@@ -1,5 +1,7 @@
 export type TaskUID = string;
 
+new Event("bla")
+
 /**
  * Messages client -> thread
  */
@@ -14,17 +16,21 @@ export interface ControllerMessage {
 }
 
 export interface ControllerTaskRunMessage extends ControllerMessage {
+    type: ControllerMessageType.Run;
     uid: TaskUID;
     method: string;
     args: any[];
 }
 
 /*export interface ControllerTaskCancelMessage extends ControllerMessage {
+    type: ControllerMessageType.Cancel;
     uid: TaskUID;
 }*/
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ControllerTerminateMessage extends ControllerMessage { }
+export interface ControllerTerminateMessage extends ControllerMessage {
+    type: ControllerMessageType.Terminate;
+}
 
 //export const isControllerTaskCancelMessage = (thing: ControllerMessage): thing is ControllerTaskCancelMessage => thing && thing.type === ControllerMessageType.Cancel
 export const isControllerTaskRunMessage = (thing: ControllerMessage): thing is ControllerTaskRunMessage => thing && thing.type === ControllerMessageType.Run
@@ -45,19 +51,23 @@ export interface WorkerMessage {
 }
 
 export interface WorkerInitMessage extends WorkerMessage {
+    type: WorkerMessageType.Init;
     methodNames: string[]
 }
 
 export interface WorkerUncaughtErrorMessage extends WorkerMessage {
+    type: WorkerMessageType.UnchaughtError;
     errorMessage: string
 }
 
 export interface WorkerTaskErrorMessage extends WorkerMessage {
+    type: WorkerMessageType.TaskError;
     uid: TaskUID;
     errorMessage: string;
 }
 
 export interface WorkerTaskResultMessage extends WorkerMessage {
+    type: WorkerMessageType.TaskResult;
     uid: TaskUID;
     result: any;
 }

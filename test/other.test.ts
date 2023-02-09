@@ -1,7 +1,8 @@
 import { expect, assert } from "@esm-bundle/chai"
 import { Transfer } from "../src/shared";
 import { assertMessageEvent, ControllerTaskRunMessage, ControllerMessageType,
-    isControllerTaskRunMessage, isControllerTerminateMessage } from "../src/shared/Messages";
+    isControllerTaskRunMessage, isControllerTerminateMessage,
+    ControllerTerminateMessage } from "../src/shared/Messages";
 import { assertSharedWorkerScope, assertWorkerScope, isDedicatedWorkerScope,
     isSharedWorkerContext, isSharedWorkerScope, isWorkerScope } from "../src/worker/Utils";
 
@@ -24,7 +25,7 @@ describe("Other tests", () => {
         expect(isControllerTaskRunMessage({type: ControllerMessageType.Run, uid: "uid", method: "test", args: []} as ControllerTaskRunMessage)).to.be.eq(true);
         // @ts-expect-error: test case
         expect(isControllerTerminateMessage({})).to.be.false;
-        expect(isControllerTerminateMessage({type: ControllerMessageType.Terminate} as ControllerTaskRunMessage)).to.be.eq(true);
+        expect(isControllerTerminateMessage({type: ControllerMessageType.Terminate} as ControllerTerminateMessage)).to.be.eq(true);
 
         expect(() => assertMessageEvent(new Event("error"))).to.throw("Not MessageEvent");
     });
