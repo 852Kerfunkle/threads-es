@@ -1,5 +1,6 @@
 import { fileURLToPath } from 'url';
 import { esbuildPlugin } from '@web/dev-server-esbuild';
+import { defaultReporter, summaryReporter } from '@web/test-runner';
 //import { TestRunnerConfig } from '@web/test-runner';
 //import { playwrightLauncher } from '@web/test-runner-playwright';
 
@@ -22,11 +23,12 @@ const config = {
       tsconfig: fileURLToPath(new URL('./tsconfig.json', import.meta.url))
     })
   ],
+  reporters: [defaultReporter(), summaryReporter()],
   files: ['test/**/*.test.ts'],
   testFramework: {
     config: {
       ui: 'bdd',
-      timeout: '2000',
+      timeout: '2000'
     },
   },
   port: 9876,

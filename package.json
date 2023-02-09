@@ -60,7 +60,7 @@
     "bundle:local": "yarn bundle && cd dist-esm/ && yarn pack",
     "release": "yarn bundle && yarn publish ./dist-esm --access public",
     "tsc": "tsc",
-    "test": "web-test-runner",
+    "test": "web-test-runner --static-logging",
     "test:watch": "web-test-runner --watch",
     "lint": "eslint --max-warnings=0 src"
   },
