@@ -24,6 +24,7 @@ export interface ControllerTaskRunMessage {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ControllerTerminateMessage {
     type: ControllerMessageType.Terminate;
+    keepSharedWorkerAlive?: boolean | undefined;
 }
 
 export type ControllerMessage = ControllerTaskRunMessage | ControllerTerminateMessage;

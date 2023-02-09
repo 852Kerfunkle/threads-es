@@ -14,7 +14,10 @@ export interface EsPoolOptions {
     //concurrency?: number;
 }
 
-
+/**
+ * A pool of EsThreads.
+ * NOTE: You probably don't want to use it with SharedWorker threads. It doesn't really make sense.
+ */
 export class EsThreadPool<ApiType extends WorkerModule> implements Terminable {
     private threads: EsThread<ApiType>[] = [];
     readonly options: Required<EsPoolOptions>;

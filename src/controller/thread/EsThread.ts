@@ -70,13 +70,14 @@ export class EsThread<ApiType extends WorkerModule> implements Terminable {
         await Promise.allSettled(this.tasks.values());
     }
 
-    public async terminate(): Promise<void> {
+    public async terminate(keepSharedWorkerAlive?: boolean): Promise<void> {
         // Don't terminate until all tasks are done.
         await this.settled();
 
         // Send terminate message to worker.
         const terminateMessage: ControllerTerminateMessage = {
-            type: ControllerMessageType.Terminate };
+            type: ControllerMessageType.Terminate,
+            keepSharedWorkerAlive: keepSharedWorkerAlive };
         this.interface.postMessage(terminateMessage, []);
 
         this.interface.removeEventListener("message", this.taskResultDispatch);

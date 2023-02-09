@@ -138,7 +138,10 @@ export function exposeApi(api: WorkerModule) {
 
                         // When all clients to a shared worker terminated,
                         // use workerScope.close() to terminate shared worker.
-                        if(connectedClients.size === 0) workerScope.close();
+                        // Unless the behaviour is overridden by keepSharedWorkerAlive.
+                        if(!messageData.keepSharedWorkerAlive) {
+                            if(connectedClients.size === 0) workerScope.close();
+                        }
                         break;
 
                     // TODO: default:
