@@ -1,7 +1,5 @@
 export type TaskUID = string;
 
-new Event("bla")
-
 /**
  * Messages client -> thread
  */
@@ -11,11 +9,7 @@ export enum ControllerMessageType {
     Terminate,
 }
 
-export interface ControllerMessage {
-    type: ControllerMessageType;
-}
-
-export interface ControllerTaskRunMessage extends ControllerMessage {
+export interface ControllerTaskRunMessage {
     type: ControllerMessageType.Run;
     uid: TaskUID;
     method: string;
@@ -28,13 +22,11 @@ export interface ControllerTaskRunMessage extends ControllerMessage {
 }*/
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ControllerTerminateMessage extends ControllerMessage {
+export interface ControllerTerminateMessage {
     type: ControllerMessageType.Terminate;
 }
 
-//export const isControllerTaskCancelMessage = (thing: ControllerMessage): thing is ControllerTaskCancelMessage => thing && thing.type === ControllerMessageType.Cancel
-export const isControllerTaskRunMessage = (thing: ControllerMessage): thing is ControllerTaskRunMessage => thing && thing.type === ControllerMessageType.Run
-export const isControllerTerminateMessage = (thing: ControllerMessage): thing is ControllerTerminateMessage => thing && thing.type === ControllerMessageType.Terminate
+export type ControllerMessage = ControllerTaskRunMessage | ControllerTerminateMessage;
 
 /**
  * Messages thread -> client
@@ -46,36 +38,29 @@ export enum WorkerMessageType {
     TaskResult
 }
 
-export interface WorkerMessage {
-    type: WorkerMessageType;
-}
-
-export interface WorkerInitMessage extends WorkerMessage {
+export interface WorkerInitMessage {
     type: WorkerMessageType.Init;
     methodNames: string[]
 }
 
-export interface WorkerUncaughtErrorMessage extends WorkerMessage {
+export interface WorkerUncaughtErrorMessage {
     type: WorkerMessageType.UnchaughtError;
     errorMessage: string
 }
 
-export interface WorkerTaskErrorMessage extends WorkerMessage {
+export interface WorkerTaskErrorMessage {
     type: WorkerMessageType.TaskError;
     uid: TaskUID;
     errorMessage: string;
 }
 
-export interface WorkerTaskResultMessage extends WorkerMessage {
+export interface WorkerTaskResultMessage {
     type: WorkerMessageType.TaskResult;
     uid: TaskUID;
     result: any;
 }
 
-export const isWorkerInitMessage = (thing: WorkerMessage): thing is WorkerInitMessage => thing && thing.type === WorkerMessageType.Init;
-export const isWorkerUncaughtErrorMessage = (thing: WorkerMessage): thing is WorkerUncaughtErrorMessage => thing && thing.type === WorkerMessageType.UnchaughtError;
-export const isWorkerTaskErrorMessage = (thing: WorkerMessage): thing is WorkerTaskErrorMessage => thing && thing.type === WorkerMessageType.TaskError;
-export const isWorkerTaskResultMessage = (thing: WorkerMessage): thing is WorkerTaskResultMessage => thing && thing.type === WorkerMessageType.TaskResult;
+export type WorkerMessage = WorkerInitMessage | WorkerUncaughtErrorMessage | WorkerTaskErrorMessage | WorkerTaskResultMessage;
 
 /**
  * Helpers, utils

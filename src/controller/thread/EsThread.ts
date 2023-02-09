@@ -2,12 +2,9 @@ import { assertMessageEvent,
     ControllerTaskRunMessage,
     ControllerMessageType,
     ControllerTerminateMessage,
-    isWorkerInitMessage,
-    isWorkerTaskErrorMessage,
-    isWorkerTaskResultMessage,
-    isWorkerUncaughtErrorMessage,
     WorkerInitMessage,
-    TaskUID } from "../../shared/Messages";
+    TaskUID, 
+    WorkerMessageType} from "../../shared/Messages";
 import { Terminable, WorkerModule } from "../../shared/Worker";
 import { isTransferDescriptor, TransferDescriptor } from "../../shared/TransferDescriptor";
 import { getRandomUID, withTimeout } from "../../shared/Utils";
@@ -90,24 +87,31 @@ export class EsThread<ApiType extends WorkerModule> implements Terminable {
     private taskResultDispatch = (evt: Event) => {
         try {
             assertMessageEvent(evt);
+            // TODO: assertWorkerMessage(evt.data);
 
-            if(isWorkerTaskResultMessage(evt.data)) {
-                const task = this.tasks.get(evt.data.uid);
-                if(!task) throw new Error("Recived result for invalid task with UID " + evt.data.uid);
-                this.tasks.delete(task.taskUID);
-                task.resolve(evt.data.result);
-            }
-            else if(isWorkerTaskErrorMessage(evt.data)) {
-                const task = this.tasks.get(evt.data.uid);
-                if(!task) throw new Error("Recived error for invalid task with UID " + evt.data.uid);
-                this.tasks.delete(task.taskUID);
-                task.reject(new Error(evt.data.errorMessage));
-            }
-            else if(isWorkerUncaughtErrorMessage(evt.data)) {
-                throw new Error("Uncaught error in worker: " + evt.data.errorMessage);
-            }
+            switch(evt.data.type) {
+                case WorkerMessageType.TaskResult: {
+                        const task = this.tasks.get(evt.data.uid);
+                        if(!task) throw new Error("Recived result for invalid task with UID " + evt.data.uid);
+                        this.tasks.delete(task.taskUID);
+                        task.resolve(evt.data.result);
+                    }
+                    break;
 
-            // TODO: handle other event types?
+                case WorkerMessageType.TaskError: {
+                        const task = this.tasks.get(evt.data.uid);
+                        if(!task) throw new Error("Recived error for invalid task with UID " + evt.data.uid);
+                        this.tasks.delete(task.taskUID);
+                        task.reject(new Error(evt.data.errorMessage));
+                    }
+                    break;
+
+                case WorkerMessageType.UnchaughtError:
+                    throw new Error("Uncaught error in worker: " + evt.data.errorMessage);
+
+                default:
+                    throw new Error("Recieved unexpected WorkerMessage of type: " + evt.data.type);
+            }
         }
         catch(e) {
             console.error(e);
@@ -163,13 +167,22 @@ export class EsThread<ApiType extends WorkerModule> implements Terminable {
             exposedApi = await withTimeout(new Promise<WorkerInitMessage>((resolve, reject) => {
                 const initMessageHandler = (event: Event) => {
                     assertMessageEvent(event);
-                    if (isWorkerInitMessage(event.data)) {
-                        this.interface.removeEventListener("message", initMessageHandler);
-                        resolve(event.data);
-                    }
-                    else if (isWorkerUncaughtErrorMessage(event.data)) {
-                        this.interface.removeEventListener("message", initMessageHandler);
-                        reject(new Error(event.data.errorMessage));
+                    // TODO: assertWorkerMessage(evt.data);
+
+                    switch(event.data.type) {
+                        case WorkerMessageType.Init:
+                            this.interface.removeEventListener("message", initMessageHandler);
+                            resolve(event.data);
+                            break;
+
+                        case WorkerMessageType.UnchaughtError:
+                            this.interface.removeEventListener("message", initMessageHandler);
+                            reject(new Error(event.data.errorMessage));
+                            break;
+
+                        default:
+                            this.interface.removeEventListener("message", initMessageHandler);
+                            reject(new Error("Recieved unexpected WorkerMessage of type: " + event.data.type));
                     }
                 };
                 this.interface.addEventListener("message", initMessageHandler)

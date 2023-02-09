@@ -1,13 +1,12 @@
 import { assertMessageEvent,
     ControllerMessage,
-    isControllerTaskRunMessage,
-    isControllerTerminateMessage,
+    ControllerMessageType,
     WorkerInitMessage,
     WorkerMessageType,
     WorkerUncaughtErrorMessage,
     WorkerTaskResultMessage,
     WorkerTaskErrorMessage, 
-    TaskUID} from "../shared/Messages";
+    TaskUID } from "../shared/Messages";
 import { WorkerFunction, WorkerModule } from "../shared/Worker";
 import { isTransferDescriptor } from "../shared/TransferDescriptor";
 import { assertSharedWorkerScope,
@@ -122,18 +121,23 @@ export function exposeApi(api: WorkerModule) {
     const exposeApiInner = (context: WorkerContext) => {
         if (typeof api === "object" && api) {
             const unsubscribe = subscribeToControllerMessages(context, messageData => {
-                if(isControllerTaskRunMessage(messageData)) {
-                    runFunction(context, messageData.uid, api[messageData.method], messageData.args);
-                }
+                switch(messageData.type) {
+                    case ControllerMessageType.Run:
+                        runFunction(context, messageData.uid, api[messageData.method], messageData.args);
+                        break;
 
-                if(isControllerTerminateMessage(messageData)) {
-                    // Unsubscribe from message events on this context.
-                    unsubscribe();
-                    // If it's a shared worker context, close the port.
-                    // If it's a dedicated worker context, abort the worker.
-                    context.close();
-                    // TODO: when all clients to a shared worker terminated,
-                    // use workerScope.close() to terminate shared worker?
+                    case ControllerMessageType.Terminate:
+                        // Unsubscribe from message events on this context.
+                        unsubscribe();
+                        // If it's a shared worker context, close the port.
+                        // If it's a dedicated worker context, abort the worker.
+                        context.close();
+                        // TODO: when all clients to a shared worker terminated,
+                        // use workerScope.close() to terminate shared worker?
+                        break;
+
+                    // TODO: default:
+                    // throw new Error()....
                 }
             })
 

@@ -14,6 +14,8 @@ const postWeirdResultApi = {
             uid: "invalidTaskUID",
             errorMessage: "haha" };
         globalThis.postMessage(taskErrorMessage);
+
+        globalThis.postMessage({weird: "strange message"});
     }
 }
 

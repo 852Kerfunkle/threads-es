@@ -1,6 +1,7 @@
 import { expect, assert } from "@esm-bundle/chai"
 import { EsThread } from "../src/controller";
 import { genericWorkerTests } from "./generic.test";
+import { PostWeirdBeforeExposeApiType } from "./threads/post-weird-before-exposeApi";
 import { PostWeirdResultApiType } from "./threads/post-weird-result.worker";
 import { RejectTopApiType } from "./threads/reject-top.worker";
 import { ThrowTopApiType } from "./threads/throw-top.worker";
@@ -42,6 +43,19 @@ describe("Worker tests", () => {
         await thread.methods.postWeird();
 
         thread.terminate();
+    });
+
+    it("Post weird message before exposeApi", async () => {
+        try {
+            await EsThread.Spawn<PostWeirdBeforeExposeApiType>(
+                new Worker(new URL("threads/post-weird-before-exposeApi.ts", import.meta.url),
+                {type: "module"}));
+            assert(false, "No error was thrown");
+        }
+        catch(e) {
+            assert(e instanceof Error, "Exception isn't of 'Error' type");
+            expect(e.message).to.contain("Recieved unexpected WorkerMessage of type");
+        }
     });
 
     // Similarly, these two tests, if an error is thrown before onconnect in the
