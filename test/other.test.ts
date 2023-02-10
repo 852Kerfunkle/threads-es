@@ -1,5 +1,6 @@
 import { expect, assert } from "@esm-bundle/chai"
 import { Transfer } from "../src/shared";
+import { assert as assertUtil } from "../src/shared/Utils";
 import { assertMessageEvent } from "../src/shared/Messages";
 import { assertSharedWorkerScope, assertWorkerScope, isDedicatedWorkerScope,
     isSharedWorkerContext, isSharedWorkerScope, isWorkerScope } from "../src/worker/Utils";
@@ -37,5 +38,10 @@ describe("Other tests", () => {
 
         // Don't test Worker stuff for now. Until there's a polyfill.
         //expect(() => exposeApi({test: () => {}})).to.throw("Not in a WebWorker");
+    });
+
+    it("Test assert util", () => {
+        expect(() => assertUtil(false)).to.throw("Assertion failed");
+        expect(() => assertUtil(true)).to.not.throw("Assertion failed");
     });
 });
