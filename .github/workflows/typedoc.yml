@@ -1,28 +1,28 @@
-name: Node.js CI
+name: Typedoc
 
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
 
 jobs:
-  test:
+  docs:
 
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [18.x]
+    permissions:
+      contents: write
 
     steps:
     - uses: actions/checkout@v3
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
-        node-version: ${{ matrix.node-version }}
+        node-version: 18.x
         cache: 'yarn'
     - run: yarn --frozen-lockfile
-    - run: yarn tsc
-    - run: yarn lint
-    - run: yarn test
+    - run: yarn typedoc
+    - name: Deploy docs
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        branch: gh-pages
+        folder: doc
