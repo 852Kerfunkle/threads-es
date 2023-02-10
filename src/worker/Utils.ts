@@ -1,26 +1,24 @@
-export type WorkerScope = WorkerGlobalScope & typeof globalThis;
-
-export function isWorkerScope(scope: any): scope is WorkerScope {
+export function isWorkerScope(scope: any): scope is WorkerGlobalScope {
     return typeof WorkerGlobalScope !== "undefined" && scope instanceof WorkerGlobalScope;
 }
 
-export function assertWorkerScope(scope: any): asserts scope is WorkerScope {
+export function assertWorkerScope(scope: any): asserts scope is WorkerGlobalScope {
     if(!isWorkerScope(scope)) throw new Error("Not in a WebWorker");
 }
 
-export function isDedicatedWorkerScope(scope: WorkerScope): scope is DedicatedWorkerGlobalScope & typeof globalThis {
+export function isDedicatedWorkerScope(scope: any): scope is DedicatedWorkerGlobalScope {
     return typeof DedicatedWorkerGlobalScope !== "undefined" && scope instanceof DedicatedWorkerGlobalScope;
 }
 
-export function isSharedWorkerScope(scope: WorkerScope): scope is SharedWorkerGlobalScope & typeof globalThis {
+export function isSharedWorkerScope(scope: any): scope is SharedWorkerGlobalScope {
     return typeof SharedWorkerGlobalScope !== "undefined" && scope instanceof SharedWorkerGlobalScope;
 }
 
-export function assertSharedWorkerScope(scope: WorkerScope): asserts scope is SharedWorkerGlobalScope & typeof globalThis {
+export function assertSharedWorkerScope(scope: any): asserts scope is SharedWorkerGlobalScope {
     if(!isSharedWorkerScope(scope)) throw new Error("Not in a shared web worker");
 }
 
-export type WorkerContext = WorkerScope | MessagePort;
+export type WorkerContext = DedicatedWorkerGlobalScope | MessagePort;
 
 export function isSharedWorkerContext(context: WorkerContext): context is MessagePort {
     return context instanceof MessagePort;

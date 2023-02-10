@@ -6,9 +6,7 @@ import { assertSharedWorkerScope, assertWorkerScope, isDedicatedWorkerScope,
 const testWorkerApi = {
     testWorkerApi: (workerType: "Worker" | "SharedWorker") => {
         expect(isWorkerScope(self)).to.be.true;
-        // @ts-expect-error: test case
         expect(isDedicatedWorkerScope(self)).to.be.eq(workerType === "Worker");
-        // @ts-expect-error: test case
         expect(isSharedWorkerScope(self)).to.be.eq(workerType === "SharedWorker");
 
         // No way to get the current context...
@@ -18,12 +16,10 @@ const testWorkerApi = {
 
         if(workerType === "Worker") {
             expect(() => assertWorkerScope(self)).to.be.ok;
-            // @ts-expect-error: test case
             expect(() => assertSharedWorkerScope(self)).to.throw("Not in a shared web worker");
         }
         else {
             expect(() => assertWorkerScope(self)).to.be.ok;
-            // @ts-expect-error: test case
             expect(() => assertSharedWorkerScope(self)).be.ok;
         }
 

@@ -25,15 +25,12 @@ describe("Other tests", () => {
     it("Test scope/context functions failing in Window context", async () => {
         // None of these should ever be true or not throw in Window context.
         expect(isWorkerScope(self)).to.be.false;
-        // @ts-expect-error: test case
         expect(isDedicatedWorkerScope(self)).to.be.false;
-        // @ts-expect-error: test case
         expect(isSharedWorkerScope(self)).to.be.false;
         // @ts-expect-error: test case
         expect(isSharedWorkerContext(self)).to.be.false;
 
         expect(() => assertWorkerScope(self)).to.throw("Not in a WebWorker");
-        // @ts-expect-error: test case
         expect(() => assertSharedWorkerScope(self)).to.throw("Not in a shared web worker");
 
         // Don't test Worker stuff for now. Until there's a polyfill.

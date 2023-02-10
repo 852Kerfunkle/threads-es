@@ -13,7 +13,6 @@ import { assertSharedWorkerScope,
     assertWorkerScope,
     isDedicatedWorkerScope,
     isSharedWorkerScope,
-    isWorkerScope,
     WorkerContext } from "./Utils";
 
 
@@ -95,11 +94,10 @@ let workerApiExposed = false;
 const workerScope = self;
 
 // Register error handlers
-if(isWorkerScope(workerScope)) {
-    // TODO: this doesn't work for SharedWorker.
-    // if an error is thrown before the onconnect handler in the
-    // SharedWorker is called, there is nowhere to post to. Could/should move
-    // these into the onconnect handler if it's a SharedWorker.
+// TODO: postMessage is only available on DedicatedWorkerGlobalScope.
+// Think about what to do for Shared worker and maybe also ServiceWorker.
+// Could maybe be moved into the connect handler or the init method handler.
+if(isDedicatedWorkerScope(workerScope)) {
     workerScope.addEventListener("error", event => {
         // Post with some delay, so the master had some time to subscribe to messages
         event.preventDefault();
