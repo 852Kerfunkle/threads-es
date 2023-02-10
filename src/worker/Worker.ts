@@ -111,6 +111,29 @@ if(isDedicatedWorkerScope(workerScope)) {
     });
 }
 
+/**
+ * Expose an API implementation to the controller.
+ * 
+ * @param api - The API implementation to expose.
+ * 
+ * @example
+ * An example
+ * ```ts
+ * export type ExampleAPI = {
+ *     workOnArray(array: TransferDescriptor<ArrayBuffer>): TransferDescriptor<ArrayBuffer>;
+ * }
+ * 
+ * const exampleImpl: ExampleAPI = {
+ *     workOnArray: (array: TransferDescriptor<ArrayBuffer>): TransferDescriptor<ArrayBuffer> => {
+ *         const uint8 = new Uint8Array(array.send);
+ *         // do something
+ *         return Transfer(uint8.buffer);
+ *     }
+ * }
+ * 
+ * exposeApi(exampleImpl);
+ * ```
+ */
 export function exposeApi(api: WorkerModule) {
     assertWorkerScope(workerScope);
 
