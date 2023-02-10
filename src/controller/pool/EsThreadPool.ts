@@ -89,19 +89,23 @@ export class EsThreadPool<ApiType extends WorkerModule> implements Terminable {
      * 
      * @param forceTerminateShared If you want to make sure SharedWorkers abort.
      * Probably not a great idea, but one might want to do it.
+     * 
+     * @param threadTerminate Allows running custom cleanup per thread.
      */
     public async terminate(threadTerminate?: (
         thread: EsThread<ApiType>) => Promise<void>,
         forceTerminateShared?: boolean): Promise<void> 
     {
-        // Should wait for finished tasks and whatever.
+        const doTerminate = async (thread: EsThread<ApiType>) => {
+            if(threadTerminate) await threadTerminate(thread);
+            await thread.terminate(forceTerminateShared);
+        }
+
         const terminatePromises: Promise<void>[] = [];
         for (const thread of this.threads) {
-            terminatePromises.push((async () => {
-                if(threadTerminate) await threadTerminate(thread);
-                await thread.terminate(forceTerminateShared);
-            })());
+            terminatePromises.push(doTerminate(thread));
         }
+
         await Promise.all(terminatePromises);
     }
 }
