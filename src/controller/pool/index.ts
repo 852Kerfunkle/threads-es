@@ -1,1 +1,1 @@
-export { EsThreadPool } from "./EsThreadPool"
+export { EsThreadPool, type EsPoolOptions } from "./EsThreadPool"

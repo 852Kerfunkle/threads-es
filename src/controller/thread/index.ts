@@ -1,1 +1,1 @@
-export { EsThread } from "./EsThread"
+export { EsThread, type EsThreadOptions } from "./EsThread"

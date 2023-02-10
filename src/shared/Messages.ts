@@ -1,8 +1,6 @@
 export type TaskUID = string;
 
-/**
- * Messages client -> thread
- */
+/** Messages client -\> thread */
 export enum ControllerMessageType {
     Run = 0,
     Cancel,
@@ -29,9 +27,7 @@ export interface ControllerTerminateMessage {
 
 export type ControllerMessage = ControllerTaskRunMessage | ControllerTerminateMessage;
 
-/**
- * Messages thread -> client
- */
+/** Messages thread -\> client */
 export enum WorkerMessageType {
     Init = 0,
     UnchaughtError,

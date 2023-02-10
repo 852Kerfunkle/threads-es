@@ -3,11 +3,20 @@ import { EsThread } from "../thread/EsThread"
 
 export const defaultPoolSize = navigator.hardwareConcurrency;
 
+/** Options for thread pools. */
 export interface EsPoolOptions {
-    /** Gives that pool a name to be used for debug logging, letting you distinguish between log output of different pools. */
+    /**
+     * Gives that pool a name to be used for debug logging, letting you distinguish between log output of different pools.
+     * 
+     * @defaultValue "EsThreadPool"
+     */
     name?: string;
 
-    /** No. of worker threads to spawn and to be managed by the pool. */
+    /**
+     * No. of worker threads to spawn and to be managed by the pool.
+     * 
+     * @defaultValue navigator.hardwareConcurrency
+     */
     size?: number;
 
     /** Maximum no. of tasks to run on one worker thread at a time. Defaults to one. */
@@ -16,11 +25,12 @@ export interface EsPoolOptions {
 
 /**
  * A pool of EsThreads.
- * NOTE: Works with SharedWorker, but you need to make sure to instantiate each SharedWorker
- * thread with a unique name (see pool.test.ts).
+ * 
+ * When used with {@link https://developer.mozilla.org/docs/Web/API/SharedWorker | SharedWorker},
+ * make sure to spawn each {@link EsThread} thread with a unique name in WorkerOptions (see pool.test.ts).
  */
 export class EsThreadPool<ApiType extends WorkerModule> implements Terminable {
-    private threads: EsThread<ApiType>[] = [];
+    private readonly threads: EsThread<ApiType>[] = [];
     readonly options: Required<EsPoolOptions>;
     //readonly concurrency: number;
 
@@ -32,17 +42,28 @@ export class EsThreadPool<ApiType extends WorkerModule> implements Terminable {
         }
     }
 
+    /**
+     * Spawn a new thread pool.
+     * @param spawnThread - Callback that spawns a new thread.
+     * @param poolOptions - The options for this thread pool
+     * @returns A new thread pool.
+     */
     public static async Spawn<ApiType extends WorkerModule>(
         spawnThread: (threadId: number) => Promise<EsThread<ApiType>>,
         poolOptions: EsPoolOptions = {})
     {
         const pool = new EsThreadPool<ApiType>(poolOptions);
-        pool.threads = await Promise.all([...Array(pool.options.size).keys()].map((_, idx) => spawnThread(idx)));
+        pool.threads.push(...await Promise.all([...Array(pool.options.size).keys()].map((_, idx) => spawnThread(idx))));
         // TODO: when the threads fail to spawn, make sure all threads are terminated properly.
         return pool;
     }
 
-    public async queue<Return>(taskFunction: (worker: EsThread<ApiType>) => Promise<Return>) {
+    /**
+     * Queue a new task on the pool.
+     * @param taskFunction - A callback to execute on a thread.
+     * @returns The task result promise.
+     */
+    public async queue<Return>(taskFunction: (thread: EsThread<ApiType>) => Promise<Return>) {
         return taskFunction(this.threads[this.findThreadWithFewTasks()]);
     }
 
@@ -59,9 +80,7 @@ export class EsThreadPool<ApiType extends WorkerModule> implements Terminable {
         return threadId;
     }
 
-    /**
-     * Wait for all tasks in all threads to settle.
-     */
+    /** Returns a promise that resolves when all tasks in all threads are settled. */
     public async settled(): Promise<void> {
         const settledThreads: Promise<void>[] = [];
         for (const thread of this.threads) {
@@ -71,7 +90,8 @@ export class EsThreadPool<ApiType extends WorkerModule> implements Terminable {
     }
 
     /**
-     * Wait for all task in all threads to resolve.
+     * Returns a promise that resolves when all tasks in all threads are resolved
+     * and rejects when any task rejects.
      */
     public async resolved(): Promise<void> {
         const settledThreads: Promise<void>[] = [];
@@ -84,13 +104,13 @@ export class EsThreadPool<ApiType extends WorkerModule> implements Terminable {
     /**
      * Terminate all threads in the pool.
      * 
-     * Waits for all tasks to resolve. If tasks resolving is not important, call
-     * `EsThreadPool.settled()` before calling `terminate()`.
+     * Waits for all tasks in all threads to settle. If tasks resolving is required, call
+     * {@link EsThreadPool#resolved} before calling {@link EsThreadPool#terminate}.
      * 
-     * @param forceTerminateShared If you want to make sure SharedWorkers abort.
+     * @param forceTerminateShared - If you want to make sure SharedWorkers abort.
      * Probably not a great idea, but one might want to do it.
      * 
-     * @param threadTerminate Allows running custom cleanup per thread.
+     * @param threadTerminate - Allows running custom cleanup per thread.
      */
     public async terminate(threadTerminate?: (
         thread: EsThread<ApiType>) => Promise<void>,

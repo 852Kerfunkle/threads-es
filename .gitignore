@@ -1,8 +1,9 @@
 build/
+coverage/
+doc/
 dist-esm/
 dist-cjs/
 node_modules/
-coverage/
 
 yarn-error.log
 *.tgz

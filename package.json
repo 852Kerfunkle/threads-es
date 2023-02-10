@@ -49,7 +49,9 @@
     "@web/dev-server-esbuild": "^0.3.3",
     "@web/test-runner": "^0.15.0",
     "eslint": "^8.33.0",
+    "eslint-plugin-tsdoc": "^0.2.17",
     "mocha": "^10.2.0",
+    "typedoc": "^0.23.24",
     "typescript": "^4.9.5"
   },
   "scripts": {
@@ -62,18 +64,20 @@
     "tsc": "tsc",
     "test": "web-test-runner --static-logging --port 9877",
     "test:watch": "web-test-runner --watch",
-    "lint": "eslint --max-warnings=0 src"
+    "lint": "eslint --max-warnings=0 src",
+    "typedoc": "typedoc --options typedoc.json"
   },
   "eslintConfig": {
+    "plugins": [
+      "@typescript-eslint",
+      "eslint-plugin-tsdoc"
+    ],
     "extends": [
-      "eslint:recommended",
       "plugin:@typescript-eslint/recommended"
     ],
     "parser": "@typescript-eslint/parser",
-    "plugins": [
-      "@typescript-eslint"
-    ],
     "rules": {
+      "tsdoc/syntax": "warn",
       "eqeqeq": 1,
       "curly": [
         "error",

@@ -30,22 +30,33 @@ interface WorkerInterface {
     removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
 }
 
+/** Options for threads. */
 export interface EsThreadOptions {
-    // If the thread doesn't send the init message within timeout, it rejects.
+    /**
+     * If the thread doesn't send the init message within timeout, it rejects.
+     * 
+     * In milliseconds.
+     * 
+     * @defaultValue 10000ms
+     */
     timeout?: number;
 }
 
 const defaultThreadTimeout = 10000;
 
 export class EsThread<ApiType extends WorkerModule> implements Terminable {
-    readonly tasks: Map<TaskUID, EsTaskPromise<any>> = new Map();
+    /** The threads UID. */
     readonly threadUID = getRandomUID();
     readonly options: Required<EsThreadOptions>;
+    private readonly tasks: Map<TaskUID, EsTaskPromise<any>> = new Map();
 
-    private worker: WorkerType;
-    private interface: WorkerInterface;
+    private readonly worker: WorkerType;
+    private readonly interface: WorkerInterface;
 
+    /** Access the thread API. */
     public methods: ProxyModule<ApiType> = {} as ProxyModule<ApiType>;
+
+    /** The number of active (unsettled) tasks. */
     public get numQueuedTasks() { return this.tasks.size; }
 
     private constructor(worker: WorkerType, threadOptions: EsThreadOptions) {
@@ -61,20 +72,25 @@ export class EsThread<ApiType extends WorkerModule> implements Terminable {
         }
     }
 
+    /**
+     * Spawn a new thread.
+     * @param worker - The worker for this thread.
+     * @param threadOptions - Thread options.
+     * @returns A new thread.
+     */
     public static async Spawn<ApiType extends WorkerModule>(worker: WorkerType, threadOptions: EsThreadOptions = {}) {
         const thread = new EsThread<ApiType>(worker, threadOptions);
         return thread.initThread();
     }
 
-    /**
-     * Wait for all tasks to settle.
-     */
+    /** Returns a promise that resolves when all tasks are settled. */
     public async settled(): Promise<void> {
         await Promise.allSettled(this.tasks.values());
     }
 
     /**
-     * Wait for all tasks to resolve.
+     * Returns a promise that resolves when all tasks are resolved
+     * and rejects when any task rejects.
      */
     public async resolved(): Promise<void> {
         await Promise.all(this.tasks.values());
@@ -83,15 +99,15 @@ export class EsThread<ApiType extends WorkerModule> implements Terminable {
     /**
      * Terminate this thread.
      * 
-     * Waits for all tasks to resolve. If tasks resolving is not important, call
-     * `EsThread.settled()` before calling `terminate()`.
+     * Waits for all tasks to settle. If tasks resolving is required, call
+     * {@link EsThread#resolved} before calling {@link EsThread#terminate}.
      * 
-     * @param forceTerminateShared If you want to make sure SharedWorkers abort.
+     * @param forceTerminateShared - If you want to make sure SharedWorkers abort.
      * Probably not a great idea, but one might want to do it.
      */
     public async terminate(forceTerminateShared?: boolean): Promise<void> {
         // Don't terminate until all tasks are done.
-        await this.resolved();
+        await this.settled();
 
         // Send terminate message to worker.
         const terminateMessage: ControllerTerminateMessage = {
