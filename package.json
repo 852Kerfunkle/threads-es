@@ -1,7 +1,7 @@
 {
   "name": "threads-es",
   "description": "A modern, zero-dependency WebWorker abstraction.",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "author": "852Kerfunkle",
   "license": "MIT",
   "repository": {
