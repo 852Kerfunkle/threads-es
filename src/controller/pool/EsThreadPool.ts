@@ -67,11 +67,16 @@ export class EsThreadPool<ApiType extends WorkerModule> implements Terminable {
         await Promise.allSettled(settledThreads);
     }
 
-    public async terminate(keepSharedWorkersAlive?: boolean): Promise<void> {
+    /**
+     * Terminate all threads in the pool.
+     * @param forceTerminateShared use if you want to make sure SharedWorkers abort.
+     * Probably not a great idea, but one might want to use it.
+     */
+    public async terminate(forceTerminateShared?: boolean): Promise<void> {
         // Should wait for finished tasks and whatever.
         const terminatePromises: Promise<void>[] = [];
         for (const thread of this.threads) {
-            terminatePromises.push(thread.terminate(keepSharedWorkersAlive));
+            terminatePromises.push(thread.terminate(forceTerminateShared));
         }
         await Promise.allSettled(terminatePromises);
     }

@@ -27,7 +27,7 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
 
             expect(await thread.methods.helloWorld()).to.be.eq("Hello World!");
 
-            await thread.terminate();
+            await thread.terminate(true);
         });
 
         it("exposeApi not called", async () => {
@@ -60,7 +60,7 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
                 expect(e.message).to.be.eq("Hello Error!");
             }
 
-            await thread.terminate();
+            await thread.terminate(true);
         });
 
         it("Unhandled rejection", async () => {
@@ -72,7 +72,7 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
             // "Error: it had to happen eventually"
             // NOTE: currently there is no way to deal with unhandled rejections.
             // Maybe need some event for it.
-            thread.terminate();
+            await thread.terminate(true);
         });
 
         it("With transfer", async () => {
@@ -91,7 +91,7 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
             expect(arrayOut.byteLength).to.be.eq(10);
             expect(new Uint8Array(arrayOut)).to.be.eql(new Uint8Array([0,3,6,9,12,15,18,21,24,27]));
 
-            await thread.terminate();
+            await thread.terminate(true);
         });
 
         it("With complex transfer", async () => {
@@ -111,7 +111,7 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
             expect(objectOut.array.byteLength).to.be.eq(10);
             expect(new Uint8Array(objectOut.array)).to.be.eql(new Uint8Array([0,2,4,6,8,10,12,14,16,18]));
 
-            await thread.terminate();
+            await thread.terminate(true);
         });
 
         it("Transfer stream", async () => {
@@ -143,7 +143,7 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
 
             expect(recievedMessages).to.be.eql(["World", "Hello!"]);
 
-            await thread.terminate();
+            await thread.terminate(true);
         });
 
         it("Async api", async () => {
@@ -156,7 +156,7 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
 
             expect(await thread.methods.helloWorld()).to.be.eq("Hello World!");
 
-            await thread.terminate();
+            await thread.terminate(true);
         });
 
         it("Long-running", async () => {
@@ -174,7 +174,7 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
 
             expect(await result).to.be.eq("Hello World!");
 
-            await thread.terminate();
+            await thread.terminate(true);
         });
 
         it("Test worker Api", async () => {
@@ -193,7 +193,7 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
                 assert(false, e.message);
             }
     
-            await thread.terminate();
+            await thread.terminate(true);
         });
     });
 }

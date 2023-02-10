@@ -60,7 +60,7 @@ describe("Worker tests", () => {
         // Maybe need some event for it.
         await thread.methods.postWeird();
 
-        thread.terminate();
+        await thread.terminate();
     });
 
     it("Post weird message before exposeApi", async () => {

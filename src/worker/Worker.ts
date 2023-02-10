@@ -12,7 +12,6 @@ import { isTransferDescriptor } from "../shared/TransferDescriptor";
 import { assertSharedWorkerScope,
     assertWorkerScope,
     isDedicatedWorkerScope,
-    isSharedWorkerContext,
     isSharedWorkerScope,
     isWorkerScope,
     WorkerContext } from "./Utils";
@@ -94,8 +93,6 @@ async function runFunction(context: WorkerContext, taskUid: TaskUID, fn: WorkerF
 
 let workerApiExposed = false;
 const workerScope = self;
-// connectedClients is only used for SharedWorker.
-const connectedClients = new Set<MessagePort>();
 
 // Register error handlers
 if(isWorkerScope(workerScope)) {
@@ -135,15 +132,16 @@ export function exposeApi(api: WorkerModule) {
                         unsubscribe();
                         // If it's a shared worker context, close the port.
                         // If it's a dedicated worker context, abort the worker.
-                        if(isSharedWorkerContext(context)) connectedClients.delete(context);
                         context.close();
 
                         // When all clients to a shared worker terminated,
                         // use workerScope.close() to terminate shared worker.
                         // Unless the behaviour is overridden by keepSharedWorkerAlive.
+                        // NOTE: if clients disconnect abruptly (i.e. tab is closed),
+                        // this doesn't work. Maybe don't have it at all?
+                        // Or rather: have a dedicated message for killing shared workers.
                         if(isSharedWorkerScope(workerScope)
-                            && !messageData.keepSharedWorkerAlive
-                            && connectedClients.size === 0) {
+                            && messageData.forceTerminateShared) {
                             workerScope.close();
                         }
                         break;
@@ -179,7 +177,6 @@ export function exposeApi(api: WorkerModule) {
         workerScope.onconnect = (event) => {
             const port = event.ports[0];
             port.start();
-            connectedClients.add(port);
             exposeApiInner(port);
         }
     }

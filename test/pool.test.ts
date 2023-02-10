@@ -61,7 +61,7 @@ describe("EsThreadPool tests", () => {
         expect(await result0).to.be.eq("Hello World!");
         expect(await result1).to.be.eq("Hello World!");
 
-        await pool.terminate();
+        await pool.terminate(true);
     });
 
     it("Many workers and many tasks", async () => {
