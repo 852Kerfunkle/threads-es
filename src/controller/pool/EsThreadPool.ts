@@ -59,6 +59,9 @@ export class EsThreadPool<ApiType extends WorkerModule> implements Terminable {
         return threadId;
     }
 
+    /**
+     * Wait for all tasks in all threads to settle.
+     */
     public async settled(): Promise<void> {
         const settledThreads: Promise<void>[] = [];
         for (const thread of this.threads) {
@@ -67,6 +70,9 @@ export class EsThreadPool<ApiType extends WorkerModule> implements Terminable {
         await Promise.allSettled(settledThreads);
     }
 
+    /**
+     * Wait for all task in all threads to resolve.
+     */
     public async resolved(): Promise<void> {
         const settledThreads: Promise<void>[] = [];
         for (const thread of this.threads) {
