@@ -26,8 +26,14 @@ export interface EsPoolOptions {
 /**
  * A pool of EsThreads.
  * 
+ * @example
  * When used with {@link https://developer.mozilla.org/docs/Web/API/SharedWorker | SharedWorker},
- * make sure to spawn each {@link EsThread} thread with a unique name in WorkerOptions (see pool.test.ts).
+ * make sure to spawn each {@link EsThread} thread with a unique name in WorkerOptions.
+ * ```ts
+ * const pool = await EsThreadPool.Spawn<HelloWorldApiType>((threadId) => EsThread.Spawn(
+ *     new SharedWorker(new URL("threads/valid/hello-world.worker.ts", import.meta.url),
+ *     {type: "module", name: `HelloWorldWorker #${threadId}`})), {size: 8});
+ * ```
  */
 export class EsThreadPool<ApiType extends WorkerModule> implements Terminable {
     private readonly threads: EsThread<ApiType>[] = [];

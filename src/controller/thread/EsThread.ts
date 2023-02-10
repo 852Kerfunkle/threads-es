@@ -44,6 +44,16 @@ export interface EsThreadOptions {
 
 const defaultThreadTimeout = 10000;
 
+/**
+ * EsThreads
+ * 
+ * @example
+ * ```ts
+ * const thread = await EsThread.Spawn<HelloWorldApiType>(
+ *     new WorkerType(new URL("threads/valid/hello-world.worker.ts", import.meta.url),
+ *     {type: "module"}));
+ * ```
+ */
 export class EsThread<ApiType extends WorkerModule> implements Terminable {
     /** The threads UID. */
     readonly threadUID = getRandomUID();
