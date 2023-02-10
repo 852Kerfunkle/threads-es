@@ -16,7 +16,8 @@ export interface EsPoolOptions {
 
 /**
  * A pool of EsThreads.
- * NOTE: You probably don't want to use it with SharedWorker threads. It doesn't really make sense.
+ * NOTE: Works with SharedWorker, but you need to make sure to instantiate each SharedWorker
+ * thread with a unique name (see pool.test.ts).
  */
 export class EsThreadPool<ApiType extends WorkerModule> implements Terminable {
     private threads: EsThread<ApiType>[] = [];
@@ -32,11 +33,11 @@ export class EsThreadPool<ApiType extends WorkerModule> implements Terminable {
     }
 
     public static async Spawn<ApiType extends WorkerModule>(
-        spawnThread: () => Promise<EsThread<ApiType>>,
+        spawnThread: (threadId: number) => Promise<EsThread<ApiType>>,
         poolOptions: EsPoolOptions = {})
     {
         const pool = new EsThreadPool<ApiType>(poolOptions);
-        pool.threads = await Promise.all([...Array(pool.options.size).keys()].map(() => spawnThread()));
+        pool.threads = await Promise.all([...Array(pool.options.size).keys()].map((_, idx) => spawnThread(idx)));
         // TODO: when the threads fail to spawn, make sure all threads are terminated properly.
         return pool;
     }
@@ -66,11 +67,11 @@ export class EsThreadPool<ApiType extends WorkerModule> implements Terminable {
         await Promise.allSettled(settledThreads);
     }
 
-    public async terminate(): Promise<void> {
+    public async terminate(keepSharedWorkersAlive?: boolean): Promise<void> {
         // Should wait for finished tasks and whatever.
         const terminatePromises: Promise<void>[] = [];
         for (const thread of this.threads) {
-            terminatePromises.push(thread.terminate());
+            terminatePromises.push(thread.terminate(keepSharedWorkersAlive));
         }
         await Promise.allSettled(terminatePromises);
     }
