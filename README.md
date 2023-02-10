@@ -17,8 +17,7 @@ It's made for the web, it doesn't support Node.js workers. Use with bundlers tha
 
 ### Documentation
 
-You can find the documentation here at: https://852kerfunkle.github.io/threads-es/
-(always reflects the main branch).
+You can find the (latest) documentation at: https://852kerfunkle.github.io/threads-es/main
 
 ### Examples
 

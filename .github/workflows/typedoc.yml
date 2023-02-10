@@ -3,6 +3,8 @@ name: Typedoc
 on:
   push:
     branches: [ "main" ]
+  tags:        
+    - 'v[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
   docs:
@@ -20,9 +22,10 @@ jobs:
         node-version: 18.x
         cache: 'yarn'
     - run: yarn --frozen-lockfile
-    - run: yarn typedoc
+    - run: yarn typedoc --gitRevision ${{ github.ref_name }}
     - name: Deploy docs
       uses: JamesIves/github-pages-deploy-action@v4
       with:
         branch: gh-pages
         folder: doc
+        target-folder: ${{ github.ref_name }}
