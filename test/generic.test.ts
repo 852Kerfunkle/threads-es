@@ -85,8 +85,11 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
 
             const arrayIn = new Uint8Array(10);
             arrayIn.forEach((value, index) => { arrayIn[index] = index });
+            expect(arrayIn.byteLength).to.be.eq(10);
 
             const arrayOut = await thread.methods.transferArray(3, Transfer(arrayIn.buffer));
+            // After transfer, the original buffer should have length 0.
+            expect(arrayIn.byteLength).to.be.eq(0);
 
             expect(arrayOut.byteLength).to.be.eq(10);
             expect(new Uint8Array(arrayOut)).to.be.eql(new Uint8Array([0,3,6,9,12,15,18,21,24,27]));
@@ -104,9 +107,12 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
 
             const arrayIn = new Uint8Array(10);
             arrayIn.forEach((value, index) => { arrayIn[index] = index });
-            const objectIn = {array: arrayIn.buffer}
+            const objectIn = {array: arrayIn.buffer};
+            expect(objectIn.array.byteLength).to.be.eq(10);
 
             const objectOut = await thread.methods.transferObjectWithArray(Transfer(objectIn, [objectIn.array]), 2);
+            // After transfer, the original buffer should have length 0.
+            expect(objectIn.array.byteLength).to.be.eq(0);
 
             expect(objectOut.array.byteLength).to.be.eq(10);
             expect(new Uint8Array(objectOut.array)).to.be.eql(new Uint8Array([0,2,4,6,8,10,12,14,16,18]));
@@ -138,8 +144,18 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
                 }
             });
 
-            // Will only resolve once the sink is closed.
-            await thread.methods.transferStreams(Transfer(rs), Transfer(ws));
+            // Streams not locked before transfer.
+            expect(rs.locked).to.be.eq(false);
+            expect(ws.locked).to.be.eq(false);
+
+            // Will only resolve once the rs sink is closed.
+            const res = thread.methods.transferStreams(Transfer(rs), Transfer(ws));
+
+            // Streams should be locked after transfer.
+            expect(rs.locked).to.be.eq(true);
+            expect(ws.locked).to.be.eq(true);
+
+            await res;
 
             expect(recievedMessages).to.be.eql(["World", "Hello!"]);
 
