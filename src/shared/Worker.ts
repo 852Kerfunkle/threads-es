@@ -7,4 +7,5 @@ export type WorkerModule = {
 export interface Terminable {
     terminate(): Promise<void>;
     settled(): Promise<void>;
+    resolved(): Promise<void>;
 }

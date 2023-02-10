@@ -66,18 +66,32 @@ export class EsThread<ApiType extends WorkerModule> implements Terminable {
         return thread.initThread();
     }
 
+    /**
+     * Wait for all tasks to settle.
+     */
     public async settled(): Promise<void> {
         await Promise.allSettled(this.tasks.values());
     }
 
     /**
+     * Wait for all tasks to resolve.
+     */
+    public async resolved(): Promise<void> {
+        await Promise.all(this.tasks.values());
+    }
+
+    /**
      * Terminate this thread.
-     * @param forceTerminateShared @param forceTerminateShared use if you want to make sure SharedWorkers abort.
-     * Probably not a great idea, but one might want to use it.
+     * 
+     * Waits for all tasks to resolve. If tasks resolving is not important, call
+     * `EsThread.settled()` before calling `terminate()`.
+     * 
+     * @param forceTerminateShared If you want to make sure SharedWorkers abort.
+     * Probably not a great idea, but one might want to do it.
      */
     public async terminate(forceTerminateShared?: boolean): Promise<void> {
         // Don't terminate until all tasks are done.
-        await this.settled();
+        await this.resolved();
 
         // Send terminate message to worker.
         const terminateMessage: ControllerTerminateMessage = {
