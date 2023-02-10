@@ -15,6 +15,11 @@ It's made for the web, it doesn't support Node.js workers. Use with bundlers tha
 - Fully typed.
 - Well tested.
 
+### Documentation
+
+You can find the documentation here at: https://852kerfunkle.github.io/threads-es/
+(always reflects the main branch).
+
 ### Examples
 
 [More examples](test/threads/valid) in the tests.
