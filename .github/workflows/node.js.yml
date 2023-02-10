@@ -35,7 +35,7 @@ jobs:
     - run: yarn test
     - run: yarn typedoc
     - name: Deploy docs
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          branch: gh-pages
-          folder: doc
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        branch: gh-pages
+        folder: doc
