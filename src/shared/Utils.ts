@@ -17,6 +17,7 @@ export function withTimeout<T>(
 }
 
 export function getRandomUID() {
+    assert(self.crypto && self.crypto.randomUUID, "crypto.getRandomUID() is undefined");
     return self.crypto.randomUUID();
 }
 
