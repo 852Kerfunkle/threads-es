@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.2.10
+- Documentation.
+- Improved internal types.
+
 ## 0.2.9
 - Change `keepSharedWorkersAlive` shared worker terminate to `forceTerminateShared`.
 - Add `EsTheadPool.resolved()` and `EsThread.resolved()`.
