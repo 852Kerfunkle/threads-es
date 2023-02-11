@@ -1,0 +1,29 @@
+{
+    "plugins": [
+        "@typescript-eslint",
+        "eslint-plugin-tsdoc"
+    ],
+    "extends": [
+        "plugin:@typescript-eslint/recommended"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "rules": {
+        "tsdoc/syntax": "warn",
+        "eqeqeq": 1,
+        "curly": [
+            "error",
+            "multi-line"
+        ],
+        "quotes": [
+            "error",
+            "double"
+        ],
+        "@typescript-eslint/no-explicit-any": [
+            "off",
+            {
+                "ignoreRestArgs": true
+            }
+        ]
+    },
+    "root": true
+}
