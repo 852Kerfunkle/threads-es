@@ -39,10 +39,12 @@ export interface EsThreadOptions {
      * 
      * @defaultValue 10000ms
      */
-    timeout?: number;
+    timeout: number;
 }
 
-const defaultThreadTimeout = 10000;
+const DefaultEsThreadOptions: EsThreadOptions = {
+    timeout: 10000
+}
 
 /**
  * EsThreads
@@ -57,7 +59,7 @@ const defaultThreadTimeout = 10000;
 export class EsThread<ApiType extends WorkerModule> implements Terminable {
     /** The threads UID. */
     readonly threadUID = getRandomUID();
-    readonly options: Required<EsThreadOptions>;
+    readonly options: Readonly<EsThreadOptions>;
     private readonly tasks: Map<TaskUID, EsTaskPromise<any>> = new Map();
 
     private readonly worker: WorkerType;
@@ -69,7 +71,7 @@ export class EsThread<ApiType extends WorkerModule> implements Terminable {
     /** The number of active (unsettled) tasks. */
     public get numQueuedTasks() { return this.tasks.size; }
 
-    private constructor(worker: WorkerType, threadOptions: EsThreadOptions) {
+    private constructor(worker: WorkerType, threadOptions: Partial<EsThreadOptions>) {
         this.worker = worker;
         if(worker instanceof Worker) this.interface = worker;
         else {
@@ -77,9 +79,7 @@ export class EsThread<ApiType extends WorkerModule> implements Terminable {
             worker.port.start();
         }
 
-        this.options = {
-            timeout: threadOptions.timeout || defaultThreadTimeout
-        }
+        this.options = { ...DefaultEsThreadOptions, ...threadOptions };
     }
 
     /**
@@ -88,7 +88,7 @@ export class EsThread<ApiType extends WorkerModule> implements Terminable {
      * @param threadOptions - Thread options.
      * @returns A new thread.
      */
-    public static async Spawn<ApiType extends WorkerModule>(worker: WorkerType, threadOptions: EsThreadOptions = {}) {
+    public static async Spawn<ApiType extends WorkerModule>(worker: WorkerType, threadOptions: Partial<EsThreadOptions> = {}) {
         const thread = new EsThread<ApiType>(worker, threadOptions);
         return thread.initThread();
     }

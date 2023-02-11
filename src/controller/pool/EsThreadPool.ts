@@ -1,8 +1,6 @@
 import { Terminable, WorkerModule } from "../../shared/Worker"
 import { EsThread } from "../thread/EsThread"
 
-export const defaultPoolSize = navigator.hardwareConcurrency;
-
 /** Options for thread pools. */
 export interface EsPoolOptions {
     /**
@@ -10,17 +8,23 @@ export interface EsPoolOptions {
      * 
      * @defaultValue "EsThreadPool"
      */
-    name?: string;
+    name: string;
 
     /**
      * No. of worker threads to spawn and to be managed by the pool.
      * 
      * @defaultValue navigator.hardwareConcurrency
      */
-    size?: number;
+    size: number;
 
     /** Maximum no. of tasks to run on one worker thread at a time. Defaults to one. */
-    //concurrency?: number;
+    //concurrency: number;
+}
+
+const DefaultEsPoolOptions: EsPoolOptions = {
+    size: navigator.hardwareConcurrency,
+    name: "EsThreadPool",
+    //concurrency: 1
 }
 
 /**
@@ -37,15 +41,10 @@ export interface EsPoolOptions {
  */
 export class EsThreadPool<ApiType extends WorkerModule> implements Terminable {
     private readonly threads: EsThread<ApiType>[] = [];
-    readonly options: Required<EsPoolOptions>;
-    //readonly concurrency: number;
+    readonly options: Readonly<EsPoolOptions>;
 
-    private constructor(poolOptions: EsPoolOptions = {}) {
-        this.options = {
-            size: poolOptions.size || defaultPoolSize,
-            name: poolOptions.name || "EsThreadPool"
-            //concurrency: poolOptions.concurrency || 1;
-        }
+    private constructor(poolOptions: Partial<EsPoolOptions>) {
+        this.options = { ...DefaultEsPoolOptions, ...poolOptions };
     }
 
     /**
@@ -56,7 +55,7 @@ export class EsThreadPool<ApiType extends WorkerModule> implements Terminable {
      */
     public static async Spawn<ApiType extends WorkerModule>(
         spawnThread: (threadId: number) => Promise<EsThread<ApiType>>,
-        poolOptions: EsPoolOptions = {})
+        poolOptions: Partial<EsPoolOptions> = {})
     {
         const pool = new EsThreadPool<ApiType>(poolOptions);
         pool.threads.push(...await Promise.all([...Array(pool.options.size).keys()].map((_, idx) => spawnThread(idx))));
