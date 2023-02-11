@@ -7,7 +7,7 @@ import { assert as assertUtil } from "../src/shared/Utils";
 
 describe("EsThreadPool tests", () => {
     it("Default pool options", async () => {
-        const pool = await EsThreadPool.Spawn<HelloWorldApiType>((threadId) => EsThread.Spawn(
+        const pool = await EsThreadPool.Spawn((threadId) => EsThread.Spawn<HelloWorldApiType>(
             new Worker(new URL("threads/valid/hello-world.worker.ts", import.meta.url),
             {type: "module", name: `HelloWorldWorker #${threadId}`})));
 
@@ -18,7 +18,7 @@ describe("EsThreadPool tests", () => {
     });
 
     it("One worker", async () => {
-        const pool = await EsThreadPool.Spawn<HelloWorldApiType>((threadId) => EsThread.Spawn(
+        const pool = await EsThreadPool.Spawn((threadId) => EsThread.Spawn<HelloWorldApiType>(
             new Worker(new URL("threads/valid/hello-world.worker.ts", import.meta.url),
             {type: "module", name: `LongRunningWorker #${threadId}`})), {size: 1});
 
@@ -28,7 +28,7 @@ describe("EsThreadPool tests", () => {
     });
 
     it("Multiple workers", async () => {
-        const pool = await EsThreadPool.Spawn<LongRunningApiType>((threadId) => EsThread.Spawn(
+        const pool = await EsThreadPool.Spawn((threadId) => EsThread.Spawn<LongRunningApiType>(
             new Worker(new URL("threads/valid/long-running.worker.ts", import.meta.url),
             {type: "module", name: `LongRunningWorker #${threadId}`})), {size: 2});
 
@@ -47,7 +47,7 @@ describe("EsThreadPool tests", () => {
     });
 
     it("Multiple workers with custom initialise/terminate", async () => {
-        const pool = await EsThreadPool.Spawn<CustomTerminateApiType>(async (threadId) => {
+        const pool = await EsThreadPool.Spawn(async (threadId) => {
                 const thread = await EsThread.Spawn<CustomTerminateApiType>(
                     new Worker(new URL("threads/valid/custom-terminate.worker.ts", import.meta.url),
                     {type: "module", name: `LongRunningWorker #${threadId}`}));
@@ -73,7 +73,7 @@ describe("EsThreadPool tests", () => {
 
     it("Multiple shared workers", async () => {
         // NOTE: shared worker pools will only work correctly if they have unique names.
-        const pool = await EsThreadPool.Spawn<LongRunningApiType>((threadId) => EsThread.Spawn(
+        const pool = await EsThreadPool.Spawn((threadId) => EsThread.Spawn<LongRunningApiType>(
             new SharedWorker(new URL("threads/valid/long-running.worker.ts", import.meta.url),
             {type: "module", name: `LongRunningWorker #${threadId}`})), {size: 2});
 
@@ -92,7 +92,7 @@ describe("EsThreadPool tests", () => {
     });
 
     it("Many workers and many tasks", async () => {
-        const pool = await EsThreadPool.Spawn<HelloWorldApiType>((threadId) => EsThread.Spawn(
+        const pool = await EsThreadPool.Spawn((threadId) => EsThread.Spawn<HelloWorldApiType>(
             new Worker(new URL("threads/valid/hello-world.worker.ts", import.meta.url),
             {type: "module", name: `HelloWorldWorker #${threadId}`})), {size: 8});
 

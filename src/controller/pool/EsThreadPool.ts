@@ -30,7 +30,7 @@ export interface EsPoolOptions {
  * When used with {@link https://developer.mozilla.org/docs/Web/API/SharedWorker | SharedWorker},
  * make sure to spawn each {@link EsThread} thread with a unique name in WorkerOptions.
  * ```ts
- * const pool = await EsThreadPool.Spawn<HelloWorldApiType>((threadId) => EsThread.Spawn(
+ * const pool = await EsThreadPool.Spawn((threadId) => EsThread.Spawn<HelloWorldApiType>(
  *     new SharedWorker(new URL("threads/valid/hello-world.worker.ts", import.meta.url),
  *     {type: "module", name: `HelloWorldWorker #${threadId}`})), {size: 8});
  * ```

@@ -6,7 +6,7 @@ let pool: EsThreadPool<AsyncHelloWorldApiType>;
 
 const withSubpoolApi = {
     init: async () => {
-        pool = await EsThreadPool.Spawn<AsyncHelloWorldApiType>(() => EsThread.Spawn(
+        pool = await EsThreadPool.Spawn(() => EsThread.Spawn<AsyncHelloWorldApiType>(
             new Worker(new URL("./async-api.worker.ts", import.meta.url),
             {type: "module"})), {size: 2});
     },

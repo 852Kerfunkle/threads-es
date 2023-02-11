@@ -62,7 +62,7 @@ pool.ts
 import { EsThreadPool, EsThread } from "threads-es/controller"
 import { HelloWorldApiType } from "./hello-world.worker.ts"
 
-const pool = await EsThreadPool.Spawn<HelloWorldApiType>(() => EsThread.Spawn(
+const pool = await EsThreadPool.Spawn(() => EsThread.Spawn<HelloWorldApiType>(
     new Worker(new URL("./hello-world.worker.ts", import.meta.url),
     {type: "module"}), {size: 4});
 
