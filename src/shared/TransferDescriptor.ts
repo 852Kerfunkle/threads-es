@@ -20,7 +20,7 @@ const TransferableTypes = [
     TransformStream,
     ArrayBuffer] as const;
 
-function isTransferable(thing: any): thing is Transferable {
+function isTransferable(thing: object): thing is Transferable {
     let isTransferable = false;
     for(const type of TransferableTypes) {
         if(thing instanceof type) {
@@ -31,7 +31,7 @@ function isTransferable(thing: any): thing is Transferable {
     return isTransferable;
 }
 
-function assertTransferable(thing: any): asserts thing is Transferable {
+function assertTransferable(thing: object): asserts thing is Transferable {
     if(!isTransferable(thing)) throw new Error("Object is not transferable");
 }
 
