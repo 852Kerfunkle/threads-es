@@ -72,14 +72,14 @@ export class EsThread<ApiType extends WorkerModule> implements Terminable {
     public get numQueuedTasks() { return this.tasks.size; }
 
     private constructor(worker: WorkerType, threadOptions: Partial<EsThreadOptions>) {
+        this.options = { ...DefaultEsThreadOptions, ...threadOptions };
+
         this.worker = worker;
         if(worker instanceof Worker) this.interface = worker;
         else {
             this.interface = worker.port;
             worker.port.start();
         }
-
-        this.options = { ...DefaultEsThreadOptions, ...threadOptions };
     }
 
     /**
