@@ -1,6 +1,6 @@
 export type WorkerFunction = ((...args: any[]) => any) | (() => any);
 
-export type WorkerModule = {
+export interface WorkerModule {
     [methodName: string]: WorkerFunction
 }
 
