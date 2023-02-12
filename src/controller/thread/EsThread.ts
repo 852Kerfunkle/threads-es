@@ -7,7 +7,7 @@ import { assertMessageEvent,
     WorkerMessageType} from "../../shared/Messages";
 import { Terminable, WorkerModule } from "../../shared/Worker";
 import { isTransferDescriptor, TransferDescriptor } from "../../shared/TransferDescriptor";
-import { getRandomUID, withTimeout } from "../../shared/Utils";
+import { assert, getRandomUID, withTimeout } from "../../shared/Utils";
 import { EsTaskPromise } from "./EsTask";
 
 type StripTransfer<Type> =
@@ -20,14 +20,6 @@ type ProxyFunction<Args extends any[], ReturnType> =
 
 type ProxyModule<ApiType extends WorkerModule> = {
     [method in keyof ApiType]: ProxyFunction<Parameters<ApiType[method]>, ReturnType<ApiType[method]>>
-}
-
-type WorkerType = Worker | SharedWorker;
-
-interface WorkerInterface {
-    postMessage(message: any, transfer: Transferable[]): void;
-    addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-    removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
 }
 
 /** Options for threads. */
@@ -52,7 +44,7 @@ const DefaultEsThreadOptions: EsThreadOptions = {
  * @example
  * ```ts
  * const thread = await EsThread.Spawn<HelloWorldApiType>(
- *     new WorkerType(new URL("threads/valid/hello-world.worker.ts", import.meta.url),
+ *     new Worker(new URL("threads/valid/hello-world.worker.ts", import.meta.url),
  *     {type: "module"}));
  * ```
  */
@@ -62,8 +54,8 @@ export class EsThread<ApiType extends WorkerModule> implements Terminable {
     readonly options: Readonly<EsThreadOptions>;
     private readonly tasks: Map<TaskUID, EsTaskPromise<any>> = new Map();
 
-    private readonly worker: WorkerType;
-    private readonly interface: WorkerInterface;
+    private readonly worker: AbstractWorker;
+    private readonly interface: Worker | MessagePort;
 
     /** Access the thread API. */
     public methods: ProxyModule<ApiType> = {} as ProxyModule<ApiType>;
@@ -71,12 +63,19 @@ export class EsThread<ApiType extends WorkerModule> implements Terminable {
     /** The number of active (unsettled) tasks. */
     public get numQueuedTasks() { return this.tasks.size; }
 
-    private constructor(worker: WorkerType, threadOptions: Partial<EsThreadOptions>) {
+    private constructor(worker: AbstractWorker, threadOptions: Partial<EsThreadOptions>) {
         this.options = { ...DefaultEsThreadOptions, ...threadOptions };
+
+        if(typeof ServiceWorker !== "undefined" && worker instanceof ServiceWorker) {
+            /* c8 ignore next 3 */
+            // reason: difficult to test
+            throw new Error("ServiceWorker currently not supported.");
+        }
 
         this.worker = worker;
         if(worker instanceof Worker) this.interface = worker;
         else {
+            assert(worker instanceof SharedWorker);
             this.interface = worker.port;
             worker.port.start();
         }
@@ -88,7 +87,7 @@ export class EsThread<ApiType extends WorkerModule> implements Terminable {
      * @param threadOptions - Thread options.
      * @returns A new thread.
      */
-    public static async Spawn<ApiType extends WorkerModule>(worker: WorkerType, threadOptions: Partial<EsThreadOptions> = {}) {
+    public static async Spawn<ApiType extends WorkerModule>(worker: AbstractWorker, threadOptions: Partial<EsThreadOptions> = {}) {
         const thread = new EsThread<ApiType>(worker, threadOptions);
         return thread.initThread();
     }
@@ -128,7 +127,10 @@ export class EsThread<ApiType extends WorkerModule> implements Terminable {
         this.interface.removeEventListener("message", this.taskResultDispatch);
 
         if(this.worker instanceof Worker) this.worker.terminate();
-        else this.worker.port.close();
+        else {
+            assert(this.worker instanceof SharedWorker);
+            this.worker.port.close();
+        }
     }
 
     private taskResultDispatch = (evt: Event) => {
@@ -238,7 +240,10 @@ export class EsThread<ApiType extends WorkerModule> implements Terminable {
         catch(e) {
             // If init times out, terminate worker, or close the message port.
             if(this.worker instanceof Worker) this.worker.terminate();
-            else this.worker.port.close();
+            else {
+                assert(this.worker instanceof SharedWorker)
+                this.worker.port.close();
+            }
             throw e;
         }
 
