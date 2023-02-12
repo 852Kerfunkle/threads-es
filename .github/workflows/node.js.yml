@@ -3,12 +3,13 @@ name: Node.js CI
 on:
   push:
     branches: [ "main" ]
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
   pull_request:
     branches: [ "main" ]
 
 jobs:
   test:
-
     runs-on: ubuntu-latest
 
     strategy:
@@ -26,3 +27,30 @@ jobs:
       - run: yarn tsc
       - run: yarn lint
       - run: yarn test
+
+  docs:
+    # Only run for push events
+    if: ${{ github.event_name == 'push' }}
+    # Don't run if test wasn't successful
+    needs: [test]
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+          cache: 'yarn'
+      - run: yarn --frozen-lockfile
+      - run: yarn typedoc --gitRevision ${{ github.ref_name }}
+      - name: Deploy docs
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: doc
+          target-folder: ${{ github.ref_name }}
