@@ -13,13 +13,13 @@ import { TestWorkerApiType } from "./threads/test-worker-api.worker";
 import { TransferStreamsApiType } from "./threads/valid/transfer-streams.worker";
 import { ExposeApiNotCalledApiType } from "./threads/exposeApi-not-called";
 
-type TestWorkerType = new (scriptURL: string | URL, options?: WorkerOptions) => (Worker | SharedWorker);
+type TestWorkerConstructor = new (scriptURL: string | URL, options?: WorkerOptions) => (Worker | SharedWorker);
 
-export function genericWorkerTests(WorkerType: TestWorkerType) {
-    describe(`Generic ${WorkerType.name} tests`, () => {
+export function genericWorkerTests(WorkerContructor: TestWorkerConstructor) {
+    describe(`Generic ${WorkerContructor.name} tests`, () => {
         it("Basic", async () => {
             const thread = await EsThread.Spawn<HelloWorldApiType>(
-                new WorkerType(new URL("threads/valid/hello-world.worker.ts", import.meta.url),
+                new WorkerContructor(new URL("threads/valid/hello-world.worker.ts", import.meta.url),
                 {type: "module"}));
 
             expect(thread).to.not.be.undefined;
@@ -33,7 +33,7 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
         it("exposeApi not called", async () => {
             try {
                 await EsThread.Spawn<ExposeApiNotCalledApiType>(
-                    new WorkerType(new URL("threads/exposeApi-not-called.ts", import.meta.url),
+                    new WorkerContructor(new URL("threads/exposeApi-not-called.ts", import.meta.url),
                     {type: "module"}), {timeout: 250});
                 assert(false, "Spawn should not have succeeded");
             }
@@ -45,7 +45,7 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
 
         it("Throws", async () => {
             const thread = await EsThread.Spawn<ThrowHelloWorldApiType>(
-                new WorkerType(new URL("threads/throw.worker.ts", import.meta.url),
+                new WorkerContructor(new URL("threads/throw.worker.ts", import.meta.url),
                 {type: "module"}));
 
             expect(thread).to.not.be.undefined;
@@ -65,7 +65,7 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
 
         it("Unhandled rejection", async () => {
             const thread = await EsThread.Spawn<RejectApiType>(
-                new WorkerType(new URL("threads/reject.worker.ts", import.meta.url),
+                new WorkerContructor(new URL("threads/reject.worker.ts", import.meta.url),
                 {type: "module"}));
             await delay(500);
 
@@ -77,7 +77,7 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
 
         it("With transfer", async () => {
             const thread = await EsThread.Spawn<TransferArrayApiType>(
-                new WorkerType(new URL("threads/valid/transfer-array.worker.ts", import.meta.url),
+                new WorkerContructor(new URL("threads/valid/transfer-array.worker.ts", import.meta.url),
                 {type: "module"}));
 
             expect(thread).to.not.be.undefined;
@@ -99,7 +99,7 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
 
         it("With complex transfer", async () => {
             const thread = await EsThread.Spawn<TransferObjectWithArrayApiType>(
-                new WorkerType(new URL("threads/valid/transfer-object-with-array.worker.ts", import.meta.url),
+                new WorkerContructor(new URL("threads/valid/transfer-object-with-array.worker.ts", import.meta.url),
                 {type: "module"}));
 
             expect(thread).to.not.be.undefined;
@@ -122,7 +122,7 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
 
         it("Transfer stream", async () => {
             const thread = await EsThread.Spawn<TransferStreamsApiType>(
-                new WorkerType(new URL("threads/valid/transfer-streams.worker.ts", import.meta.url),
+                new WorkerContructor(new URL("threads/valid/transfer-streams.worker.ts", import.meta.url),
                 {type: "module"}));
 
             expect(thread).to.not.be.undefined;
@@ -164,7 +164,7 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
 
         it("Async api", async () => {
             const thread = await EsThread.Spawn<AsyncHelloWorldApiType>(
-                new WorkerType(new URL("threads/valid/async-api.worker.ts", import.meta.url),
+                new WorkerContructor(new URL("threads/valid/async-api.worker.ts", import.meta.url),
                 {type: "module"}));
 
             expect(thread).to.not.be.undefined;
@@ -177,7 +177,7 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
 
         it("Long-running", async () => {
             const thread = await EsThread.Spawn<LongRunningApiType>(
-                new WorkerType(new URL("threads/valid/long-running.worker.ts", import.meta.url),
+                new WorkerContructor(new URL("threads/valid/long-running.worker.ts", import.meta.url),
                 {type: "module"}));
 
             expect(thread).to.not.be.undefined;
@@ -195,14 +195,14 @@ export function genericWorkerTests(WorkerType: TestWorkerType) {
 
         it("Test worker Api", async () => {
             const thread = await EsThread.Spawn<TestWorkerApiType>(
-                new WorkerType(new URL("threads/test-worker-api.worker.ts", import.meta.url),
+                new WorkerContructor(new URL("threads/test-worker-api.worker.ts", import.meta.url),
                 {type: "module"}));
     
             expect(thread).to.not.be.undefined;
             expect(thread.methods.testWorkerApi).to.not.be.undefined;
     
             try {
-                await thread.methods.testWorkerApi(WorkerType.name as "Worker" | "SharedWorker");
+                await thread.methods.testWorkerApi(WorkerContructor.name as "Worker" | "SharedWorker");
             }
             catch(e) {
                 assert(e instanceof Error, "Exception isn't of 'Error' type");
