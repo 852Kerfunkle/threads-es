@@ -79,6 +79,12 @@ let workerApiExposed = false;
 // Assume WorkerGlobalScope, to avoid some type weirdness.
 const workerScope = self as WorkerGlobalScope;
 
+// For debugging GC only.
+/*import { getRandomUID } from "../shared/Utils";
+const registry = new FinalizationRegistry<string>((clientId) => {
+    console.log("destroyed: ", clientId);
+});*/
+
 // Register error handlers for DedicatedWorker.
 if(isDedicatedWorkerScope(workerScope)) {
     // For some reason onerror and onunhandledrejection don't work in
@@ -188,6 +194,9 @@ export function exposeApi(api: WorkerModule) {
         assertSharedWorkerScope(workerScope);
         workerScope.onconnect = (event) => {
             const port = event.ports[0];
+
+            // For debugging GC only.
+            //registry.register(port, getRandomUID());
 
             // Register error handlers for SharedWorker on connect.
             // Assign to onerror and onunhandledrejection, otherwise ports are not GCd (in chrome),
