@@ -17,6 +17,11 @@
 <h1>Class EsThread&lt;ApiType&gt;</h1></div>
 <section class="tsd-panel tsd-comment">
 <div class="tsd-comment tsd-typography"><p>EsThreads</p>
+<p>Some worker errors (unhandled rejection, uncaught exceptions, posting of incorrect results/errors) are dispatched
+by threads. You can use <code>thread.addEventListener(&quot;error&quot;, ...)</code> to recive those, but they&#39;re not particularily
+useful, aside from maybe debugging and testing.</p>
+<p>Also, for SharedWorker threads: unhandled rejection and uncaught exceptions will not be delivered until a client
+connects. They are delivered to every connected client.</p>
 
 <h3>Example</h3><pre><code class="language-ts"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-5">thread</span><span class="hl-1"> = </span><span class="hl-0">await</span><span class="hl-1"> </span><span class="hl-2">EsThread</span><span class="hl-1">.</span><span class="hl-6">Spawn</span><span class="hl-1">&lt;</span><span class="hl-7">HelloWorldApiType</span><span class="hl-1">&gt;(</span><br/><span class="hl-1">    </span><span class="hl-4">new</span><span class="hl-1"> </span><span class="hl-6">Worker</span><span class="hl-1">(</span><span class="hl-4">new</span><span class="hl-1"> </span><span class="hl-6">URL</span><span class="hl-1">(</span><span class="hl-3">&quot;threads/valid/hello-world.worker.ts&quot;</span><span class="hl-1">, </span><span class="hl-0">import</span><span class="hl-1">.</span><span class="hl-2">meta</span><span class="hl-1">.</span><span class="hl-2">url</span><span class="hl-1">),</span><br/><span class="hl-1">    {</span><span class="hl-2">type:</span><span class="hl-1"> </span><span class="hl-3">&quot;module&quot;</span><span class="hl-1">}));</span>
 </code></pre>
@@ -37,7 +42,7 @@
 <ul class="tsd-hierarchy">
 <li><span class="tsd-signature-type">Terminable</span></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/852Kerfunkle/threads-es/blob/main/src/controller/thread/EsThread.ts#L51">src/controller/thread/EsThread.ts:51</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/852Kerfunkle/threads-es/blob/main/src/controller/thread/EsThread.ts#L58">src/controller/thread/EsThread.ts:58</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -97,43 +102,43 @@
 <h4 class="tsd-returns-title">Returns <a href="EsThread.html" class="tsd-signature-type" data-tsd-kind="Class">EsThread</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type" data-tsd-kind="Type parameter">ApiType</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <p>Overrides EventTarget.constructor</p>
 <ul>
-<li>Defined in <a href="https://github.com/852Kerfunkle/threads-es/blob/main/src/controller/thread/EsThread.ts#L66">src/controller/thread/EsThread.ts:66</a></li></ul></aside></li></ul></section></section>
+<li>Defined in <a href="https://github.com/852Kerfunkle/threads-es/blob/main/src/controller/thread/EsThread.ts#L73">src/controller/thread/EsThread.ts:73</a></li></ul></aside></li></ul></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Properties</h2>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private"><a id="interface" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <code class="tsd-tag ts-flagReadonly">Readonly</code> <span>interface</span><a href="#interface" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">interface<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">MessagePort</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Worker</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/852Kerfunkle/threads-es/blob/main/src/controller/thread/EsThread.ts#L58">src/controller/thread/EsThread.ts:58</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/852Kerfunkle/threads-es/blob/main/src/controller/thread/EsThread.ts#L65">src/controller/thread/EsThread.ts:65</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class"><a id="methods" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>methods</span><a href="#methods" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">methods<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ProxyModule</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type" data-tsd-kind="Type parameter">ApiType</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = ...</span></div>
 <div class="tsd-comment tsd-typography"><p>Access the thread API.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/852Kerfunkle/threads-es/blob/main/src/controller/thread/EsThread.ts#L61">src/controller/thread/EsThread.ts:61</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/852Kerfunkle/threads-es/blob/main/src/controller/thread/EsThread.ts#L68">src/controller/thread/EsThread.ts:68</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class"><a id="options" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagReadonly">Readonly</code> <span>options</span><a href="#options" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">options<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Readonly</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/EsThreadOptions.html" class="tsd-signature-type" data-tsd-kind="Interface">EsThreadOptions</a><span class="tsd-signature-symbol">&gt;</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/852Kerfunkle/threads-es/blob/main/src/controller/thread/EsThread.ts#L54">src/controller/thread/EsThread.ts:54</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/852Kerfunkle/threads-es/blob/main/src/controller/thread/EsThread.ts#L61">src/controller/thread/EsThread.ts:61</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private"><a id="tasks" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <code class="tsd-tag ts-flagReadonly">Readonly</code> <span>tasks</span><a href="#tasks" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">tasks<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">EsTaskPromise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = ...</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/852Kerfunkle/threads-es/blob/main/src/controller/thread/EsThread.ts#L55">src/controller/thread/EsThread.ts:55</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/852Kerfunkle/threads-es/blob/main/src/controller/thread/EsThread.ts#L62">src/controller/thread/EsThread.ts:62</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class"><a id="threadUID" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagReadonly">Readonly</code> <span>threadUID</span><a href="#threadUID" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">threadUID<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = ...</span></div>
 <div class="tsd-comment tsd-typography"><p>The threads UID.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/852Kerfunkle/threads-es/blob/main/src/controller/thread/EsThread.ts#L53">src/controller/thread/EsThread.ts:53</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/852Kerfunkle/threads-es/blob/main/src/controller/thread/EsThread.ts#L60">src/controller/thread/EsThread.ts:60</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private"><a id="worker" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <code class="tsd-tag ts-flagReadonly">Readonly</code> <span>worker</span><a href="#worker" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <div class="tsd-signature">worker<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">AbstractWorker</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/852Kerfunkle/threads-es/blob/main/src/controller/thread/EsThread.ts#L57">src/controller/thread/EsThread.ts:57</a></li></ul></aside></section></section>
+<li>Defined in <a href="https://github.com/852Kerfunkle/threads-es/blob/main/src/controller/thread/EsThread.ts#L64">src/controller/thread/EsThread.ts:64</a></li></ul></aside></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Accessors</h2>
 <section class="tsd-panel tsd-member tsd-kind-accessor tsd-parent-kind-class"><a id="numQueuedTasks" class="tsd-anchor"></a>
@@ -145,7 +150,7 @@
 </div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/852Kerfunkle/threads-es/blob/main/src/controller/thread/EsThread.ts#L64">src/controller/thread/EsThread.ts:64</a></li></ul></aside></li></ul></section></section>
+<li>Defined in <a href="https://github.com/852Kerfunkle/threads-es/blob/main/src/controller/thread/EsThread.ts#L71">src/controller/thread/EsThread.ts:71</a></li></ul></aside></li></ul></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Methods</h2>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-external"><a id="addEventListener" class="tsd-anchor"></a>
@@ -209,7 +214,7 @@
 <h5>methodNames: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/852Kerfunkle/threads-es/blob/main/src/controller/thread/EsThread.ts#L205">src/controller/thread/EsThread.ts:205</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/852Kerfunkle/threads-es/blob/main/src/controller/thread/EsThread.ts#L211">src/controller/thread/EsThread.ts:211</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private"><a id="createProxyFunction" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>create<wbr/>Proxy<wbr/>Function</span><a href="#createProxyFunction" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
@@ -229,7 +234,7 @@
 <h5>method: <span class="tsd-signature-type">string</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">ProxyFunction</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type" data-tsd-kind="Type parameter">Args</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type" data-tsd-kind="Type parameter">ReturnType</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/852Kerfunkle/threads-es/blob/main/src/controller/thread/EsThread.ts#L188">src/controller/thread/EsThread.ts:188</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/852Kerfunkle/threads-es/blob/main/src/controller/thread/EsThread.ts#L194">src/controller/thread/EsThread.ts:194</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-external"><a id="dispatchEvent" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>dispatch<wbr/>Event</span><a href="#dispatchEvent" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-external">
@@ -266,7 +271,7 @@
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="EsThread.html" class="tsd-signature-type" data-tsd-kind="Class">EsThread</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type" data-tsd-kind="Type parameter">ApiType</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/852Kerfunkle/threads-es/blob/main/src/controller/thread/EsThread.ts#L215">src/controller/thread/EsThread.ts:215</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/852Kerfunkle/threads-es/blob/main/src/controller/thread/EsThread.ts#L221">src/controller/thread/EsThread.ts:221</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-external"><a id="removeEventListener" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>remove<wbr/>Event<wbr/>Listener</span><a href="#removeEventListener" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-external">
@@ -315,7 +320,7 @@ and rejects when any task rejects.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <p>Implementation of Terminable.resolved</p>
 <ul>
-<li>Defined in <a href="https://github.com/852Kerfunkle/threads-es/blob/main/src/controller/thread/EsThread.ts#L105">src/controller/thread/EsThread.ts:105</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/852Kerfunkle/threads-es/blob/main/src/controller/thread/EsThread.ts#L112">src/controller/thread/EsThread.ts:112</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class"><a id="settled" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>settled</span><a href="#settled" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
@@ -326,7 +331,7 @@ and rejects when any task rejects.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <p>Implementation of Terminable.settled</p>
 <ul>
-<li>Defined in <a href="https://github.com/852Kerfunkle/threads-es/blob/main/src/controller/thread/EsThread.ts#L97">src/controller/thread/EsThread.ts:97</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/852Kerfunkle/threads-es/blob/main/src/controller/thread/EsThread.ts#L104">src/controller/thread/EsThread.ts:104</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private"><a id="taskResultDispatch" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagPrivate">Private</code> <span>task<wbr/>Result<wbr/>Dispatch</span><a href="#taskResultDispatch" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
@@ -339,7 +344,7 @@ and rejects when any task rejects.</p>
 <h5>evt: <span class="tsd-signature-type">Event</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/852Kerfunkle/threads-es/blob/main/src/controller/thread/EsThread.ts#L137">src/controller/thread/EsThread.ts:137</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/852Kerfunkle/threads-es/blob/main/src/controller/thread/EsThread.ts#L144">src/controller/thread/EsThread.ts:144</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class"><a id="terminate" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>terminate</span><a href="#terminate" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
@@ -360,7 +365,7 @@ Probably not a great idea, but one might want to do it.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <p>Implementation of Terminable.terminate</p>
 <ul>
-<li>Defined in <a href="https://github.com/852Kerfunkle/threads-es/blob/main/src/controller/thread/EsThread.ts#L118">src/controller/thread/EsThread.ts:118</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/852Kerfunkle/threads-es/blob/main/src/controller/thread/EsThread.ts#L125">src/controller/thread/EsThread.ts:125</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class"><a id="Spawn" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>Spawn</span><a href="#Spawn" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
@@ -388,7 +393,7 @@ Probably not a great idea, but one might want to do it.</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="EsThread.html" class="tsd-signature-type" data-tsd-kind="Class">EsThread</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type" data-tsd-kind="Type parameter">ApiType</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/852Kerfunkle/threads-es/blob/main/src/controller/thread/EsThread.ts#L91">src/controller/thread/EsThread.ts:91</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/852Kerfunkle/threads-es/blob/main/src/controller/thread/EsThread.ts#L98">src/controller/thread/EsThread.ts:98</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private"><a id="prepareArguments" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <code class="tsd-tag ts-flagPrivate">Private</code> <span>prepare<wbr/>Arguments</span><a href="#prepareArguments" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><use href="#icon-anchor-a"></use><use href="#icon-anchor-b"></use><use href="#icon-anchor-c"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
@@ -406,7 +411,7 @@ Probably not a great idea, but one might want to do it.</p>
 <li class="tsd-parameter">
 <h5>transferables<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Transferable</span><span class="tsd-signature-symbol">[]</span></h5></li></ul><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/852Kerfunkle/threads-es/blob/main/src/controller/thread/EsThread.ts#L172">src/controller/thread/EsThread.ts:172</a></li></ul></aside></li></ul></section></section></div>
+<li>Defined in <a href="https://github.com/852Kerfunkle/threads-es/blob/main/src/controller/thread/EsThread.ts#L178">src/controller/thread/EsThread.ts:178</a></li></ul></aside></li></ul></section></section></div>
 <div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 <div class="tsd-navigation settings">
 <details class="tsd-index-accordion"><summary class="tsd-accordion-summary">
