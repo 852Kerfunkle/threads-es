@@ -136,6 +136,10 @@ export class EsThreadPool<ApiType extends WorkerModule> extends EventTarget impl
 
     /**
      * Queue a new task on the pool.
+     * 
+     * Finds a thread with few queued tasks and queues another. Tasks are
+     * immediately sent to the thread.
+     * 
      * @param taskFunction - A callback to execute on a thread.
      * @returns The task result promise.
      */
