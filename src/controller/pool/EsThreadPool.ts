@@ -1,3 +1,4 @@
+import { assert } from "../../shared/Utils";
 import { Terminable, WorkerModule } from "../../shared/Worker"
 import { EsThread } from "../thread/EsThread"
 
@@ -27,6 +28,8 @@ const DefaultEsPoolOptions: EsPoolOptions = {
     //concurrency: 1
 }
 
+export type ThreadLifecycleFn<ApiType extends WorkerModule> = (threadId: number, thread: EsThread<ApiType>) => Promise<void>;
+
 /**
  * A pool of EsThreads.
  * 
@@ -39,29 +42,93 @@ const DefaultEsPoolOptions: EsPoolOptions = {
  *     {type: "module", name: `HelloWorldWorker #${threadId}`})), {size: 8});
  * ```
  */
-export class EsThreadPool<ApiType extends WorkerModule> implements Terminable {
+export class EsThreadPool<ApiType extends WorkerModule> extends EventTarget implements Terminable {
     private readonly threads: EsThread<ApiType>[] = [];
+    private readonly terminateThread: ThreadLifecycleFn<ApiType> | undefined;
     readonly options: Readonly<EsPoolOptions>;
 
-    private constructor(poolOptions: Partial<EsPoolOptions>) {
+    private constructor(
+        poolOptions: Partial<EsPoolOptions>,
+        terminateThread?: ThreadLifecycleFn<ApiType>)
+    {
+        super();
         this.options = { ...DefaultEsPoolOptions, ...poolOptions };
+        this.terminateThread = terminateThread;
     }
 
     /**
      * Spawn a new thread pool.
-     * @param spawnThread - Callback that spawns a new thread.
-     * @param poolOptions - The options for this thread pool
+     * @param spawnThread - Callback that spawns a new thread. If you need to
+     * run custom init per thread, use the `initialiseThread` lifecycle function.
+     * @param initialiseThread - Allows running custom init per thread.
+     * @param terminateThread - Allows running custom cleanup per thread.
+     * @param poolOptions - The options for this thread pool.
      * @returns A new thread pool.
      */
     public static async Spawn<ApiType extends WorkerModule>(
         spawnThread: (threadId: number) => Promise<EsThread<ApiType>>,
-        poolOptions: Partial<EsPoolOptions> = {})
+        poolOptions: Partial<EsPoolOptions> = {},
+        initialiseThread?: ThreadLifecycleFn<ApiType>,
+        terminateThread?: ThreadLifecycleFn<ApiType>)
     {
-        const pool = new EsThreadPool<ApiType>(poolOptions);
-        pool.threads.push(...await Promise.all([...Array(pool.options.size).keys()].map((_, idx) => spawnThread(idx))));
-        // TODO: when the threads fail to spawn, make sure all threads are terminated properly.
-        return pool;
+        const pool = new EsThreadPool<ApiType>(poolOptions, terminateThread);
+
+        // Spawn a thread, run the init lifecycle and connect the error listener.
+        const doSpawn = async (idx: number) => {
+            const thread = await spawnThread(idx);
+            if(initialiseThread) {
+                try {
+                    await initialiseThread(idx, thread);
+                }
+                catch(e) {
+                    // If initialiseThread fails, terminate the thread immediately.
+                    // Otherwise it will stay alive, because only fulfilled doSpawn
+                    // promises are terminated in any fail.
+                    await thread.terminate();
+                    throw e;
+                }
+            }
+            thread.addEventListener("error", pool.handleErrorEvent);
+            return thread;
+        }
+
+        const threadSpawnPromises: Promise<EsThread<ApiType>>[] = [];
+        for(let idx = 0; idx < pool.options.size; ++idx) {
+            threadSpawnPromises.push(doSpawn(idx));
+        }
+
+        try {
+            // Try to spawn the threads.
+            pool.threads.push(...await Promise.all(threadSpawnPromises));
+            return pool;
+        }
+        catch(e) {
+            // If spawning the threads fails...
+            const res = await Promise.allSettled(threadSpawnPromises);
+
+            // Terminate all threads that spawned successfully and collect all rejection messages.
+            // TODO: need to call threadTerminate on all threads that spawned successfully!
+            const terminatePromises: Promise<void>[] = [];
+            const rejectionMessages: string[] = [];
+            for (const [idx, item] of res.entries()) {
+                if(item.status === "fulfilled") {
+                    terminatePromises.push(pool.doTerminate(idx, item.value));
+                }
+                if(item.status === "rejected") rejectionMessages.push(`\tThread #${idx}: ${item.reason.toString()}`)
+            }
+
+            // I suppose if this fails, we throw our hands in the air and give up.
+            await Promise.all(terminatePromises);
+
+            // Throw an error with all rejection messages.
+            throw new Error("Failed to spawn thread pool. Errors:\n" + rejectionMessages.join("\n"))
+        }
     }
+
+    private readonly handleErrorEvent = ((evt: Event): void => {
+        assert(evt instanceof ErrorEvent, "Unhandled event type");
+        this.dispatchEvent(new ErrorEvent("error", {error: evt.error}));
+    }).bind(this);
 
     /**
      * Queue a new task on the pool.
@@ -106,6 +173,12 @@ export class EsThreadPool<ApiType extends WorkerModule> implements Terminable {
         await Promise.all(settledThreads);
     }
 
+    private async doTerminate(threadId: number, thread: EsThread<ApiType>, forceTerminateShared?: boolean) {
+        if(this.terminateThread) await this.terminateThread(threadId, thread);
+        thread.removeEventListener("error", this.handleErrorEvent);
+        await thread.terminate(forceTerminateShared);
+    }
+
     /**
      * Terminate all threads in the pool.
      * 
@@ -114,21 +187,11 @@ export class EsThreadPool<ApiType extends WorkerModule> implements Terminable {
      * 
      * @param forceTerminateShared - If you want to make sure SharedWorkers abort.
      * Probably not a great idea, but one might want to do it.
-     * 
-     * @param threadTerminate - Allows running custom cleanup per thread.
      */
-    public async terminate(threadTerminate?: (
-        thread: EsThread<ApiType>) => Promise<void>,
-        forceTerminateShared?: boolean): Promise<void> 
-    {
-        const doTerminate = async (thread: EsThread<ApiType>) => {
-            if(threadTerminate) await threadTerminate(thread);
-            await thread.terminate(forceTerminateShared);
-        }
-
+    public async terminate(forceTerminateShared?: boolean): Promise<void> {
         const terminatePromises: Promise<void>[] = [];
-        for (const thread of this.threads) {
-            terminatePromises.push(doTerminate(thread));
+        for (const [idx, thread] of this.threads.entries()) {
+            terminatePromises.push(this.doTerminate(idx, thread, forceTerminateShared));
         }
 
         await Promise.all(terminatePromises);

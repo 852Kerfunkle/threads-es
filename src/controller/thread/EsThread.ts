@@ -48,7 +48,7 @@ const DefaultEsThreadOptions: EsThreadOptions = {
  *     {type: "module"}));
  * ```
  */
-export class EsThread<ApiType extends WorkerModule> implements Terminable {
+export class EsThread<ApiType extends WorkerModule> extends EventTarget implements Terminable {
     /** The threads UID. */
     readonly threadUID = getRandomUID();
     readonly options: Readonly<EsThreadOptions>;
@@ -64,6 +64,7 @@ export class EsThread<ApiType extends WorkerModule> implements Terminable {
     public get numQueuedTasks() { return this.tasks.size; }
 
     private constructor(worker: AbstractWorker, threadOptions: Partial<EsThreadOptions>) {
+        super();
         this.options = { ...DefaultEsThreadOptions, ...threadOptions };
 
         if(typeof ServiceWorker !== "undefined" && worker instanceof ServiceWorker) {
@@ -156,6 +157,7 @@ export class EsThread<ApiType extends WorkerModule> implements Terminable {
                     break;
 
                 case WorkerMessageType.UnchaughtError:
+                    console.error("Uncaught error in worker: " + evt.data.errorMessage);
                     throw new Error("Uncaught error in worker: " + evt.data.errorMessage);
 
                 default:
@@ -163,7 +165,7 @@ export class EsThread<ApiType extends WorkerModule> implements Terminable {
             }
         }
         catch(e) {
-            console.error(e);
+            this.dispatchEvent(new ErrorEvent("error", {error: e}));
         }
     }
 

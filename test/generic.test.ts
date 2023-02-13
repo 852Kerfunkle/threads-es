@@ -1,13 +1,11 @@
 import { expect, assert } from "@esm-bundle/chai"
 import { EsThread } from "../src/controller";
 import { Transfer } from "../src/shared";
-import { delay } from "../src/shared/Utils";
 import { HelloWorldApiType } from "./threads/valid/hello-world.worker"
 import { TransferArrayApiType } from "./threads/valid/transfer-array.worker";
 import { AsyncHelloWorldApiType } from "./threads/valid/async-api.worker";
 import { ThrowHelloWorldApiType } from "./threads/throw.worker";
 import { LongRunningApiType } from "./threads/valid/long-running.worker";
-import { RejectApiType } from "./threads/reject.worker";
 import { TransferObjectWithArrayApiType } from "./threads/valid/transfer-object-with-array.worker";
 import { TestWorkerApiType } from "./threads/test-worker-api.worker";
 import { TransferStreamsApiType } from "./threads/valid/transfer-streams.worker";
@@ -60,18 +58,6 @@ export function genericWorkerTests(WorkerContructor: TestWorkerConstructor) {
                 expect(e.message).to.be.eq("Hello Error!");
             }
 
-            await thread.terminate(true);
-        });
-
-        it("Unhandled rejection", async () => {
-            const thread = await EsThread.Spawn<RejectApiType>(
-                new WorkerContructor(new URL("threads/reject.worker.ts", import.meta.url),
-                {type: "module"}));
-            await delay(500);
-
-            // "Error: it had to happen eventually"
-            // NOTE: currently there is no way to deal with unhandled rejections.
-            // Maybe need some event for it.
             await thread.terminate(true);
         });
 

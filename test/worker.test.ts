@@ -1,9 +1,11 @@
 import { expect, assert } from "@esm-bundle/chai"
 import { EsThread } from "../src/controller";
+import { delay } from "../src/shared/Utils";
 import { genericWorkerTests } from "./generic.test";
 import { PostWeirdBeforeExposeApiType } from "./threads/post-weird-before-exposeApi";
 import { PostWeirdResultApiType } from "./threads/post-weird-result.worker";
 import { RejectTopApiType } from "./threads/reject-top.worker";
+import { RejectApiType } from "./threads/reject.worker";
 import { ThrowTopApiType } from "./threads/throw-top.worker";
 import { WithSubpoolApiType } from "./threads/valid/with-subpool.worker";
 import { WithSubworkerApiType } from "./threads/valid/with-subworker.worker";
@@ -54,11 +56,24 @@ describe("Worker tests", () => {
         const thread = await EsThread.Spawn<PostWeirdResultApiType>(
             new Worker(new URL("threads/post-weird-result.worker.ts", import.meta.url),
             {type: "module"}));
-        
-        // "Error: it had to happen eventually"
-        // NOTE: currently there is no way to deal with these errors.
-        // Maybe need some event for it.
+
+        let errorsRecived = 0;
+        const validErrors = [
+            "Recieved unexpected WorkerMessage of type: undefined",
+            "Recived result for invalid task with UID invalidTaskUID",
+            "Recived error for invalid task with UID invalidTaskUID"
+        ];
+
+        thread.addEventListener("error", (evt: Event) => {
+            errorsRecived++;
+            assert(evt instanceof ErrorEvent, "event was not of ErrorEvent type");
+            assert(evt.error instanceof Error, "error was not of Error type");
+            expect(validErrors).to.include(evt.error.message)
+        });
+
         await thread.methods.postWeird();
+
+        expect(errorsRecived).to.be.eq(3);
 
         await thread.terminate();
     });
@@ -102,6 +117,31 @@ describe("Worker tests", () => {
             assert(e instanceof Error, "Exception isn't of 'Error' type");
             expect(e.message).to.be.eq("spoohw");
         }
+    });
+
+    // Similarly, this tests, shared worker thread does not report unhandled rejections (yet).
+    it("Unhandled rejection", async () => {
+        const thread = await EsThread.Spawn<RejectApiType>(
+            new Worker(new URL("threads/reject.worker.ts", import.meta.url),
+            {type: "module"}));
+
+        let errorsRecived = 0;
+        const validErrors = [
+            "Uncaught error in worker: it had to happen eventually"
+        ];
+
+        thread.addEventListener("error", (evt: Event) => {
+            errorsRecived++;
+            assert(evt instanceof ErrorEvent, "event was not of ErrorEvent type");
+            assert(evt.error instanceof Error, "error was not of Error type");
+            expect(validErrors).to.include(evt.error.message)
+        });
+
+        await delay(500);
+
+        expect(errorsRecived).to.be.eq(1);
+
+        await thread.terminate(true);
     });
 
     // TODO: find (or make) a Worker and SharedWorker polyfill!

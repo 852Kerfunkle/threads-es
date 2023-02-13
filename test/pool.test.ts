@@ -3,7 +3,9 @@ import { EsThread, EsThreadPool } from "../src/controller";
 import { CustomTerminateApiType } from "./threads/valid/custom-terminate.worker";
 import { HelloWorldApiType } from "./threads/valid/hello-world.worker"
 import { LongRunningApiType } from "./threads/valid/long-running.worker";
-import { assert as assertUtil } from "../src/shared/Utils";
+import { ThrowTopApiType } from "./threads/throw-top.worker";
+import { PostWeirdResultApiType } from "./threads/post-weird-result.worker";
+import { RandomThrowTopApiType } from "./threads/random-throw-top.worker";
 
 describe("EsThreadPool tests", () => {
     it("Default pool options", async () => {
@@ -47,13 +49,16 @@ describe("EsThreadPool tests", () => {
     });
 
     it("Multiple workers with custom initialise/terminate", async () => {
-        const pool = await EsThreadPool.Spawn(async (threadId) => {
-                const thread = await EsThread.Spawn<CustomTerminateApiType>(
-                    new Worker(new URL("threads/valid/custom-terminate.worker.ts", import.meta.url),
-                    {type: "module", name: `LongRunningWorker #${threadId}`}));
-                await thread.methods.initialise();
-                return thread;
-            }, {size: 2});
+        const pool = await EsThreadPool.Spawn(threadId => EsThread.Spawn<CustomTerminateApiType>(
+                new Worker(new URL("threads/valid/custom-terminate.worker.ts", import.meta.url),
+                {type: "module", name: `LongRunningWorker #${threadId}`})),
+            {size: 2},
+            async (threadId, thread) => {
+                return thread.methods.initialise();
+            },
+            async (threadId, thread) => {
+                expect(await thread.methods.terminate()).to.be.eq(42);
+            });
 
         const result0 = pool.queue(worker => worker.methods.doWork(50));
         const result1 = pool.queue(worker => worker.methods.doWork(50));
@@ -66,9 +71,7 @@ describe("EsThreadPool tests", () => {
         expect(await result0).to.be.eq("Hello World!");
         expect(await result1).to.be.eq("Hello World!");
 
-        await pool.terminate(async (thread) => {
-            expect(await thread.methods.terminate()).to.be.eq(42);
-        });
+        await pool.terminate();
     });
 
     it("Multiple shared workers", async () => {
@@ -88,7 +91,78 @@ describe("EsThreadPool tests", () => {
         expect(await result0).to.be.eq("Hello World!");
         expect(await result1).to.be.eq("Hello World!");
 
-        await pool.terminate(undefined, true);
+        await pool.terminate(true);
+    });
+
+    it("Pool fails to spawn threads", async () => {
+        try {
+            await EsThreadPool.Spawn((threadId) => EsThread.Spawn<ThrowTopApiType>(
+                new Worker(new URL("threads/throw-top.worker.ts", import.meta.url),
+                {type: "module", name: `HelloWorldWorker #${threadId}`})), {size: 2});
+            assert(false, "Unexpectedly succeeded to spawn thread pool");
+        }
+        catch(e) {
+            assert(e instanceof Error, "Error was not of Error type");
+            expect(e.message).to.contain("Failed to spawn thread pool. Errors:");
+            expect(e.message).to.contain("whoops");
+        }
+    });
+
+    it("Pool fails to spawn some threads", async () => {
+        try {
+            await EsThreadPool.Spawn((threadId) => EsThread.Spawn<RandomThrowTopApiType>(
+                new Worker(new URL("threads/random-throw-top.worker.ts", import.meta.url),
+                {type: "module", name: `HelloWorldWorker #${threadId}`})), {size: 8});
+            assert(false, "Unexpectedly succeeded to spawn thread pool");
+        }
+        catch(e) {
+            assert(e instanceof Error, "Error was not of Error type");
+            expect(e.message).to.contain("Failed to spawn thread pool. Errors:");
+            expect(e.message).to.contain("whoops");
+        }
+    });
+
+    it("Multiple workers, custom initialise fails", async () => {
+        try {
+            await EsThreadPool.Spawn(threadId => EsThread.Spawn<HelloWorldApiType>(
+                    new Worker(new URL("threads/valid/hello-world.worker.ts", import.meta.url),
+                    {type: "module", name: `LongRunningWorker #${threadId}`})),
+                {size: 2},
+                async (threadId) => {
+                    if(threadId === 1) throw new Error("oh no...");
+                });
+            assert(false, "Unexpectedly succeeded to spawn thread pool");
+        }
+        catch(e) {
+            assert(e instanceof Error, "Error was not of Error type");
+            expect(e.message).to.contain("Failed to spawn thread pool. Errors:");
+            expect(e.message).to.contain("oh no...");
+        }
+    });
+
+    it("Pool threads post invalid results", async () => {
+        const pool = await EsThreadPool.Spawn(() => EsThread.Spawn<PostWeirdResultApiType>(
+            new Worker(new URL("threads/post-weird-result.worker.ts", import.meta.url),
+            {type: "module"})), {size: 1});
+
+        let errorsRecived = 0;
+        const validErrors = [
+            "Recieved unexpected WorkerMessage of type: undefined",
+            "Recived result for invalid task with UID invalidTaskUID",
+            "Recived error for invalid task with UID invalidTaskUID"
+        ]
+        pool.addEventListener("error", (evt: Event) => {
+            errorsRecived++;
+            assert(evt instanceof ErrorEvent, "event was not of ErrorEvent type");
+            assert(evt.error instanceof Error, "error was not of Error type");
+            expect(validErrors).to.include(evt.error.message)
+        })
+
+        await pool.queue(thread => thread.methods.postWeird());
+
+        expect(errorsRecived).to.be.eq(3);
+
+        await pool.terminate();
     });
 
     it("Many workers and many tasks", async () => {

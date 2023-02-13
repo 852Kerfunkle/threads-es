@@ -1,1 +1,1 @@
-export { EsThreadPool, type EsPoolOptions } from "./EsThreadPool"
+export { EsThreadPool, type EsPoolOptions, type ThreadLifecycleFn } from "./EsThreadPool"
