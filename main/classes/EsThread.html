@@ -21,7 +21,7 @@
 by threads. You can use <code>thread.addEventListener(&quot;error&quot;, ...)</code> to recive those, but they&#39;re not particularily
 useful, aside from maybe debugging and testing.</p>
 <p>Also, for SharedWorker threads: unhandled rejection and uncaught exceptions will not be delivered until a client
-connects. They are delivered to every connected client.</p>
+connects. They are delivered only to the last connected client.</p>
 
 <h3>Example</h3><pre><code class="language-ts"><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-5">thread</span><span class="hl-1"> = </span><span class="hl-0">await</span><span class="hl-1"> </span><span class="hl-2">EsThread</span><span class="hl-1">.</span><span class="hl-6">Spawn</span><span class="hl-1">&lt;</span><span class="hl-7">HelloWorldApiType</span><span class="hl-1">&gt;(</span><br/><span class="hl-1">    </span><span class="hl-4">new</span><span class="hl-1"> </span><span class="hl-6">Worker</span><span class="hl-1">(</span><span class="hl-4">new</span><span class="hl-1"> </span><span class="hl-6">URL</span><span class="hl-1">(</span><span class="hl-3">&quot;threads/valid/hello-world.worker.ts&quot;</span><span class="hl-1">, </span><span class="hl-0">import</span><span class="hl-1">.</span><span class="hl-2">meta</span><span class="hl-1">.</span><span class="hl-2">url</span><span class="hl-1">),</span><br/><span class="hl-1">    {</span><span class="hl-2">type:</span><span class="hl-1"> </span><span class="hl-3">&quot;module&quot;</span><span class="hl-1">}));</span>
 </code></pre>
