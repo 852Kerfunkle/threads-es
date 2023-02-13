@@ -58,6 +58,10 @@ export class EsThreadPool<ApiType extends WorkerModule> extends EventTarget impl
 
     /**
      * Spawn a new thread pool.
+     * 
+     * If any thread fails to spawn or any threads `initialiseThread` fails, the entire
+     * pool will terminate. Threads are attempted to be terminated in that case.
+     * 
      * @param spawnThread - Callback that spawns a new thread. If you need to
      * run custom init per thread, use the `initialiseThread` lifecycle function.
      * @param initialiseThread - Allows running custom init per thread.
