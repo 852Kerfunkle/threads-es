@@ -60,7 +60,7 @@ export class EsThreadPool<ApiType extends WorkerModule> extends EventTarget impl
      * Spawn a new thread pool.
      * 
      * If any thread fails to spawn or any threads `initialiseThread` fails, the entire
-     * pool will terminate. Threads are attempted to be terminated in that case.
+     * pool will terminate. Threads are (attempted to be) terminated in that case.
      * 
      * @param spawnThread - Callback that spawns a new thread. If you need to
      * run custom init per thread, use the `initialiseThread` lifecycle function.
@@ -68,6 +68,24 @@ export class EsThreadPool<ApiType extends WorkerModule> extends EventTarget impl
      * @param terminateThread - Allows running custom cleanup per thread.
      * @param poolOptions - The options for this thread pool.
      * @returns A new thread pool.
+     * 
+     * @example
+     * Spawning a thread pool with thread lifecyle callbacks.
+     * 
+     * ```ts
+     * const pool = await EsThreadPool.Spawn(threadId => EsThread.Spawn<CustomTerminateApiType>(
+     *         new Worker(new URL("threads/valid/custom-terminate.worker.ts", import.meta.url),
+     *         {type: "module", name: `LongRunningWorker #${threadId}`})),
+     *     {size: 2},
+     *     (threadId, thread) => {
+     *         // returns Promise<void>
+     *         return thread.methods.initialise();
+     *     },
+     *     (threadId, thread) => {
+     *         // returns Promise<void>
+     *         return thread.methods.terminate();
+     *     });
+     * ```
      */
     public static async Spawn<ApiType extends WorkerModule>(
         spawnThread: (threadId: number) => Promise<EsThread<ApiType>>,
