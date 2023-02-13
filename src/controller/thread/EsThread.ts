@@ -46,7 +46,7 @@ const DefaultEsThreadOptions: EsThreadOptions = {
  * useful, aside from maybe debugging and testing.
  * 
  * Also, for SharedWorker threads: unhandled rejection and uncaught exceptions will not be delivered until a client
- * connects. They are delivered to every connected client.
+ * connects. They are delivered only to the last connected client.
  * 
  * @example
  * ```ts

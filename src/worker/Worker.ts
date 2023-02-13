@@ -1,5 +1,4 @@
-import { assertMessageEvent,
-    ControllerMessage,
+import { ControllerMessage,
     ControllerMessageType,
     WorkerInitMessage,
     WorkerMessageType,
@@ -15,20 +14,6 @@ import { assertSharedWorkerScope,
     isSharedWorkerScope,
     WorkerContext } from "./Utils";
 
-
-function subscribeToControllerMessages(context: WorkerContext, handler: (ev: ControllerMessage) => void) {
-    const messageHandler = (event: Event) => {
-        assertMessageEvent(event);
-        handler(event.data);
-    }
-
-    const unsubscribe = () => {
-        context.removeEventListener("message", messageHandler);
-    }
-
-    context.addEventListener("message", messageHandler);
-    return unsubscribe;
-}
 
 function postModuleInitMessage(context: WorkerContext, methodNames: string[]) {
     const initMsg: WorkerInitMessage = {
@@ -91,21 +76,28 @@ async function runFunction(context: WorkerContext, taskUid: TaskUID, fn: WorkerF
 }
 
 let workerApiExposed = false;
-const workerScope = self;
+// Assume WorkerGlobalScope, to avoid some type weirdness.
+const workerScope = self as WorkerGlobalScope;
 
 // Register error handlers for DedicatedWorker.
 if(isDedicatedWorkerScope(workerScope)) {
+    // For some reason onerror and onunhandledrejection don't work in
+    // DedicatedWorkerGlobalScope (on chrome, at least), so use addEventListener.
     workerScope.addEventListener("error", event => {
-        // Post with some delay, so the master had some time to subscribe to messages?
         event.preventDefault();
-        setTimeout(() => postUncaughtErrorMessage(workerScope, event.error || event), 250);
+        // TODO: Post with some delay, so the master had some time to subscribe to messages?
+        //setTimeout(() =>
+            postUncaughtErrorMessage(workerScope, event.error || event);
+            //, 250);
     });
 
     workerScope.addEventListener("unhandledrejection", event => {
-        // Post with some delay, so the master had some time to subscribe to messages?
         event.preventDefault();
-        const error = (event as PromiseRejectionEvent).reason
-        setTimeout(() => postUncaughtErrorMessage(workerScope, error || event), 250);
+        const error = (event as PromiseRejectionEvent).reason;
+        // TODO: Post with some delay, so the master had some time to subscribe to messages?
+        //setTimeout(() =>
+            postUncaughtErrorMessage(workerScope, error || event)
+            //, 250);
     });
 }
 
@@ -140,25 +132,22 @@ export function exposeApi(api: WorkerModule) {
 
     const exposeApiInner = (context: WorkerContext) => {
         if (typeof api === "object" && api) {
-            const unsubscribe = subscribeToControllerMessages(context, messageData => {
+            // Set message handler on worker context.
+            context.onmessage = (event) => {
+                // We can assume the target of the message to be the current worker context.
+                const eventContext = event.currentTarget as WorkerContext;
+                const messageData: ControllerMessage = event.data;
                 switch(messageData.type) {
                     case ControllerMessageType.Run:
-                        runFunction(context, messageData.uid, api[messageData.method], messageData.args);
+                        runFunction(eventContext, messageData.uid, api[messageData.method], messageData.args);
                         break;
 
                     case ControllerMessageType.Terminate:
-                        // Unsubscribe from message events on this context.
-                        unsubscribe();
                         // If it's a shared worker context, close the port.
                         // If it's a dedicated worker context, abort the worker.
-                        context.close();
+                        eventContext.close();
 
-                        // When all clients to a shared worker terminated,
-                        // use workerScope.close() to terminate shared worker.
-                        // Unless the behaviour is overridden by keepSharedWorkerAlive.
-                        // NOTE: if clients disconnect abruptly (i.e. tab is closed),
-                        // this doesn't work. Maybe don't have it at all?
-                        // Or rather: have a dedicated message for killing shared workers.
+                        // If SharedWorker and forceTerminateShared is set, abort SharedWorker.
                         if(isSharedWorkerScope(workerScope)
                             && messageData.forceTerminateShared) {
                             workerScope.close();
@@ -168,8 +157,12 @@ export function exposeApi(api: WorkerModule) {
                     // TODO: default:
                     // throw new Error()....
                 }
-            })
+            }
 
+            // If context is SharedWorker port, start port.
+            if(context instanceof MessagePort) context.start();
+
+            // Sent init message to client.
             const methodNames = Object.keys(api).filter(key => typeof api[key] === "function");
             postModuleInitMessage(context, methodNames)
         } else {
@@ -197,23 +190,30 @@ export function exposeApi(api: WorkerModule) {
             const port = event.ports[0];
 
             // Register error handlers for SharedWorker on connect.
-            // This means some of these events will be swallowed until a client connects.
+            // Assign to onerror and onunhandledrejection, otherwise ports are not GCd (in chrome),
+            // when a client terminated without sending a terminate message (no chance to remove event listener).
+            // Only the last connected client will recieve error messages.
+            //
+            // This also means some of these events will be swallowed until a client connects.
             // Could maybe have a global queue of errors that is emptied and sent when a client connects.
-            workerScope.addEventListener("error", event => {
-                // Post with some delay, so the master had some time to subscribe to messages?
+            workerScope.onerror = event => {
                 event.preventDefault();
-                setTimeout(() => postUncaughtErrorMessage(port, event.error || event), 250);
-            });
+                // TODO: Post with some delay, so the master had some time to subscribe to messages?
+                //setTimeout(() =>
+                    postUncaughtErrorMessage(port, event.error || event);
+                    //, 250);
+            };
         
-            workerScope.addEventListener("unhandledrejection", event => {
-                // Post with some delay, so the master had some time to subscribe to messages?
+            workerScope.onunhandledrejection = event => {
                 event.preventDefault();
-                const error = (event as PromiseRejectionEvent).reason
-                setTimeout(() => postUncaughtErrorMessage(port, error || event), 250);
-            });
+                const error = (event as PromiseRejectionEvent).reason;
+                // TODO: Post with some delay, so the master had some time to subscribe to messages?
+                //setTimeout(() =>
+                    postUncaughtErrorMessage(port, error || event)
+                    //, 250);
+            };
 
             exposeApiInner(port);
-            port.start();
         }
     }
 }
