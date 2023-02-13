@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.3.0
+- Thread and pool are now EventTargets they dispatch unhandled worker errors as events.
+- Added thread lifecycle methods to pool (for per thread init and terminate).
+- Handle thread spawn failure in pool, if some fail, the entire pool fails.
+- Trying to spawn a thread with ServiceWorker now throws an error.
+- Simplified and improved types (for example: WorkerModule is now interface).
+
 ## 0.2.10
 - Documentation.
 - Improved internal types.
