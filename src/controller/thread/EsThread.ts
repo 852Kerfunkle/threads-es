@@ -41,6 +41,13 @@ const DefaultEsThreadOptions: EsThreadOptions = {
 /**
  * EsThreads
  * 
+ * Some worker errors (unhandled rejection, uncaught exceptions, posting of incorrect results/errors) are dispatched
+ * by threads. You can use `thread.addEventListener("error", ...)` to recive those, but they're not particularily
+ * useful, aside from maybe debugging and testing.
+ * 
+ * Also, for SharedWorker threads: unhandled rejection and uncaught exceptions will not be delivered until a client
+ * connects. They are delivered to every connected client.
+ * 
  * @example
  * ```ts
  * const thread = await EsThread.Spawn<HelloWorldApiType>(
@@ -157,7 +164,6 @@ export class EsThread<ApiType extends WorkerModule> extends EventTarget implemen
                     break;
 
                 case WorkerMessageType.UnchaughtError:
-                    console.error("Uncaught error in worker: " + evt.data.errorMessage);
                     throw new Error("Uncaught error in worker: " + evt.data.errorMessage);
 
                 default:

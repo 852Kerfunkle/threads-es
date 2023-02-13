@@ -119,31 +119,6 @@ describe("Worker tests", () => {
         }
     });
 
-    // Similarly, this tests, shared worker thread does not report unhandled rejections (yet).
-    it("Unhandled rejection", async () => {
-        const thread = await EsThread.Spawn<RejectApiType>(
-            new Worker(new URL("threads/reject.worker.ts", import.meta.url),
-            {type: "module"}));
-
-        let errorsRecived = 0;
-        const validErrors = [
-            "Uncaught error in worker: it had to happen eventually"
-        ];
-
-        thread.addEventListener("error", (evt: Event) => {
-            errorsRecived++;
-            assert(evt instanceof ErrorEvent, "event was not of ErrorEvent type");
-            assert(evt.error instanceof Error, "error was not of Error type");
-            expect(validErrors).to.include(evt.error.message)
-        });
-
-        await delay(500);
-
-        expect(errorsRecived).to.be.eq(1);
-
-        await thread.terminate(true);
-    });
-
     // TODO: find (or make) a Worker and SharedWorker polyfill!
     /*it("Test with Worker polyfill", async () => {
         window.Worker = ???

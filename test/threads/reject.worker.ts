@@ -1,3 +1,4 @@
+import { delay } from "../../src/shared/Utils";
 import { exposeApi } from "../../src/worker/Worker"
 
 const rejectApi = {
@@ -8,6 +9,6 @@ const rejectApi = {
 
 export type RejectApiType = typeof rejectApi;
 
-Promise.reject(new Error("it had to happen eventually"));
+delay(50).then(() => Promise.reject(new Error("it had to happen eventually")));
 
 exposeApi(rejectApi);

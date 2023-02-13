@@ -10,6 +10,8 @@ import { TransferObjectWithArrayApiType } from "./threads/valid/transfer-object-
 import { TestWorkerApiType } from "./threads/test-worker-api.worker";
 import { TransferStreamsApiType } from "./threads/valid/transfer-streams.worker";
 import { ExposeApiNotCalledApiType } from "./threads/exposeApi-not-called";
+import { RejectApiType } from "./threads/reject.worker";
+import { delay } from "../src/shared/Utils";
 
 type TestWorkerConstructor = new (scriptURL: string | URL, options?: WorkerOptions) => (Worker | SharedWorker);
 
@@ -57,6 +59,30 @@ export function genericWorkerTests(WorkerContructor: TestWorkerConstructor) {
                 assert(e instanceof Error, "Exception isn't of 'Error' type");
                 expect(e.message).to.be.eq("Hello Error!");
             }
+
+            await thread.terminate(true);
+        });
+
+        it("Unhandled rejection", async () => {
+            const thread = await EsThread.Spawn<RejectApiType>(
+                new WorkerContructor(new URL("threads/reject.worker.ts", import.meta.url),
+                {type: "module"}));
+
+            let errorsRecived = 0;
+            const validErrors = [
+                "Uncaught error in worker: it had to happen eventually"
+            ];
+
+            thread.addEventListener("error", (evt: Event) => {
+                errorsRecived++;
+                assert(evt instanceof ErrorEvent, "event was not of ErrorEvent type");
+                assert(evt.error instanceof Error, "error was not of Error type");
+                expect(validErrors).to.include(evt.error.message)
+            });
+
+            await delay(500);
+
+            expect(errorsRecived).to.be.eq(1);
 
             await thread.terminate(true);
         });

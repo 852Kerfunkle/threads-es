@@ -93,18 +93,16 @@ async function runFunction(context: WorkerContext, taskUid: TaskUID, fn: WorkerF
 let workerApiExposed = false;
 const workerScope = self;
 
-// Register error handlers
-// TODO: postMessage is only available on DedicatedWorkerGlobalScope.
-// Think about what to do for Shared worker and maybe also ServiceWorker.
-// Could maybe be moved into the connect handler or the init method handler.
+// Register error handlers for DedicatedWorker.
 if(isDedicatedWorkerScope(workerScope)) {
     workerScope.addEventListener("error", event => {
-        // Post with some delay, so the master had some time to subscribe to messages
+        // Post with some delay, so the master had some time to subscribe to messages?
         event.preventDefault();
         setTimeout(() => postUncaughtErrorMessage(workerScope, event.error || event), 250);
     });
 
     workerScope.addEventListener("unhandledrejection", event => {
+        // Post with some delay, so the master had some time to subscribe to messages?
         event.preventDefault();
         const error = (event as PromiseRejectionEvent).reason
         setTimeout(() => postUncaughtErrorMessage(workerScope, error || event), 250);
@@ -197,8 +195,25 @@ export function exposeApi(api: WorkerModule) {
         assertSharedWorkerScope(workerScope);
         workerScope.onconnect = (event) => {
             const port = event.ports[0];
-            port.start();
+
+            // Register error handlers for SharedWorker on connect.
+            // This means some of these events will be swallowed until a client connects.
+            // Could maybe have a global queue of errors that is emptied and sent when a client connects.
+            workerScope.addEventListener("error", event => {
+                // Post with some delay, so the master had some time to subscribe to messages?
+                event.preventDefault();
+                setTimeout(() => postUncaughtErrorMessage(port, event.error || event), 250);
+            });
+        
+            workerScope.addEventListener("unhandledrejection", event => {
+                // Post with some delay, so the master had some time to subscribe to messages?
+                event.preventDefault();
+                const error = (event as PromiseRejectionEvent).reason
+                setTimeout(() => postUncaughtErrorMessage(port, error || event), 250);
+            });
+
             exposeApiInner(port);
+            port.start();
         }
     }
 }
