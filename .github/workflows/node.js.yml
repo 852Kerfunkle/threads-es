@@ -11,6 +11,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    container: mcr.microsoft.com/playwright:latest
 
     env:
       USE_PLAYWRIGHT: 1
@@ -27,8 +28,6 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'yarn'
       - run: yarn --frozen-lockfile
-      - name: Install playwright dependencies
-        run: npx playwright install-deps
       - run: yarn tsc
       - run: yarn lint
       - run: yarn test
