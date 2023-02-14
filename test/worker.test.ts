@@ -1,11 +1,9 @@
 import { expect, assert } from "@esm-bundle/chai"
 import { EsThread } from "../src/controller";
-import { delay } from "../src/shared/Utils";
 import { genericWorkerTests } from "./generic.test";
-import { PostWeirdBeforeExposeApiType } from "./threads/post-weird-before-exposeApi";
+import { PostWeirdBeforeExposeApiType } from "./threads/post-weird-before-exposeApi.worker";
 import { PostWeirdResultApiType } from "./threads/post-weird-result.worker";
 import { RejectTopApiType } from "./threads/reject-top.worker";
-import { RejectApiType } from "./threads/reject.worker";
 import { ThrowTopApiType } from "./threads/throw-top.worker";
 import { WithSubpoolApiType } from "./threads/valid/with-subpool.worker";
 import { WithSubworkerApiType } from "./threads/valid/with-subworker.worker";
@@ -81,7 +79,7 @@ describe("Worker tests", () => {
     it("Post weird message before exposeApi", async () => {
         try {
             await EsThread.Spawn<PostWeirdBeforeExposeApiType>(
-                new Worker(new URL("threads/post-weird-before-exposeApi.ts", import.meta.url),
+                new Worker(new URL("threads/post-weird-before-exposeApi.worker.ts", import.meta.url),
                 {type: "module"}));
             assert(false, "No error was thrown");
         }

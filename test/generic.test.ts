@@ -9,7 +9,7 @@ import { LongRunningApiType } from "./threads/valid/long-running.worker";
 import { TransferObjectWithArrayApiType } from "./threads/valid/transfer-object-with-array.worker";
 import { TestWorkerApiType } from "./threads/test-worker-api.worker";
 import { TransferStreamsApiType } from "./threads/valid/transfer-streams.worker";
-import { ExposeApiNotCalledApiType } from "./threads/exposeApi-not-called";
+import { ExposeApiNotCalledApiType } from "./threads/exposeApi-not-called.worker";
 import { RejectApiType } from "./threads/reject.worker";
 import { delay } from "../src/shared/Utils";
 
@@ -33,7 +33,7 @@ export function genericWorkerTests(WorkerContructor: TestWorkerConstructor) {
         it("exposeApi not called", async () => {
             try {
                 await EsThread.Spawn<ExposeApiNotCalledApiType>(
-                    new WorkerContructor(new URL("threads/exposeApi-not-called.ts", import.meta.url),
+                    new WorkerContructor(new URL("threads/exposeApi-not-called.worker.ts", import.meta.url),
                     {type: "module"}), {timeout: 250});
                 assert(false, "Spawn should not have succeeded");
             }
