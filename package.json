@@ -64,9 +64,9 @@
     "bundle:local": "yarn bundle && cd dist-esm/ && yarn pack",
     "release": "yarn bundle && yarn publish ./dist-esm --access public",
     "tsc": "tsc",
-    "test-docker": "docker-compose build && docker-compose run playwright-tests",
     "test": "web-test-runner --static-logging --port 9877",
     "test:watch": "web-test-runner --watch",
+    "test:docker": "docker-compose build && docker-compose run playwright-tests",
     "lint": "eslint --max-warnings=0 src",
     "typedoc": "typedoc --options typedoc.json"
   },

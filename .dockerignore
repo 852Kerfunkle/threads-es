@@ -5,3 +5,6 @@ coverage/
 dist-esm/
 dist-cjs/
 doc/
+
+Dockerfile
+docker-compose.yml
