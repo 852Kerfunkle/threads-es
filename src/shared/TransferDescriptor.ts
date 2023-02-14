@@ -11,7 +11,8 @@ export function isTransferDescriptor(thing: any): thing is TransferDescriptor<an
     return thing && typeof thing === "object" && thing[$transferable];
 }
 
-const TransferableTypes = [
+// NOTE: causes issues on browsers where not all transferable types are defined.
+/*const TransferableTypes = [
     OffscreenCanvas,
     ImageBitmap,
     MessagePort,
@@ -33,24 +34,26 @@ function isTransferable(thing: object): thing is Transferable {
 
 function assertTransferable(thing: object): asserts thing is Transferable {
     if(!isTransferable(thing)) throw new Error("Object is not transferable");
-}
+}*/
 
 export function Transfer<T extends Transferable>(transferable: T): TransferDescriptor<T>;
 
 export function Transfer<T extends object>(payload: T, transferables: Transferable[]): TransferDescriptor<T>;
 
 export function Transfer<T extends object>(payload: T, transferables?: Transferable[]): TransferDescriptor<T> {
-    // If no transferables are specified, payload must be a Transferable.
+    // If no transferables are specified (first variant),
+    // payload must be a Transferable.
     if(!transferables) {
-        assertTransferable(payload);
-        transferables = [payload];
+        //assertTransferable(payload);
+        transferables = [payload as Transferable];
     }
-    // If transferables are specified, each transferable must be a Transferable.
-    else {
+    // Else transferables are specified (second variant),
+    // each transferable must be a Transferable.
+    /*else {
         for (const transfer of transferables) {
             assertTransferable(transfer);
         }
-    }
+    }*/
 
     return {
         [$transferable]: true,
