@@ -1,0 +1,7 @@
+node_modules/
+git/
+build/
+coverage/
+dist-esm/
+dist-cjs/
+doc/

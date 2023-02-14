@@ -2,7 +2,8 @@ import { fileURLToPath } from 'url';
 import { esbuildPlugin } from '@web/dev-server-esbuild';
 import { defaultReporter, summaryReporter } from '@web/test-runner';
 //import { TestRunnerConfig } from '@web/test-runner';
-//import { playwrightLauncher } from '@web/test-runner-playwright';
+import { chromeLauncher } from '@web/test-runner';
+import { playwrightLauncher } from '@web/test-runner-playwright';
 
 const config = {
   plugins: [
@@ -45,12 +46,14 @@ const config = {
       functions: 95,
       lines: 95,
     },
-  }
-  /*browsers: [
-    playwrightLauncher({ product: 'chromium' }),
-    playwrightLauncher({ product: 'firefox' }),
-    playwrightLauncher({ product: 'webkit' })
-  ],*/
+  },
+  browsers:
+    process.env.PLAYWRIGHT ? [
+      playwrightLauncher({ product: 'chromium' }),
+      // Would need to build with rollup to test on firefox.
+      //playwrightLauncher({ product: 'firefox' }),
+      playwrightLauncher({ product: 'webkit' }) ] :
+      [ chromeLauncher() ]
 };
 
 export default config;
