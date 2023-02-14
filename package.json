@@ -66,7 +66,7 @@
     "tsc": "tsc",
     "test": "web-test-runner --static-logging --port 9877",
     "test:watch": "web-test-runner --watch",
-    "test:docker": "docker build -t playwright-tests . && docker run --rm playwright-tests",
+    "test:docker": "docker build -t threads-es_playwright-tests . && docker run --rm threads-es_playwright-tests",
     "lint": "eslint --max-warnings=0 src",
     "typedoc": "typedoc --options typedoc.json"
   },

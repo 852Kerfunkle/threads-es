@@ -160,16 +160,24 @@ export function genericWorkerTests(WorkerContructor: TestWorkerConstructor) {
             expect(rs.locked).to.be.eq(false);
             expect(ws.locked).to.be.eq(false);
 
-            // Will only resolve once the rs sink is closed.
-            const res = thread.methods.transferStreams(Transfer(rs), Transfer(ws));
+            try {
+                // Will only resolve once the rs sink is closed.
+                const res = thread.methods.transferStreams(Transfer(rs), Transfer(ws));
 
-            // Streams should be locked after transfer.
-            expect(rs.locked).to.be.eq(true);
-            expect(ws.locked).to.be.eq(true);
+                // Streams should be locked after transfer.
+                expect(rs.locked).to.be.eq(true);
+                expect(ws.locked).to.be.eq(true);
 
-            await res;
+                await res;
 
-            expect(recievedMessages).to.be.eql(["World", "Hello!"]);
+                expect(recievedMessages).to.be.eql(["World", "Hello!"]);
+            }
+            catch(e) {
+                // Might fail because cloning streams is not supported in some browsers.
+                assert(e instanceof Error, "Error was not of Error type");
+                expect(e.message).to.contain("The object can not be cloned.");
+                return;
+            }
 
             await thread.terminate(true);
         });

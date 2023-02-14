@@ -12,6 +12,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    env:
+      USE_PLAYWRIGHT: 1
+
     strategy:
       matrix:
         node-version: [18.x]

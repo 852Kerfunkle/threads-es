@@ -1,6 +1,6 @@
 FROM mcr.microsoft.com/playwright:latest
 
-ENV DOCKER_PLAYWRIGHT=1
+ENV USE_PLAYWRIGHT=1
 
 WORKDIR /test
 

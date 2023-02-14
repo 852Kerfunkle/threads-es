@@ -48,13 +48,15 @@ const config = {
     },
   },
   browsers:
-    process.env.DOCKER_PLAYWRIGHT ? [
+    process.env.USE_PLAYWRIGHT ? [
       playwrightLauncher({ product: 'chromium' }),
       // Would need to transform with with rollup to test on firefox.
       // Or wait for ff 111, which will supports module workers, apparently.
       //playwrightLauncher({ product: 'firefox' }),
-      playwrightLauncher({ product: 'webkit' }) ] :
-      [ chromeLauncher() ]
+      playwrightLauncher({ product: 'webkit' })
+    ] : [
+      chromeLauncher()
+    ]
 };
 
 export default config;
