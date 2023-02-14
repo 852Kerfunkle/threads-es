@@ -99,10 +99,9 @@ if(isDedicatedWorkerScope(workerScope)) {
 
     workerScope.addEventListener("unhandledrejection", event => {
         event.preventDefault();
-        const error = (event as PromiseRejectionEvent).reason;
         // TODO: Post with some delay, so the master had some time to subscribe to messages?
         //setTimeout(() =>
-            postUncaughtErrorMessage(workerScope, error || event)
+            postUncaughtErrorMessage(workerScope, event.reason || event);
             //, 250);
     });
 }
@@ -215,10 +214,9 @@ export function exposeApi(api: WorkerModule) {
         
             workerScope.onunhandledrejection = event => {
                 event.preventDefault();
-                const error = (event as PromiseRejectionEvent).reason;
                 // TODO: Post with some delay, so the master had some time to subscribe to messages?
                 //setTimeout(() =>
-                    postUncaughtErrorMessage(port, error || event)
+                    postUncaughtErrorMessage(port, event.reason || event);
                     //, 250);
             };
 
