@@ -48,7 +48,7 @@ const config = {
     },
   },
   browsers:
-    process.env.PLAYWRIGHT ? [
+    process.env.DOCKER_PLAYWRIGHT ? [
       playwrightLauncher({ product: 'chromium' }),
       // Would need to build with rollup to test on firefox.
       //playwrightLauncher({ product: 'firefox' }),

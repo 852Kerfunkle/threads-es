@@ -1,7 +1,7 @@
 # build app
 FROM mcr.microsoft.com/playwright:v1.30.0-focal
 
-ENV PLAYWRIGHT=1
+ENV DOCKER_PLAYWRIGHT=1
 
 WORKDIR /test
 COPY . .
