@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.3.1
+- Worker-side improvements:
+  + Improve GC for SharedWorkers (addEventListener prevented GC for abruptly disconnected clients).
+  + Improve error handling for SharedWorkers.
+- Remove runtime type checks on Transferable objects. Types should be checked at compile time (fixes #1).
+- Added testing with playwright in docker container.
+
 ## 0.3.0
 - Thread and pool are now EventTargets they dispatch unhandled worker errors as events.
 - Added thread lifecycle methods to pool (for per thread init and terminate).
