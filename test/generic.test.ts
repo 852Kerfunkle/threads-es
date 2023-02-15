@@ -30,6 +30,21 @@ export function genericWorkerTests(WorkerContructor: TestWorkerConstructor) {
             await thread.terminate(true);
         });
 
+        it("Api not fully exposed", async () => {
+            const thread = await EsThread.Spawn<{helloWorld(): string, goodbyeWorld(): void}>(
+                new WorkerContructor(new URL("threads/valid/hello-world.worker.ts", import.meta.url),
+                {type: "module"}));
+
+            expect(thread).to.not.be.undefined;
+            expect(thread.methods.helloWorld).to.not.be.undefined;
+            expect(thread.methods.goodbyeWorld).to.be.undefined;
+
+            expect(await thread.methods.helloWorld()).to.be.eq("Hello World!");
+            expect(() => thread.methods.goodbyeWorld()).to.throw("is not a function");
+
+            await thread.terminate(true);
+        });
+
         it("exposeApi not called", async () => {
             try {
                 await EsThread.Spawn<ExposeApiNotCalledApiType>(
