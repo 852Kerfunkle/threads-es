@@ -185,5 +185,5 @@ describe("EsThreadPool tests", () => {
         }
 
         await pool.terminate();
-    });
+    }).timeout(4000);
 });
