@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 0.3.2
+- Add fallback for UID generation if `crypto.randomUUID` is not available (fixes #2).
+
 ## 0.3.1
 - Worker-side improvements:
   + Improve GC for SharedWorkers (addEventListener prevented GC for abruptly disconnected clients).
