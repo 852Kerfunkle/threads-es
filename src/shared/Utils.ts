@@ -18,9 +18,9 @@ export function withTimeout<T>(
 
 // Generates a 128 bit random ID, not quite the same as crypto.randomUUID, but close.
 export function getRandomUIDLegacy() {
-    let uid = '';
-    for (var i = 0; i < 16; i++) {
-        uid += Math.floor(Math.random() * 255).toString(16).padStart(2, '0');
+    let uid = "";
+    for (let i = 0; i < 16; i++) {
+        uid += Math.floor(Math.random() * 255).toString(16).padStart(2, "0");
     }
     return uid;
 }
