@@ -16,9 +16,20 @@ export function withTimeout<T>(
     return Promise.race<T>([promise, timeout]);
 }
 
+// Generates a 128 bit random ID, not quite the same as crypto.randomUUID, but close.
+export function getRandomUIDLegacy() {
+    let uid = '';
+    for (var i = 0; i < 16; i++) {
+        uid += Math.floor(Math.random() * 255).toString(16).padStart(2, '0');
+    }
+    return uid;
+}
+
 export function getRandomUID() {
-    assert(self.crypto && self.crypto.randomUUID, "crypto.getRandomUID() is undefined");
-    return self.crypto.randomUUID();
+    // Difficult to test this branch, so ignore it.
+    /* c8 ignore next */
+    if(self.crypto && self.crypto.randomUUID) return self.crypto.randomUUID();
+    else return getRandomUIDLegacy();
 }
 
 export function assert(condition: unknown, message?: string): asserts condition {

@@ -1,5 +1,5 @@
 import { expect, assert } from "@esm-bundle/chai"
-import { assert as assertUtil } from "../src/shared/Utils";
+import { assert as assertUtil, getRandomUIDLegacy } from "../src/shared/Utils";
 import { assertMessageEvent } from "../src/shared/Messages";
 import { assertSharedWorkerScope, assertWorkerScope, isDedicatedWorkerScope,
     isSharedWorkerContext, isSharedWorkerScope, isWorkerScope } from "../src/worker/Utils";
@@ -27,5 +27,10 @@ describe("Other tests", () => {
     it("Test assert util", () => {
         expect(() => assertUtil(false)).to.throw("Assertion failed");
         expect(() => assertUtil(true)).to.not.throw("Assertion failed");
+    });
+
+    it("Test getRandomUIDLegacy", () => {
+        expect(getRandomUIDLegacy()).to.not.throw;
+        expect(getRandomUIDLegacy()).to.have.length(32);
     });
 });
