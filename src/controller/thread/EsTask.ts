@@ -1,5 +1,5 @@
-import { TaskUID } from "../../shared/Messages";
-import { assert, getRandomUID } from "../../shared/Utils";
+import { TaskUID } from "../../shared/Messages.js";
+import { assert, getRandomUID } from "../../shared/Utils.js";
 
 type ResolveFn<T> = (value: T | PromiseLike<T>) => void;
 type RejectFn = (reason?: Error) => void;

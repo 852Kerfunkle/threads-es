@@ -5,14 +5,14 @@ import { ControllerMessage,
     WorkerUncaughtErrorMessage,
     WorkerTaskResultMessage,
     WorkerTaskErrorMessage, 
-    TaskUID } from "../shared/Messages";
-import { WorkerFunction, WorkerModule } from "../shared/Worker";
-import { isTransferDescriptor } from "../shared/TransferDescriptor";
+    TaskUID } from "../shared/Messages.js";
+import { WorkerFunction, WorkerModule } from "../shared/Worker.js";
+import { isTransferDescriptor } from "../shared/TransferDescriptor.js";
 import { assertSharedWorkerScope,
     assertWorkerScope,
     isDedicatedWorkerScope,
     isSharedWorkerScope,
-    WorkerContext } from "./Utils";
+    WorkerContext } from "./Utils.js";
 
 
 function postModuleInitMessage(context: WorkerContext, methodNames: string[]) {

@@ -4,11 +4,11 @@ import { assertMessageEvent,
     ControllerTerminateMessage,
     WorkerInitMessage,
     TaskUID, 
-    WorkerMessageType} from "../../shared/Messages";
-import { Terminable, WorkerModule } from "../../shared/Worker";
-import { isTransferDescriptor, TransferDescriptor } from "../../shared/TransferDescriptor";
-import { assert, getRandomUID, withTimeout } from "../../shared/Utils";
-import { EsTaskPromise } from "./EsTask";
+    WorkerMessageType} from "../../shared/Messages.js";
+import { Terminable, WorkerModule } from "../../shared/Worker.js";
+import { isTransferDescriptor, TransferDescriptor } from "../../shared/TransferDescriptor.js";
+import { assert, getRandomUID, withTimeout } from "../../shared/Utils.js";
+import { EsTaskPromise } from "./EsTask.js";
 
 type StripTransfer<Type> =
     Type extends TransferDescriptor<infer BaseType>

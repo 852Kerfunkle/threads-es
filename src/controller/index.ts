@@ -1,3 +1,3 @@
-export * from "./thread"
+export * from "./thread/index.js"
 //export * from "./workers"
-export * from "./pool"
+export * from "./pool/index.js"

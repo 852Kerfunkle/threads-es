@@ -1,1 +1,1 @@
-export { EsThread, type EsThreadOptions } from "./EsThread"
+export { EsThread, type EsThreadOptions } from "./EsThread.js"

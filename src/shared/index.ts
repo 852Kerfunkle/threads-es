@@ -1,2 +1,2 @@
-export { type TransferDescriptor, Transfer } from "./TransferDescriptor"
-export { type WorkerModule } from "./Worker"
+export { type TransferDescriptor, Transfer } from "./TransferDescriptor.js"
+export { type WorkerModule } from "./Worker.js"

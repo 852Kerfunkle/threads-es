@@ -1,6 +1,6 @@
-import { assert } from "../../shared/Utils";
-import { Terminable, WorkerModule } from "../../shared/Worker"
-import { EsThread } from "../thread/EsThread"
+import { assert } from "../../shared/Utils.js";
+import { Terminable, WorkerModule } from "../../shared/Worker.js"
+import { EsThread } from "../thread/EsThread.js"
 
 /** Options for thread pools. */
 export interface EsPoolOptions {

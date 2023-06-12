@@ -1,1 +1,1 @@
-export { exposeApi } from "./Worker"
+export { exposeApi } from "./Worker.js"
