@@ -114,4 +114,44 @@ const arrayOut = await thread.methods.transferArray(Transfer(arrayIn.buffer));
 await thread.terminate();
 ```
 
+#### Webpack note
+
+With Webpack (unless there's some config magic you can do), you might need the separate your thread api types from the thread code:
+
+api-type.ts
+```ts
+export type HelloWorldApiType = {
+  helloWorld: () => string;
+};
+```
+
+worker.ts
+```ts
+import { exposeApi } from 'threads-es/worker';
+import { type HelloWorldApiType } from './api-type';
+
+const helloWorldApi: HelloWorldApiType = {
+  helloWorld: () => {
+    return 'Hello World!';
+  },
+};
+
+exposeApi(helloWorldApi);
+```
+
+controller.ts
+```ts
+import { EsThread } from "threads-es/controller"
+import { HelloWorldApiType } from "./api-type"
+
+const thread = await EsThread.Spawn<HelloWorldApiType>(
+    new Worker(new URL("./hello-world.worker.ts", import.meta.url),
+    {type: "module"}));
+
+// "Hello World!"
+console.log(await thread.methods.helloWorld());
+
+await thread.terminate();
+```
+
 Inspired by [threads.js](https://github.com/andywer/threads.js).
