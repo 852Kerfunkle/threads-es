@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 0.3.3
+- Resolve some issues preventing usage with Webpack (fixes #3).
+
 ## 0.3.2
 - Add fallback for UID generation if `crypto.randomUUID` is not available (fixes #2).
 
