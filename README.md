@@ -114,9 +114,54 @@ const arrayOut = await thread.methods.transferArray(Transfer(arrayIn.buffer));
 await thread.terminate();
 ```
 
+#### Reporting progress from a worker
+
+If you need a worker to report progress you could use a stream. For other options see [#4](https://github.com/852Kerfunkle/threads-es/issues/4).
+
+progress.worker.ts
+```ts
+import { TransferDescriptor } from 'threads-es/shared';
+import { exposeApi } from 'threads-es/worker';
+
+const progressApi = {
+    withProgress: async (ags..., progress: TransferDescriptor<WritableStream<number>>) => {
+        // Imagine doing some work and updating the progress as it goes along.
+        await progress.write(10);
+        await progress.write(20);
+        await progress.write(100);
+        await progress.close();
+    }
+}
+
+export type ProgressApiType = typeof progressApi;
+
+exposeApi(progressApi);
+```
+
+controller.ts
+```ts
+import { EsThread } from "threads-es/controller"
+import { Transfer } from "threads-es/shared"
+import { HelloWorldApiType } from "./progress.worker.ts"
+
+const thread = await EsThread.Spawn<ProgressApiType>(
+    new Worker(new URL("./progress.worker.ts", import.meta.url),
+    {type: "module"}));
+
+const progress = new WritableStream<number>({
+    write(p) {
+        // You could update the progress in the DOM, or write it to a log, or something like that.
+    }
+});
+
+await thread.methods.withProgress(args..., Transfer(progress));
+
+await thread.terminate();
+```
+
 #### Webpack note
 
-With Webpack (unless there's some config magic you can do), you might need the separate your thread api types from the thread code:
+With Webpack or certain test frameworks, you might need the separate your thread api types from the thread code:
 
 api-type.ts
 ```ts
