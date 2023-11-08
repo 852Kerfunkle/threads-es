@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 0.3.4
+- Using EventTarget shim to support certain older browsers (fixes #5).
+
 ## 0.3.3
 - Resolve some issues preventing usage with Webpack (fixes #3).
 
