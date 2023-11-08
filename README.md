@@ -1,5 +1,5 @@
 # threads-es
-## A modern, zero-dependency WebWorker abstraction.
+## A modern, (almost) zero-dependency WebWorker abstraction.
 
 [![npm](https://img.shields.io/npm/v/threads-es?logo=npm)](https://npmjs.com/package/threads-es)
 ![GitHub license](https://img.shields.io/github/license/852Kerfunkle/threads-es?logo=github)

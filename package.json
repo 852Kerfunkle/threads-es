@@ -41,6 +41,9 @@
   "sideEffects": [
     "./worker/Worker.js"
   ],
+  "dependencies": {
+    "@ungap/event-target": "^0.2.4"
+  },
   "devDependencies": {
     "@esm-bundle/chai": "^4.3.4-fix.0",
     "@types/mocha": "^10.0.1",

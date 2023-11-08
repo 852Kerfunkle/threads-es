@@ -9,6 +9,7 @@ import { Terminable, WorkerModule } from "../../shared/Worker.js";
 import { isTransferDescriptor, TransferDescriptor } from "../../shared/TransferDescriptor.js";
 import { assert, getRandomUID, withTimeout } from "../../shared/Utils.js";
 import { EsTaskPromise } from "./EsTask.js";
+import EventTarget from "@ungap/event-target"
 
 type StripTransfer<Type> =
     Type extends TransferDescriptor<infer BaseType>

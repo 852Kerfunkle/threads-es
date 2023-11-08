@@ -1,6 +1,7 @@
 import { assert } from "../../shared/Utils.js";
 import { Terminable, WorkerModule } from "../../shared/Worker.js"
 import { EsThread } from "../thread/EsThread.js"
+import EventTarget from "@ungap/event-target"
 
 /** Options for thread pools. */
 export interface EsPoolOptions {
