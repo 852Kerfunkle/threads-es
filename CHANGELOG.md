@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.0.0
+- No changes. Package appears stable enough for a 1.0.
+
 ## 0.3.4
 - Using EventTarget shim to support certain older browsers (fixes #5).
 
